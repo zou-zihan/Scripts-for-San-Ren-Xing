@@ -427,7 +427,7 @@ functionRuleDf = readCsv(githubFileName=functionalityRuleCsvName,
                          githubBranchName=githubBranchName,
                          csvSep='|',
                          csvEncoding='utf-8',
-                         runLocally=runLocally)
+                         runLocally=FPara['runLocally'])
 
 FPara = {}
 for row in range(len(functionRuleDf)):
@@ -443,6 +443,7 @@ FPara['githubUserName'] = githubUserName
 FPara['githubRepoName'] = githubRepoName
 FPara['githubBranchName'] = githubBranchName
 FPara['takeawayBoxInventoryURL'] = takeawayBoxInventoryURL
+FPara['runLocally'] = runLocally
 
 takeawayBoxInventoryFunction = FPara['takeawayBoxInventoryFunction']
 stockAlertFunction = FPara['stockAlertFunction']
@@ -592,7 +593,7 @@ if len(read) > int(FPara['minBookFileLenAllowable']):
                        githubBranchName=FPara['githubBranchName'],
                        csvSep='|',
                        csvEncoding='utf-8',
-                       runLocally=runLocally)
+                       runLocally=FPara['runLocally'])
 
         TBRuleDf['String Locator'] = TBRuleDf['String Locator'].apply(lambda a : unicodedata.normalize("NFKD", a))
         TBRuleDf['String Locator'] = TBRuleDf['String Locator'].apply(lambda x : remove_spaces(x))
@@ -657,7 +658,7 @@ if len(read) > int(FPara['minBookFileLenAllowable']):
                            githubBranchName=FPara['githubBranchName'],
                            csvSep='|',
                            csvEncoding='utf-8',
-                           runLocally=runLocally)
+                           runLocally=FPara['runLocally'])
 
             if TBExtraRuleDf.empty:
                 pass
@@ -870,7 +871,7 @@ if len(read) > int(FPara['minBookFileLenAllowable']):
                        githubBranchName=FPara['githubBranchName'],
                        csvSep='|',
                        csvEncoding='utf-8',
-                       runLocally=runLocally)
+                       runLocally=FPara['runLocally'])
 
         for i in range(len(rule.index)):
             if int(rule.iloc[i, 7]) == 1:
@@ -991,7 +992,7 @@ if len(read) > int(FPara['minBookFileLenAllowable']):
                            githubBranchName=FPara['githubBranchName'],
                            csvSep='|',
                            csvEncoding='utf-8',
-                           runLocally=runLocally)
+                           runLocally=FPara['runLocally'])
 
             for column in printRuleDf.columns:
                 printRuleDf[column] = printRuleDf[column].astype(str)
@@ -1272,7 +1273,7 @@ if len(read) > int(FPara['minBookFileLenAllowable']):
                            githubBranchName=FPara['githubBranchName'],
                            csvSep='|',
                            csvEncoding='utf-8',
-                           runLocally=runLocally)
+                           runLocally=FPara['runLocally'])
 
             if drinkInventoryFunction:
                 print()
