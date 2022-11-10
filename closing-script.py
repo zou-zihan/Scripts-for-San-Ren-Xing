@@ -379,7 +379,7 @@ def readCsv(githubUserName, githubRepoName, githubBranchName, githubFileName, cs
 #emailSender = ''
 #emailSenderPassword = ''
 #emailReceiverList = ['']
-#githubPrefix = "https://raw.githubusercontent.com"
+#takeawayBoxInventoryURL = ""
 
 functionalityRuleCsvName = "FunctionalityRule.csv"
 valueDictRuleCsvName = 'ValueDictRule.csv'
@@ -423,7 +423,7 @@ drinkTakeOverName11Ziyong = 0
 #else:
 #    print("网路连接正常")
 
-#URL = "{}/{}/{}/{}/{}".format(githubPrefix, githubUserName, githubRepoName, githubBranchName, githubFileName)
+#URL = "{}/{}/{}/{}/{}".format("https://raw.githubusercontent.com", githubUserName, githubRepoName, githubBranchName, githubFileName)
 #script = urllib.request.urlopen(URL).read().decode()
 #exec(script)
 
@@ -447,6 +447,7 @@ FPara['emailSenderPassword'] = emailSenderPassword
 FPara['githubUserName'] = githubUserName
 FPara['githubRepoName'] = githubRepoName
 FPara['githubBranchName'] = githubBranchName
+FPara['takeawayBoxInventoryURL'] = takeawayBoxInventoryURL
 
 takeawayBoxInventoryFunction = FPara['takeawayBoxInventoryFunction']
 stockAlertFunction = FPara['stockAlertFunction']
