@@ -154,7 +154,7 @@ def gen_pdf(customFont, pageOneDf, pageTwoDf, pageThreeDf, fileNameAfterCheck, o
 
     Document = borb_Document()
     Page = borb_Page(width=Decimal(595), height=Decimal(842))
-    Document.append_page(Page)
+    Document.add_page(Page)
 
     layout: borb_PageLayout = borb_SCL(Page)
 
@@ -355,9 +355,9 @@ def readCsv(githubUserName, githubRepoName, githubBranchName, githubFileName, cs
 #script = urllib.request.urlopen(URL).read().decode()
 #exec(script)
 
-#generate pdf works well with borb version 2.0.27
+#generate pdf works well with borb version 2.1.6
 #pip uninstall borb
-#pip install --upgrade borb==2.0.27
+#pip install --upgrade borb==2.1.6
 
 pageTwoNameReplaceFileName = 'pageTwoItemConverterForInventory.csv'
 
