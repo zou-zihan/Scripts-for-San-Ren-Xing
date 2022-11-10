@@ -226,7 +226,7 @@ def sending_email(text, receiver_list, td_pd, emailSender, emailSenderPassword):
     mail_server = 'smtp.126.com'
 
     message = MIMEText(str(text), 'plain', 'utf-8')
-    message['From'] = sender
+    message['From'] = emailSender
 
     subject = '物品库存通知 {}'.format(td_pd)
     message['Subject'] = Header(subject, 'utf-8')
