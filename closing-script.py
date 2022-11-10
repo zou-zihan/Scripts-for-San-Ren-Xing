@@ -378,7 +378,7 @@ def readCsv(githubUserName, githubRepoName, githubBranchName, githubFileName, gi
 
 #githubUserName = ""
 #githubRepoName = ""
-#githubBranch = ""
+#githubBranchName = ""
 #githubToken = ""
 #emailSender = ''
 #emailSenderPassword = ''
