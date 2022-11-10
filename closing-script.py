@@ -252,14 +252,14 @@ def normal_round(n, decimals=0):
 def remove_spaces(var):
     return str(var).translate({ord(y): None for y in string.whitespace})
 
-def on_internet():
-    url = "https://www.google.com.sg/"
-    timeout = 5
-    try:
-        request = requests.get(url, timeout=timeout)
-        return True
-    except (requests.ConnectionError, requests.Timeout) as exception:
-        return False
+#def on_internet():
+#    url = "https://www.google.com.sg/"
+#    timeout = 5
+#    try:
+#        request = requests.get(url, timeout=timeout)
+#        return True
+#    except (requests.ConnectionError, requests.Timeout) as exception:
+#        return False
 
 def drink_beizhu(ziyong):
     if ziyong == 0:
@@ -274,15 +274,6 @@ def prtdf(df):
                            'display.precision', 2,
                            'display.colheader_justify', 'center'):
         return display(df)
-
-#def on_internet():
-#    url = "https://www.google.com.sg/"
-#    timeout = 5
-#    try:
-#        request = requests.get(url, timeout=timeout)
-#        return True
-#    except (requests.ConnectionError, requests.Timeout) as exception:
-#        return False
 
 def readCsv(githubUserName, githubRepoName, githubBranchName, githubFileName, csvSep, csvEncoding):
     githubPrefix = "https://raw.githubusercontent.com"
@@ -608,8 +599,8 @@ if len(read) > int(FPara['minBookFileLenAllowable']):
             model_listing.update({ modelName : TBRuleDf[(TBRuleDf['Model to Use'] == 'boxTakeOverName{}'.format(number)) & (TBRuleDf['active status'] == 1)]['String Locator'].values.tolist()})
 
         html_df = pd.read_html(FPara['takeawayBoxInventoryURL'], encoding='utf-8')
-        model_df = html_df.copy()[0]
-        #model_df = pd.read_excel("model_df.xlsx", thousands=',')
+        #model_df = html_df.copy()[0]
+        model_df = pd.read_excel("model_df.xlsx", thousands=',')
         model_df.drop('Unnamed: 0', axis=1, inplace=True)
         model_df.columns = model_df.iloc[0, :]
         model_df.drop(0, axis=0, inplace=True)
