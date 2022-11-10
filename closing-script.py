@@ -238,7 +238,7 @@ def sending_email(text, receiver_list, td_pd, emailSender, emailSenderPassword):
         for ppl in receiver_list:
             print('正在发送电邮给{}'.format(ppl))
             message['To'] = ppl
-            smtpObj.sendmail(sender, ppl, message.as_string())
+            smtpObj.sendmail(emailSender, ppl, message.as_string())
             print('{} 电邮发送成功'.format(ppl))
     except smtplib.SMTPException:
         print('电邮发送失败')
