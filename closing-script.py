@@ -275,15 +275,18 @@ def prtdf(df):
                            'display.colheader_justify', 'center'):
         return display(df)
 
-def readCsv(githubUserName, githubRepoName, githubBranchName, githubFileName, csvSep, csvEncoding):
-    githubPrefix = "https://raw.githubusercontent.com"
-    URL = "{}/{}/{}/{}/{}".format(githubPrefix, githubUserName, githubRepoName, githubBranchName, githubFileName)
-
-    resp = requests.get(URL)
-    if resp.status_code == 200:
-        return pd.read_csv(io.StringIO(resp.text), sep=csvSep, encoding=csvEncoding)
+def readCsv(githubUserName, githubRepoName, githubBranchName, githubFileName, csvSep, csvEncoding, runLocally):
+    if runLocally:
+        return pd.read_csv(githubFileName, sep=csvSep, encoding=csvEncoding)
     else:
-        raise ConnectionError("访问错误")
+        githubPrefix = "https://raw.githubusercontent.com"
+        URL = "{}/{}/{}/{}/{}".format(githubPrefix, githubUserName, githubRepoName, githubBranchName, githubFileName)
+
+        resp = requests.get(URL)
+        if resp.status_code == 200:
+            return pd.read_csv(io.StringIO(resp.text), sep=csvSep, encoding=csvEncoding)
+        else:
+            raise ConnectionError("访问错误")
 
 #中午营业额
 #lun_sales = 0
@@ -423,7 +426,8 @@ functionRuleDf = readCsv(githubFileName=functionalityRuleCsvName,
                          githubRepoName=githubRepoName,
                          githubBranchName=githubBranchName,
                          csvSep='|',
-                         csvEncoding='utf-8')
+                         csvEncoding='utf-8',
+                         runLocally=runLocally)
 
 FPara = {}
 for row in range(len(functionRuleDf)):
@@ -587,7 +591,8 @@ if len(read) > int(FPara['minBookFileLenAllowable']):
                        githubRepoName=FPara['githubRepoName'],
                        githubBranchName=FPara['githubBranchName'],
                        csvSep='|',
-                       csvEncoding='utf-8')
+                       csvEncoding='utf-8',
+                       runLocally=runLocally)
 
         TBRuleDf['String Locator'] = TBRuleDf['String Locator'].apply(lambda a : unicodedata.normalize("NFKD", a))
         TBRuleDf['String Locator'] = TBRuleDf['String Locator'].apply(lambda x : remove_spaces(x))
@@ -651,7 +656,8 @@ if len(read) > int(FPara['minBookFileLenAllowable']):
                            githubRepoName=FPara['githubRepoName'],
                            githubBranchName=FPara['githubBranchName'],
                            csvSep='|',
-                           csvEncoding='utf-8')
+                           csvEncoding='utf-8',
+                           runLocally=runLocally)
 
             if TBExtraRuleDf.empty:
                 pass
@@ -863,7 +869,8 @@ if len(read) > int(FPara['minBookFileLenAllowable']):
                        githubRepoName=FPara['githubRepoName'],
                        githubBranchName=FPara['githubBranchName'],
                        csvSep='|',
-                       csvEncoding='utf-8')
+                       csvEncoding='utf-8',
+                       runLocally=runLocally)
 
         for i in range(len(rule.index)):
             if int(rule.iloc[i, 7]) == 1:
@@ -983,7 +990,8 @@ if len(read) > int(FPara['minBookFileLenAllowable']):
                            githubRepoName=FPara['githubRepoName'],
                            githubBranchName=FPara['githubBranchName'],
                            csvSep='|',
-                           csvEncoding='utf-8')
+                           csvEncoding='utf-8',
+                           runLocally=runLocally)
 
             for column in printRuleDf.columns:
                 printRuleDf[column] = printRuleDf[column].astype(str)
@@ -1263,7 +1271,8 @@ if len(read) > int(FPara['minBookFileLenAllowable']):
                            githubRepoName=FPara['githubRepoName'],
                            githubBranchName=FPara['githubBranchName'],
                            csvSep='|',
-                           csvEncoding='utf-8')
+                           csvEncoding='utf-8',
+                           runLocally=runLocally)
 
             if drinkInventoryFunction:
                 print()
