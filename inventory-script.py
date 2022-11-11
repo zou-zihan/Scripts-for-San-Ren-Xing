@@ -355,9 +355,9 @@ def readCsv(githubUserName, githubRepoName, githubBranchName, githubFileName, cs
 #script = urllib.request.urlopen(URL).read().decode()
 #exec(script)
 
-#generate pdf works well with borb version 2.1.6
+#generate pdf works well with borb version 2.1.5.5.2
 #pip uninstall borb
-#pip install --upgrade borb==2.1.6
+#pip install --upgrade borb==2.1.5.5.2
 
 pageTwoNameReplaceFileName = 'pageTwoItemConverterForInventory.csv'
 
