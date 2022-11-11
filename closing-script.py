@@ -187,14 +187,14 @@ def stock_alert(box_value, model_df, noti_df, td_pd, alert_everyday=False):
     if alert_everyday:
         for index in range(len(model_df)):
             alert_dict.update({
-                    '{}'.format(model_df.iloc[index, 7]) : box_value['{}_now'.format(model_df.iloc[index, 0])]
+                    '{}'.format(model_df.iloc[index, 0]) : box_value['{}_now'.format(model_df.iloc[index, 0])]
             })
 
     elif not alert_everyday:
         if day_name == 'Friday':
             for index in range(len(model_df)):
                 alert_dict.update({
-                        '{}'.format(model_df.iloc[index, 7]) : box_value['{}_now'.format(model_df.iloc[index, 0])]
+                        '{}'.format(model_df.iloc[index, 0]) : box_value['{}_now'.format(model_df.iloc[index, 0])]
                 })
 
         elif day_name != 'Friday':
