@@ -1014,23 +1014,6 @@ if len(read) > int(FPara['minBookFileLenAllowable']):
                 else:
                     print_result += [printRuleDf['print_statement'][index].format(*formatEval)]
 
-            print()
-            print('生成报表中...')
-            print('——————————————')
-            print()
-
-            for items in print_result:
-                print(items)
-
-            print()
-            print('——————————————')
-            print()
-            print('服务费: ${}'.format(value_dict['svc']))
-            print('GST: ${}'.format(value_dict['gst']))
-            print('日均营业额: ${}'.format(value_dict['ads']))
-            print()
-            print("帐务簿记")
-            print(take_date)
             bookkeeping_particulars = ['初始额', '销售额']
 
             voucher_expense_list = ['Trueblue会员', '三人行礼券', 'PandaBox', "唐人街首单减$5"]
@@ -1079,11 +1062,7 @@ if len(read) > int(FPara['minBookFileLenAllowable']):
                                            "收入": income_list,
                                            "支出": expense_list,
                                            "月累计": balance_list,})
-            prtdf(bookkeeping_df)
-            print()
-            print('——————————————')
-            print('正在写入...')
-            print()
+
             promo_df = pd.read_excel(FPara['databaseFileName'], thousands=',', sheet_name=FPara['promoRecordSheetName'])
 
             tdy_input_promo = [td_pd, dt.datetime.strptime(td_pd,'%Y-%m-%d').strftime("%A"), ]
@@ -1262,10 +1241,7 @@ if len(read) > int(FPara['minBookFileLenAllowable']):
             with pd.ExcelWriter(FPara['databaseFileName']) as writer:
                 for file in range(len(concaFile)):
                     concaFile[file].to_excel(writer, sheet_name=concaFileName[file], index=False, header=True, encoding="GBK")
-                    print(msgList[file])
 
-            print()
-            print('——————————————')
             NameConverter = readCsv(githubFileName=NameConverterForShowingDfCsvName,
                            githubUserName=FPara['githubUserName'],
                            githubRepoName=FPara['githubRepoName'],
@@ -1275,9 +1251,6 @@ if len(read) > int(FPara['minBookFileLenAllowable']):
                            runLocally=FPara['runLocally'])
 
             if drinkInventoryFunction:
-                print()
-                print('酒水信息: ')
-                print(take_date)
                 read_drink = pd.read_excel(FPara['databaseFileName'], thousands = ',', sheet_name=FPara['drinkRecordSheetName'])
                 for_drink_df = read_drink[read_drink['日期'] == take_date]
 
@@ -1309,15 +1282,11 @@ if len(read) > int(FPara['minBookFileLenAllowable']):
                         dropIndex += [index]
 
                 drink_df.drop(dropIndex, axis=0, inplace=True)
-                prtdf(drink_df)
+
             else:
-                pass
+                drink_df = None
 
             if takeawayBoxInventoryFunction:
-                print()
-                print('打包盒信息: ')
-                print(take_date)
-
                 tabox = pd.read_excel(FPara['databaseFileName'], sheet_name=FPara['takeawayBoxRecordSheetName'])
                 for_takeaway_df = tabox[tabox['Date'] == td_pd]
                 wuPin = []
@@ -1344,15 +1313,13 @@ if len(read) > int(FPara['minBookFileLenAllowable']):
                         dropIndex += [index]
 
                 takeaway_df.drop(dropIndex, axis=0, inplace=True)
-                prtdf(takeaway_df)
-                print()
+
 
             else:
-                pass
+                takeaway_df = None
 
             if cashRecordShowFunction:
-                print("现金收入存放信息: ")
-                print(take_date)
+
                 cash_df = pd.read_excel(FPara['databaseFileName'], thousands=",", sheet_name=FPara['cashRecordSheetName'])
                 cash_df['Date'] = cash_df['Date'].astype(str)
                 if cash_received_tdy != None:
@@ -1360,7 +1327,9 @@ if len(read) > int(FPara['minBookFileLenAllowable']):
                     try:
                         start_date_index = int(cash_df[cash_df['Date'] == cash_start_date].index.values[0])
                     except:
-                        print("未存放现金的起始日期错误,原因可能是标点符号使用错误或是数据库里不存在该日期的记录. ")
+                        cash_df = None
+                        cash_summary = None
+                        cash_df_msg = "未存放现金的起始日期错误,原因可能是标点符号使用错误或是数据库里不存在该日期的记录. "
                         start_date_continue = False
 
                     if start_date_continue:
@@ -1369,39 +1338,93 @@ if len(read) > int(FPara['minBookFileLenAllowable']):
                                 drop_indexes = np.arange(start_date_index)
                                 cash_df.drop(drop_indexes, axis=0, inplace=True)
                                 cash_df.reset_index(inplace=True)
-                                if "index" in  cash_df.columns:
+                                if "index" in cash_df.columns:
                                     cash_df.drop("index", axis=1, inplace=True)
                             else:
                                 pass
 
                             cash_summary = cash_df['Amount'].sum()
-                            prtdf(cash_df)
-                            print("{}至{}的现金收入共计${}".format(cash_start_date, td_pd, format(cash_summary, '.2f')))
+                            cash_df_msg = "{}至{}的现金收入共计${}".format(cash_start_date, td_pd, format(cash_summary, '.2f'))
 
                         else:
                             end_date_continue = True
                             try:
                                 end_date_index = int(cash_df[cash_df['Date'] == cash_end_date].index.values[0])
                             except:
-                                print("未存放现金的结束日期错误,原因可能是标点符号使用错误或是数据库里不存在该日期的记录. ")
+                                cash_df = None
+                                cash_summary = None
+                                cash_df_msg = "未存放现金的结束日期错误,原因可能是标点符号使用错误或是数据库里不存在该日期的记录. "
                                 end_date_continue = False
 
                             if end_date_continue:
-                                prtdf(cash_df.iloc[np.arange(start_date_index, end_date_index+1),:])
-                                cash_summary = cash_df.iloc[np.arange(start_date_index, end_date_index+1),:]["Amount"].sum()
-                                print("{}至{}的现金收入共计${}".format(cash_start_date, cash_end_date, format(cash_summary, '.2f')))
+                                cash_df = cash_df.iloc[np.arange(start_date_index, end_date_index+1),:]
+                                cash_summary = cash_df["Amount"].sum()
+                                cash_df_msg = "{}至{}的现金收入共计${}".format(cash_start_date, cash_end_date, format(cash_summary, '.2f'))
                             else:
                                 pass
                     else:
                         pass
                 else:
-                    print("现金收入存放信息生成错误! ")
+                    cash_df = None
+                    cash_summary = None
+                    cash_df_msg = "现金收入存放信息生成错误! "
             else:
                 pass
+
+
+            print()
+            print('生成报表中...')
+            print('——————————————')
+            print()
+
+            for items in print_result:
+                print(items)
+
+            print()
+            print('——————————————')
+            print()
+            print('服务费: ${}'.format(value_dict['svc']))
+            print('GST: ${}'.format(value_dict['gst']))
+            print('日均营业额: ${}'.format(value_dict['ads']))
+            print()
+            print("帐务簿记")
+            print(take_date)
+            print()
+            prtdf(bookkeeping_df)
+            print()
+            print('——————————————')
+            print('正在写入...')
+            for msg in msgList:
+                print(msg)
+            print()
+            print('——————————————')
+            if drinkInventoryFunction:
+                if drink_df != None:
+                    print('酒水信息: ')
+                    print(take_date)
+                    prtdf(drink_df)
+                    print()
+
+            if takeawayBoxInventoryFunction:
+                if takeaway_df != None:
+                    print('打包盒信息: ')
+                    print(take_date)
+                    prtdf(takeaway_df)
+                    print()
+
+            if cashRecordShowFunction:
+                print("现金收入存放信息: ")
+                print(take_date)
+                if cash_df != None and cash_summary != None:
+                    prtdf(cash_df)
+                    print(cash_df_msg)
+                else:
+                    print(cash_df_msg)
+
         else:
              print("逻辑错误")
     else:
         print("导出的报表无法识别来自哪家门店")
         print("请选择门店导出报表后再运行一遍吧")
 else:
-    print("你应该没有复制所有的后台数据,复制完所有的数据再允许一遍吧")
+    print("你应该没有复制所有的后台数据,复制完所有的数据再运行一遍吧")
