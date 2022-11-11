@@ -426,7 +426,7 @@ functionRuleDf = readCsv(githubFileName=functionalityRuleCsvName,
                          githubBranchName=githubBranchName,
                          csvSep='|',
                          csvEncoding='utf-8',
-                         runLocally=FPara['runLocally'])
+                         runLocally=runLocally)
 
 FPara = {}
 for row in range(len(functionRuleDf)):
