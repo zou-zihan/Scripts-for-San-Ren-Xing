@@ -1,6 +1,6 @@
 function|status
 bookFileName|book.xlsx
-databaseFileName|abc.xlsx
+databaseFileName|Thomson Database.xlsx
 minBookFileLenAllowable|100
 takeawayBoxInventoryFunction|True
 stockAlertFunction|True
