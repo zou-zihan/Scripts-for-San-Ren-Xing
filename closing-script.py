@@ -13,7 +13,6 @@ import smtplib
 from email.mime.text import MIMEText
 from email.header import Header
 import requests
-import validators
 from requests.structures import CaseInsensitiveDict
 import io
 #import urllib
