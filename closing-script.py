@@ -982,7 +982,10 @@ if len(read) > int(FPara['minBookFileLenAllowable']):
                 generate = False
             else:
                 pass
-
+        print()
+        print('生成报表中...')
+        print('——————————————')
+        print()
         if generate:
             print_result = []
             printRuleDf = readCsv(githubFileName=printRuleCsvName,
@@ -1371,11 +1374,6 @@ if len(read) > int(FPara['minBookFileLenAllowable']):
             else:
                 pass
 
-
-            print()
-            print('生成报表中...')
-            print('——————————————')
-            print()
 
             for items in print_result:
                 print(items)
