@@ -1,32 +1,3 @@
-Skip to content
-Search or jump to…
-Pull requests
-Issues
-Codespaces
-Marketplace
-Explore
-
-@zou-zihan
-zou-zihan
-/
-Scripts-for-San-Ren-Xing
-Public
-Code
-Issues
-Pull requests
-Actions
-Projects
-Security
-Insights
-Settings
-Scripts-for-San-Ren-Xing/inventory-script.py /
-@zou-zihan
-zou-zihan Update inventory-script.py
-Latest commit c76b1a3 yesterday
- History
- 1 contributor
-1207 lines (964 sloc)  76 KB
-
 #! /usr/bin/env python3
 #encoding='GBK'
 
