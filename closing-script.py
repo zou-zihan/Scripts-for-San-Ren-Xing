@@ -1399,14 +1399,14 @@ if len(read) > int(FPara['minBookFileLenAllowable']):
             print()
             print('——————————————')
             if drinkInventoryFunction:
-                if drink_df != None:
+                if isinstance(drink_df, pd.DataFrame):
                     print('酒水信息: ')
                     print(take_date)
                     prtdf(drink_df)
                     print()
 
             if takeawayBoxInventoryFunction:
-                if takeaway_df != None:
+                if isinstance(takeaway_df, pd.DataFrame):
                     print('打包盒信息: ')
                     print(take_date)
                     prtdf(takeaway_df)
@@ -1415,7 +1415,7 @@ if len(read) > int(FPara['minBookFileLenAllowable']):
             if cashRecordShowFunction:
                 print("现金收入存放信息: ")
                 print(take_date)
-                if cash_df != None and cash_summary != None:
+                if isinstance(cash_df, pd.DataFrame) and cash_summary != None:
                     prtdf(cash_df)
                     print(cash_df_msg)
                 else:
