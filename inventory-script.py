@@ -1,3 +1,32 @@
+Skip to content
+Search or jump to…
+Pull requests
+Issues
+Codespaces
+Marketplace
+Explore
+
+@zou-zihan
+zou-zihan
+/
+Scripts-for-San-Ren-Xing
+Public
+Code
+Issues
+Pull requests
+Actions
+Projects
+Security
+Insights
+Settings
+Scripts-for-San-Ren-Xing/inventory-script.py /
+@zou-zihan
+zou-zihan Update inventory-script.py
+Latest commit c76b1a3 yesterday
+ History
+ 1 contributor
+1207 lines (964 sloc)  76 KB
+
 #! /usr/bin/env python3
 #encoding='GBK'
 
@@ -612,512 +641,507 @@ while userInputOne != 3:
                             print("Critical Error 关键错误")
                         else:
                             if os.path.exists("{}/{}".format(os.getcwd(), databaseFileName)):
-                                if os.path.exists("{}/{}".format(os.getcwd(), pageTwoNameReplaceFileName)):
-                                    stockCountDfIndexChangeOne = [i.replace("_盘点数量","") for i in stockCountDfFiltered.index]
-                                    stockCountDfFilteredForPageOne = stockCountDfFiltered.copy()
-                                    stockCountDfFilteredForPageOne.index = stockCountDfIndexChangeOne
+                                stockCountDfIndexChangeOne = [i.replace("_盘点数量","") for i in stockCountDfFiltered.index]
+                                stockCountDfFilteredForPageOne = stockCountDfFiltered.copy()
+                                stockCountDfFilteredForPageOne.index = stockCountDfIndexChangeOne
 
-                                    regex = r'\(.*\)'
-                                    stockCountDfFilteredForPageOneIndexes = stockCountDfFilteredForPageOne.copy().index.values
-                                    stockCountDfFilteredRemoveUnitsArray = np.repeat(None, len(stockCountDfFilteredForPageOneIndexes))
-                                    for name in range(len(stockCountDfFilteredForPageOneIndexes)):
-                                        reStr = re.search(regex, stockCountDfFilteredForPageOneIndexes[name])
-                                        if reStr is None:
-                                            stockCountDfFilteredRemoveUnitsArray[name] = stockCountDfFilteredForPageOneIndexes[name]
-                                        else:
-                                            stockCountDfFilteredRemoveUnitsArray[name] = stockCountDfFilteredForPageOneIndexes[name].replace(reStr[0], '')
-
-                                    stockCountDfFilteredRemoveUnits = stockCountDfFilteredForPageOne.copy()
-                                    stockCountDfFilteredRemoveUnits.index = stockCountDfFilteredRemoveUnitsArray
-
-                                    buyInStockDfFiltered = buyInStockDf.copy()
-                                    buyInStockDfFiltered = buyInStockDfFiltered[buyInStockDfFiltered['进货日期(年年年年-月月-日日)'].isin(dateRangeFilter)]
-
-                                    if buyInStockDfFiltered.empty:
-                                        buyInStockDfFilteredGrouped = pd.DataFrame(columns=['物品(单位)', '进货数量'])
+                                regex = r'\(.*\)'
+                                stockCountDfFilteredForPageOneIndexes = stockCountDfFilteredForPageOne.copy().index.values
+                                stockCountDfFilteredRemoveUnitsArray = np.repeat(None, len(stockCountDfFilteredForPageOneIndexes))
+                                for name in range(len(stockCountDfFilteredForPageOneIndexes)):
+                                    reStr = re.search(regex, stockCountDfFilteredForPageOneIndexes[name])
+                                    if reStr is None:
+                                        stockCountDfFilteredRemoveUnitsArray[name] = stockCountDfFilteredForPageOneIndexes[name]
                                     else:
-                                        buyInStockDfFilteredGrouped = buyInStockDfFiltered.groupby("进货物品(单位)")[['进货数量']].sum()
-                                        buyInStockDfFilteredGrouped.reset_index(inplace=True)
-                                        buyInStockDfFilteredGrouped.columns = ['物品(单位)', '进货数量']
+                                        stockCountDfFilteredRemoveUnitsArray[name] = stockCountDfFilteredForPageOneIndexes[name].replace(reStr[0], '')
 
-                                    buyInStockDfFilteredGroupedRemoveUnits = buyInStockDfFilteredGrouped.copy()
-                                    buyInStockDfFilteredGroupedRemoveUnits['物品(单位)'] = buyInStockDfFilteredGroupedRemoveUnits['物品(单位)'].apply(lambda x: DfRemoveUnits(regex, x))
+                                stockCountDfFilteredRemoveUnits = stockCountDfFilteredForPageOne.copy()
+                                stockCountDfFilteredRemoveUnits.index = stockCountDfFilteredRemoveUnitsArray
 
-                                    breakages_dfFiltered = breakages_df.copy()
-                                    breakages_dfFiltered = breakages_dfFiltered[breakages_dfFiltered["日期(年年年年-月月-日日)"].isin(dateRangeFilter)]
+                                buyInStockDfFiltered = buyInStockDf.copy()
+                                buyInStockDfFiltered = buyInStockDfFiltered[buyInStockDfFiltered['进货日期(年年年年-月月-日日)'].isin(dateRangeFilter)]
 
-                                    if breakages_dfFiltered.empty:
-                                        breakages_dfFilteredGrouped = pd.DataFrame(columns=['物品(单位)', "破损数量"])
+                                if buyInStockDfFiltered.empty:
+                                    buyInStockDfFilteredGrouped = pd.DataFrame(columns=['物品(单位)', '进货数量'])
+                                else:
+                                    buyInStockDfFilteredGrouped = buyInStockDfFiltered.groupby("进货物品(单位)")[['进货数量']].sum()
+                                    buyInStockDfFilteredGrouped.reset_index(inplace=True)
+                                    buyInStockDfFilteredGrouped.columns = ['物品(单位)', '进货数量']
+
+                                buyInStockDfFilteredGroupedRemoveUnits = buyInStockDfFilteredGrouped.copy()
+                                buyInStockDfFilteredGroupedRemoveUnits['物品(单位)'] = buyInStockDfFilteredGroupedRemoveUnits['物品(单位)'].apply(lambda x: DfRemoveUnits(regex, x))
+
+                                breakages_dfFiltered = breakages_df.copy()
+                                breakages_dfFiltered = breakages_dfFiltered[breakages_dfFiltered["日期(年年年年-月月-日日)"].isin(dateRangeFilter)]
+
+                                if breakages_dfFiltered.empty:
+                                    breakages_dfFilteredGrouped = pd.DataFrame(columns=['物品(单位)', "破损数量"])
+                                else:
+                                    breakages_dfFilteredGrouped = breakages_dfFiltered.groupby("破损物品(单位)")[['破损数量']].sum()
+                                    breakages_dfFilteredGrouped.reset_index(inplace=True)
+                                    breakages_dfFilteredGrouped.columns = ['物品(单位)', "破损数量"]
+
+                                pageOneUnitPrice = pd.read_html(formURL, encoding='utf-8')[2]
+                                pageOneUnitPrice.drop("Unnamed: 0", axis=1, inplace=True)
+                                pageOneUnitPrice.columns = pageOneUnitPrice.iloc[0, :]
+                                pageOneUnitPrice.drop(0, axis=0, inplace=True)
+                                pageOneUnitPrice.reset_index(inplace=True)
+                                pageOneUnitPrice.drop("index", axis=1, inplace=True)
+
+                                pageOnePriceRawList = pageOneUnitPrice[pageOneUnitPrice.columns[1]].values
+                                pageOnePriceList=[' ' if x is np.nan else x for x in pageOnePriceRawList]
+
+                                previousStockCount = pd.read_excel('{}/盘点详情excel/{}.xlsx'.format(os.getcwd(), previousStockCountFileName),sheet_name="Sheet1")
+                                previousStockCount.drop(['编号','单价', '上月存货', '进货数量', '破损数量', '损耗数量','备注'], axis=1, inplace=True)
+
+                                pageOneDf = pd.DataFrame({"编号" : np.arange(1, len(pageOneUnitPrice)+1),
+                                                          "物品(单位)": pageOneUnitPrice[pageOneUnitPrice.columns[0]].values,
+                                                          })
+
+                                previousStockArray = np.repeat(None, len(pageOneDf['物品(单位)'].values))
+                                for itemName in range(len(pageOneDf['物品(单位)'].values)):
+                                    try:
+                                        previousStockArray[itemName] = int(previousStockCount[previousStockCount['物品(单位)'] == pageOneDf['物品(单位)'].values[itemName]]["现有数量"].values[0])
+                                    except IndexError:
+                                        previousStockArray[itemName] = -404
+                                    except ValueError:
+                                        previousStockArray[itemName] = -406
+
+                                pageOneDf['上月存货'] = previousStockArray
+                                pageOneDf['上月存货'] = pageOneDf['上月存货'].astype(int)
+
+                                buyInStockDfFilteredGroupedForPageOne = buyInStockDfFilteredGrouped.copy()
+                                buyInStockDfFilteredGroupedForPageOneIndexDrop = []
+
+                                for item in range(len(buyInStockDfFilteredGroupedForPageOne)):
+                                    if buyInStockDfFilteredGroupedForPageOne['物品(单位)'].values[item] not in pageOneDf['物品(单位)'].values:
+                                        buyInStockDfFilteredGroupedForPageOneIndexDrop += [item]
+                                buyInStockDfFilteredGroupedForPageOne.drop(buyInStockDfFilteredGroupedForPageOneIndexDrop, axis=0, inplace=True)
+                                buyInStockDfFilteredGroupedForPageOne.reset_index(inplace=True)
+                                buyInStockDfFilteredGroupedForPageOne.drop("index", axis=1, inplace=True)
+
+                                pageOneDf = pd.merge(right=buyInStockDfFilteredGroupedForPageOne, left=pageOneDf, how="outer")
+
+                                breakages_dfFilteredGroupedForPageOne = breakages_dfFilteredGrouped.copy()
+                                breakages_dfFilteredGroupedForPageOneIndexDrop = []
+
+                                for item in range(len(breakages_dfFilteredGroupedForPageOne)):
+                                    if breakages_dfFilteredGroupedForPageOne['物品(单位)'].values[item] not in pageOneDf['物品(单位)'].values:
+                                        breakages_dfFilteredGroupedForPageOneIndexDrop += [item]
+
+                                breakages_dfFilteredGroupedForPageOne.drop(breakages_dfFilteredGroupedForPageOneIndexDrop, axis=0, inplace=True)
+                                breakages_dfFilteredGroupedForPageOne.reset_index(inplace=True)
+                                breakages_dfFilteredGroupedForPageOne.drop("index", axis=1, inplace=True)
+
+                                pageOneDf = pd.merge(right=breakages_dfFilteredGroupedForPageOne, left=pageOneDf, how="outer")
+
+                                breakagesColumnsTurnZero = [0 if x is np.nan else x for x in pageOneDf['破损数量'].values]
+                                pageOneDf['破损数量'] = breakagesColumnsTurnZero
+                                buyInStockColumnsTurnZero = [0 if x is np.nan else x for x in pageOneDf['进货数量'].values]
+                                pageOneDf['进货数量'] = buyInStockColumnsTurnZero
+
+                                lockInStockDfForPageOne = lockInStockDf.copy()
+                                lockInStockDfForPageOne.drop(['23下','23壁橱', '66下', '68下','15下','28下','28壁橱','63壁橱','61壁橱','传菜口','制冰机上',88], axis=1, inplace=True)
+                                lockInStockDfForPageOne.columns = ['物品(单位)', '总数']
+
+                                pageOneCurrentArray = np.repeat(None, len(pageOneDf))
+
+                                for num in range(len(pageOneDf)):
+                                    pageOneCurrentArray[num] = stockCountDfFilteredForPageOne[pageOneDf['物品(单位)'].values[num]]
+
+                                addLockInStockArray = np.repeat(None, len(pageOneDf))
+
+                                for num in range(len(pageOneDf)):
+                                    addLockInStockArray[num] = lockInStockDfForPageOne[lockInStockDfForPageOne['物品(单位)'] == pageOneDf['物品(单位)'].values[num]]['总数'].sum()
+
+                                PageOneDfCurrentwithLockInStock = np.add(pageOneCurrentArray.astype(int), addLockInStockArray.astype(int))
+
+                                pageOneDf['现有数量'] = PageOneDfCurrentwithLockInStock
+
+                                pageOneDf['破损数量'] = pageOneDf['破损数量'].astype(int)
+                                pageOneDf['进货数量'] = pageOneDf['进货数量'].astype(int)
+                                pageOneDf['现有数量'] = pageOneDf['现有数量'].astype(int)
+
+                                pageOneDf['损耗数量'] = pageOneDf['上月存货'] - pageOneDf['现有数量'] + pageOneDf['进货数量'] - pageOneDf['破损数量']
+
+                                pageOnePriceRestructArray = np.repeat(None, len(pageOnePriceList))
+
+                                for price in range(len(pageOnePriceList)):
+                                    if pageOnePriceList[price] == ' ':
+                                        pageOnePriceRestructArray[price] = ' '
                                     else:
-                                        breakages_dfFilteredGrouped = breakages_dfFiltered.groupby("破损物品(单位)")[['破损数量']].sum()
-                                        breakages_dfFilteredGrouped.reset_index(inplace=True)
-                                        breakages_dfFilteredGrouped.columns = ['物品(单位)', "破损数量"]
-
-                                    pageOneUnitPrice = pd.read_html(formURL, encoding='utf-8')[2]
-                                    pageOneUnitPrice.drop("Unnamed: 0", axis=1, inplace=True)
-                                    pageOneUnitPrice.columns = pageOneUnitPrice.iloc[0, :]
-                                    pageOneUnitPrice.drop(0, axis=0, inplace=True)
-                                    pageOneUnitPrice.reset_index(inplace=True)
-                                    pageOneUnitPrice.drop("index", axis=1, inplace=True)
-
-                                    pageOnePriceRawList = pageOneUnitPrice[pageOneUnitPrice.columns[1]].values
-                                    pageOnePriceList=[' ' if x is np.nan else x for x in pageOnePriceRawList]
-
-                                    previousStockCount = pd.read_excel('{}/盘点详情excel/{}.xlsx'.format(os.getcwd(), previousStockCountFileName),sheet_name="Sheet1")
-                                    previousStockCount.drop(['编号','单价', '上月存货', '进货数量', '破损数量', '损耗数量','备注'], axis=1, inplace=True)
-
-                                    pageOneDf = pd.DataFrame({"编号" : np.arange(1, len(pageOneUnitPrice)+1),
-                                                              "物品(单位)": pageOneUnitPrice[pageOneUnitPrice.columns[0]].values,
-                                                              })
-
-                                    previousStockArray = np.repeat(None, len(pageOneDf['物品(单位)'].values))
-                                    for itemName in range(len(pageOneDf['物品(单位)'].values)):
-                                        try:
-                                            previousStockArray[itemName] = int(previousStockCount[previousStockCount['物品(单位)'] == pageOneDf['物品(单位)'].values[itemName]]["现有数量"].values[0])
-                                        except IndexError:
-                                            previousStockArray[itemName] = -404
-                                        except ValueError:
-                                            previousStockArray[itemName] = -406
-
-                                    pageOneDf['上月存货'] = previousStockArray
-                                    pageOneDf['上月存货'] = pageOneDf['上月存货'].astype(int)
-
-                                    buyInStockDfFilteredGroupedForPageOne = buyInStockDfFilteredGrouped.copy()
-                                    buyInStockDfFilteredGroupedForPageOneIndexDrop = []
-
-                                    for item in range(len(buyInStockDfFilteredGroupedForPageOne)):
-                                        if buyInStockDfFilteredGroupedForPageOne['物品(单位)'].values[item] not in pageOneDf['物品(单位)'].values:
-                                            buyInStockDfFilteredGroupedForPageOneIndexDrop += [item]
-                                    buyInStockDfFilteredGroupedForPageOne.drop(buyInStockDfFilteredGroupedForPageOneIndexDrop, axis=0, inplace=True)
-                                    buyInStockDfFilteredGroupedForPageOne.reset_index(inplace=True)
-                                    buyInStockDfFilteredGroupedForPageOne.drop("index", axis=1, inplace=True)
-
-                                    pageOneDf = pd.merge(right=buyInStockDfFilteredGroupedForPageOne, left=pageOneDf, how="outer")
-
-                                    breakages_dfFilteredGroupedForPageOne = breakages_dfFilteredGrouped.copy()
-                                    breakages_dfFilteredGroupedForPageOneIndexDrop = []
-
-                                    for item in range(len(breakages_dfFilteredGroupedForPageOne)):
-                                        if breakages_dfFilteredGroupedForPageOne['物品(单位)'].values[item] not in pageOneDf['物品(单位)'].values:
-                                            breakages_dfFilteredGroupedForPageOneIndexDrop += [item]
-
-                                    breakages_dfFilteredGroupedForPageOne.drop(breakages_dfFilteredGroupedForPageOneIndexDrop, axis=0, inplace=True)
-                                    breakages_dfFilteredGroupedForPageOne.reset_index(inplace=True)
-                                    breakages_dfFilteredGroupedForPageOne.drop("index", axis=1, inplace=True)
-
-                                    pageOneDf = pd.merge(right=breakages_dfFilteredGroupedForPageOne, left=pageOneDf, how="outer")
-
-                                    breakagesColumnsTurnZero = [0 if x is np.nan else x for x in pageOneDf['破损数量'].values]
-                                    pageOneDf['破损数量'] = breakagesColumnsTurnZero
-                                    buyInStockColumnsTurnZero = [0 if x is np.nan else x for x in pageOneDf['进货数量'].values]
-                                    pageOneDf['进货数量'] = buyInStockColumnsTurnZero
-
-                                    lockInStockDfForPageOne = lockInStockDf.copy()
-                                    lockInStockDfForPageOne.drop(['23下','23壁橱', '66下', '68下','15下','28下','28壁橱','63壁橱','61壁橱','传菜口','制冰机上',88], axis=1, inplace=True)
-                                    lockInStockDfForPageOne.columns = ['物品(单位)', '总数']
-
-                                    pageOneCurrentArray = np.repeat(None, len(pageOneDf))
-
-                                    for num in range(len(pageOneDf)):
-                                        pageOneCurrentArray[num] = stockCountDfFilteredForPageOne[pageOneDf['物品(单位)'].values[num]]
-
-                                    addLockInStockArray = np.repeat(None, len(pageOneDf))
-
-                                    for num in range(len(pageOneDf)):
-                                        addLockInStockArray[num] = lockInStockDfForPageOne[lockInStockDfForPageOne['物品(单位)'] == pageOneDf['物品(单位)'].values[num]]['总数'].sum()
-
-                                    PageOneDfCurrentwithLockInStock = np.add(pageOneCurrentArray.astype(int), addLockInStockArray.astype(int))
-
-                                    pageOneDf['现有数量'] = PageOneDfCurrentwithLockInStock
-
-                                    pageOneDf['破损数量'] = pageOneDf['破损数量'].astype(int)
-                                    pageOneDf['进货数量'] = pageOneDf['进货数量'].astype(int)
-                                    pageOneDf['现有数量'] = pageOneDf['现有数量'].astype(int)
-
-                                    pageOneDf['损耗数量'] = pageOneDf['上月存货'] - pageOneDf['现有数量'] + pageOneDf['进货数量'] - pageOneDf['破损数量']
-
-                                    pageOnePriceRestructArray = np.repeat(None, len(pageOnePriceList))
-
-                                    for price in range(len(pageOnePriceList)):
-                                        if pageOnePriceList[price] == ' ':
-                                            pageOnePriceRestructArray[price] = ' '
-                                        else:
-                                            pageOnePriceRestructArray[price] = '${}'.format(format(float(pageOnePriceList[price]), '.2f'))
+                                        pageOnePriceRestructArray[price] = '${}'.format(format(float(pageOnePriceList[price]), '.2f'))
 
 
-                                    pageOneDf['单价'] = pageOnePriceRestructArray
-                                    pageOneDf = pageOneDf[['编号', '物品(单位)', '单价', '上月存货', '进货数量', '破损数量', '损耗数量','现有数量']]
+                                pageOneDf['单价'] = pageOnePriceRestructArray
+                                pageOneDf = pageOneDf[['编号', '物品(单位)', '单价', '上月存货', '进货数量', '破损数量', '损耗数量','现有数量']]
 
-                                    pageTwoUnitPrice = pd.read_html(formURL, encoding='utf-8')[3]
-                                    pageTwoUnitPrice.drop("Unnamed: 0", axis=1, inplace=True)
-                                    pageTwoUnitPrice.columns = pageTwoUnitPrice.iloc[0,:]
-                                    pageTwoUnitPrice.drop(0, axis=0, inplace=True)
-                                    pageTwoUnitPrice.reset_index(inplace=True)
-                                    pageTwoUnitPrice.drop("index", axis=1, inplace=True)
+                                pageTwoUnitPrice = pd.read_html(formURL, encoding='utf-8')[3]
+                                pageTwoUnitPrice.drop("Unnamed: 0", axis=1, inplace=True)
+                                pageTwoUnitPrice.columns = pageTwoUnitPrice.iloc[0,:]
+                                pageTwoUnitPrice.drop(0, axis=0, inplace=True)
+                                pageTwoUnitPrice.reset_index(inplace=True)
+                                pageTwoUnitPrice.drop("index", axis=1, inplace=True)
 
-                                    pageTwoUnitPriceAuto = pageTwoUnitPrice.copy()
-                                    pageTwoUnitPriceAutoDropIndex = pageTwoUnitPrice[pageTwoUnitPrice['物品'] == 'BREAKLINE'].index[0]
-                                    pageTwoUnitPriceAuto.drop(np.arange(pageTwoUnitPriceAutoDropIndex, len(pageTwoUnitPrice)), axis=0, inplace=True)
+                                pageTwoUnitPriceAuto = pageTwoUnitPrice.copy()
+                                pageTwoUnitPriceAutoDropIndex = pageTwoUnitPrice[pageTwoUnitPrice['物品'] == 'BREAKLINE'].index[0]
+                                pageTwoUnitPriceAuto.drop(np.arange(pageTwoUnitPriceAutoDropIndex, len(pageTwoUnitPrice)), axis=0, inplace=True)
 
-                                    TBFile = pd.read_excel(databaseFileName, sheet_name=TBSheetName)
-                                    TBFile = TBFile[TBFile['Date'].isin(dateRangeFilter)]
+                                TBFile = pd.read_excel(databaseFileName, sheet_name=TBSheetName)
+                                TBFile = TBFile[TBFile['Date'].isin(dateRangeFilter)]
 
-                                    TBstockInColumnTitleForDrop = []
-                                    for column in TBFile.columns:
-                                        if column not in ['Date']:
-                                            if "入库" not in column:
-                                                TBstockInColumnTitleForDrop += [column]
-                                            else:
-                                                continue
+                                TBstockInColumnTitleForDrop = []
+                                for column in TBFile.columns:
+                                    if column not in ['Date']:
+                                        if "入库" not in column:
+                                            TBstockInColumnTitleForDrop += [column]
                                         else:
                                             continue
-
-                                    TBFileStockIn = TBFile.copy()
-                                    TBFileStockIn.drop(TBstockInColumnTitleForDrop, axis=1, inplace=True)
-
-                                    if TBFileStockIn.empty:
-                                        TBstockInSums = np.repeat(-404, len(pageTwoUnitPriceAuto['物品'].values))
                                     else:
-                                        TBstockInSums = np.repeat(None, len(pageTwoUnitPriceAuto['物品'].values))
+                                        continue
 
-                                        for item in range(len(pageTwoUnitPriceAuto['物品'].values)):
-                                            TBstockInSums[item]  = np.floor(TBFileStockIn[pageTwoUnitPriceAuto['物品'].values[item]+'入库'].sum())
+                                TBFileStockIn = TBFile.copy()
+                                TBFileStockIn.drop(TBstockInColumnTitleForDrop, axis=1, inplace=True)
 
-                                    TBstockInAuto = pd.DataFrame({'物品': pageTwoUnitPriceAuto['物品'].values,
-                                                                "进货数量": TBstockInSums.astype(int)})
+                                if TBFileStockIn.empty:
+                                    TBstockInSums = np.repeat(-404, len(pageTwoUnitPriceAuto['物品'].values))
+                                else:
+                                    TBstockInSums = np.repeat(None, len(pageTwoUnitPriceAuto['物品'].values))
 
-                                    pageTwoUnitPriceAuto = pd.merge(right=TBstockInAuto, left = pageTwoUnitPriceAuto, how='outer')
+                                    for item in range(len(pageTwoUnitPriceAuto['物品'].values)):
+                                        TBstockInSums[item]  = np.floor(TBFileStockIn[pageTwoUnitPriceAuto['物品'].values[item]+'入库'].sum())
+
+                                TBstockInAuto = pd.DataFrame({'物品': pageTwoUnitPriceAuto['物品'].values,
+                                                            "进货数量": TBstockInSums.astype(int)})
+
+                                pageTwoUnitPriceAuto = pd.merge(right=TBstockInAuto, left = pageTwoUnitPriceAuto, how='outer')
 
 
-                                    TBOutColumnTitleForDrop = []
-                                    for column in TBFile.columns:
-                                        if column not in ['Date']:
-                                            if "出库" not in column:
-                                                TBOutColumnTitleForDrop += [column]
-                                            else:
-                                                continue
+                                TBOutColumnTitleForDrop = []
+                                for column in TBFile.columns:
+                                    if column not in ['Date']:
+                                        if "出库" not in column:
+                                            TBOutColumnTitleForDrop += [column]
                                         else:
                                             continue
-
-                                    TBFileOut = TBFile.copy()
-                                    TBFileOut.drop(TBOutColumnTitleForDrop, axis=1, inplace=True)
-
-                                    if TBFileOut.empty:
-                                        TBOutSums = np.repeat(-404, len(pageTwoUnitPriceAuto['物品'].values))
                                     else:
-                                        TBOutSums = np.repeat(None, len(pageTwoUnitPriceAuto['物品'].values))
+                                        continue
 
-                                        for item in range(len(pageTwoUnitPriceAuto['物品'].values)):
-                                            TBOutSums[item]  = np.ceil(TBFileOut[pageTwoUnitPriceAuto['物品'].values[item]+'出库'].sum())
+                                TBFileOut = TBFile.copy()
+                                TBFileOut.drop(TBOutColumnTitleForDrop, axis=1, inplace=True)
 
-                                    TBOutAuto = pd.DataFrame({
-                                                              "编号": np.arange(1, len(pageTwoUnitPriceAuto['物品'].values)+1),
-                                                              "物品": pageTwoUnitPriceAuto['物品'].values,
-                                                              "本月使用量": TBOutSums.astype(int)
-                                                              })
+                                if TBFileOut.empty:
+                                    TBOutSums = np.repeat(-404, len(pageTwoUnitPriceAuto['物品'].values))
+                                else:
+                                    TBOutSums = np.repeat(None, len(pageTwoUnitPriceAuto['物品'].values))
 
-                                    pageTwoUnitPriceAuto = pd.merge(right=TBOutAuto, left = pageTwoUnitPriceAuto, how='outer')
+                                    for item in range(len(pageTwoUnitPriceAuto['物品'].values)):
+                                        TBOutSums[item]  = np.ceil(TBFileOut[pageTwoUnitPriceAuto['物品'].values[item]+'出库'].sum())
 
-                                    TBCurrentColumnTitleForDrop = []
-                                    for column in TBFile.columns:
-                                        if column not in ['Date']:
-                                            if "现有数量" not in column:
-                                                TBCurrentColumnTitleForDrop += [column]
-                                            else:
-                                                continue
+                                TBOutAuto = pd.DataFrame({
+                                                          "编号": np.arange(1, len(pageTwoUnitPriceAuto['物品'].values)+1),
+                                                          "物品": pageTwoUnitPriceAuto['物品'].values,
+                                                          "本月使用量": TBOutSums.astype(int)
+                                                          })
+
+                                pageTwoUnitPriceAuto = pd.merge(right=TBOutAuto, left = pageTwoUnitPriceAuto, how='outer')
+
+                                TBCurrentColumnTitleForDrop = []
+                                for column in TBFile.columns:
+                                    if column not in ['Date']:
+                                        if "现有数量" not in column:
+                                            TBCurrentColumnTitleForDrop += [column]
                                         else:
                                             continue
-
-                                    TBFileCurrent = TBFile.copy()
-                                    TBFileCurrent.drop(TBCurrentColumnTitleForDrop, axis=1, inplace=True)
-
-                                    if TBFileCurrent.empty:
-                                        TBCurrentSums = np.repeat(-404, len(pageTwoUnitPriceAuto['物品'].values))
                                     else:
-                                        TBFileCurrent.sort_values(by="Date", ascending=True, ignore_index=True, inplace=True)
-                                        maxDateForTBFileCurrent = TBFileCurrent['Date'].values[-1]
-                                        TBFileCurrent = TBFileCurrent[TBFileCurrent['Date'] == maxDateForTBFileCurrent]
+                                        continue
 
-                                        TBCurrentSums = np.repeat(None, len(pageTwoUnitPriceAuto['物品'].values))
-                                        for item in range(len(pageTwoUnitPriceAuto['物品'].values)):
-                                            TBCurrentSums[item] = np.floor(TBFileCurrent[pageTwoUnitPriceAuto['物品'].values[item]+'现有数量'].sum())
+                                TBFileCurrent = TBFile.copy()
+                                TBFileCurrent.drop(TBCurrentColumnTitleForDrop, axis=1, inplace=True)
 
-                                    TBCurrentAuto = pd.DataFrame({"物品": pageTwoUnitPriceAuto['物品'].values,
-                                                                  "现有数量": TBCurrentSums.astype(int)})
+                                if TBFileCurrent.empty:
+                                    TBCurrentSums = np.repeat(-404, len(pageTwoUnitPriceAuto['物品'].values))
+                                else:
+                                    TBFileCurrent.sort_values(by="Date", ascending=True, ignore_index=True, inplace=True)
+                                    maxDateForTBFileCurrent = TBFileCurrent['Date'].values[-1]
+                                    TBFileCurrent = TBFileCurrent[TBFileCurrent['Date'] == maxDateForTBFileCurrent]
 
-                                    pageTwoUnitPriceAuto = pd.merge(right=TBCurrentAuto, left = pageTwoUnitPriceAuto, how='outer')
+                                    TBCurrentSums = np.repeat(None, len(pageTwoUnitPriceAuto['物品'].values))
+                                    for item in range(len(pageTwoUnitPriceAuto['物品'].values)):
+                                        TBCurrentSums[item] = np.floor(TBFileCurrent[pageTwoUnitPriceAuto['物品'].values[item]+'现有数量'].sum())
 
-                                    pageTwoNameReplaceFile = readCsv(githubUserName=githubUserName,
-                                                                    githubRepoName=githubRepoName,
-                                                                    githubBranchName=githubBranchName,
-                                                                    githubFileName=pageTwoNameReplaceFileName,
-                                                                    csvSep='|',
-                                                                    csvEncoding='utf-8')
+                                TBCurrentAuto = pd.DataFrame({"物品": pageTwoUnitPriceAuto['物品'].values,
+                                                              "现有数量": TBCurrentSums.astype(int)})
+
+                                pageTwoUnitPriceAuto = pd.merge(right=TBCurrentAuto, left = pageTwoUnitPriceAuto, how='outer')
+
+                                pageTwoNameReplaceFile = readCsv(githubUserName=githubUserName,
+                                                                githubRepoName=githubRepoName,
+                                                                githubBranchName=githubBranchName,
+                                                                githubFileName=pageTwoNameReplaceFileName,
+                                                                csvSep='|',
+                                                                csvEncoding='utf-8')
 
 
-                                    nameReplace = np.repeat(None, len(pageTwoUnitPriceAuto['物品'].values))
-                                    for name in range(len(pageTwoUnitPriceAuto['物品'].values)):
-                                        nameReplace[name] = pageTwoNameReplaceFile[pageTwoNameReplaceFile['物品'] == pageTwoUnitPriceAuto['物品'].values[name]]['item name to show'].values[0]
+                                nameReplace = np.repeat(None, len(pageTwoUnitPriceAuto['物品'].values))
+                                for name in range(len(pageTwoUnitPriceAuto['物品'].values)):
+                                    nameReplace[name] = pageTwoNameReplaceFile[pageTwoNameReplaceFile['物品'] == pageTwoUnitPriceAuto['物品'].values[name]]['item name to show'].values[0]
 
-                                    pageTwoUnitPriceAuto['物品'] = nameReplace
+                                pageTwoUnitPriceAuto['物品'] = nameReplace
 
-                                    previousStockCountPageTwo = pd.read_excel('{}/盘点详情excel/{}.xlsx'.format(os.getcwd(), previousStockCountFileName),sheet_name="Sheet2")
-                                    previousStockCountPageTwo.drop(['编号','单位', '单价', '上月存货', '进货数量', '本月使用量','备注'], axis=1, inplace=True)
+                                previousStockCountPageTwo = pd.read_excel('{}/盘点详情excel/{}.xlsx'.format(os.getcwd(), previousStockCountFileName),sheet_name="Sheet2")
+                                previousStockCountPageTwo.drop(['编号','单位', '单价', '上月存货', '进货数量', '本月使用量','备注'], axis=1, inplace=True)
 
-                                    pageTwoUnitPriceAutoPreviousStockArray = np.repeat(None, len(pageTwoUnitPriceAuto))
-                                    for name in range(len(pageTwoUnitPriceAuto)):
-                                        try:
-                                            pageTwoUnitPriceAutoPreviousStockArray[name] = int(previousStockCountPageTwo[previousStockCountPageTwo['物品'] == pageTwoUnitPriceAuto['物品'].values[name]]['现有数量'].values[0])
-                                        except IndexError:
-                                            pageTwoUnitPriceAutoPreviousStockArray[name] = -404
-                                        except ValueError:
-                                            pageTwoUnitPriceAutoPreviousStockArray[name] = -406
+                                pageTwoUnitPriceAutoPreviousStockArray = np.repeat(None, len(pageTwoUnitPriceAuto))
+                                for name in range(len(pageTwoUnitPriceAuto)):
+                                    try:
+                                        pageTwoUnitPriceAutoPreviousStockArray[name] = int(previousStockCountPageTwo[previousStockCountPageTwo['物品'] == pageTwoUnitPriceAuto['物品'].values[name]]['现有数量'].values[0])
+                                    except IndexError:
+                                        pageTwoUnitPriceAutoPreviousStockArray[name] = -404
+                                    except ValueError:
+                                        pageTwoUnitPriceAutoPreviousStockArray[name] = -406
 
-                                    pageTwoUnitPriceAuto['上月存货'] = pageTwoUnitPriceAutoPreviousStockArray
-                                    pageTwoUnitPriceAuto = pageTwoUnitPriceAuto[['编号','物品', '单位', '单价', "上月存货",'进货数量','本月使用量', '现有数量']]
+                                pageTwoUnitPriceAuto['上月存货'] = pageTwoUnitPriceAutoPreviousStockArray
+                                pageTwoUnitPriceAuto = pageTwoUnitPriceAuto[['编号','物品', '单位', '单价', "上月存货",'进货数量','本月使用量', '现有数量']]
 
-                                    pageTwoUnitPriceNOTAuto = pageTwoUnitPrice.copy()
-                                    pageTwoUnitPriceNOTAuto.drop(np.arange(0, pageTwoUnitPriceAutoDropIndex+1), axis=0, inplace=True)
+                                pageTwoUnitPriceNOTAuto = pageTwoUnitPrice.copy()
+                                pageTwoUnitPriceNOTAuto.drop(np.arange(0, pageTwoUnitPriceAutoDropIndex+1), axis=0, inplace=True)
 
-                                    buyInStockDfFilteredGroupedRemoveUnitsForPageTwoNOTAuto = buyInStockDfFilteredGroupedRemoveUnits.copy()
-                                    buyInStockDfFilteredGroupedRemoveUnitsForPageTwoNOTAutoIndexDrop = []
+                                buyInStockDfFilteredGroupedRemoveUnitsForPageTwoNOTAuto = buyInStockDfFilteredGroupedRemoveUnits.copy()
+                                buyInStockDfFilteredGroupedRemoveUnitsForPageTwoNOTAutoIndexDrop = []
 
-                                    for name in range(len(buyInStockDfFilteredGroupedRemoveUnitsForPageTwoNOTAuto)):
-                                        if buyInStockDfFilteredGroupedRemoveUnitsForPageTwoNOTAuto['物品(单位)'].values[name] not in pageTwoUnitPriceNOTAuto['物品'].values:
-                                            buyInStockDfFilteredGroupedRemoveUnitsForPageTwoNOTAutoIndexDrop += [name]
-                                        else:
-                                            continue
-
-                                    buyInStockDfFilteredGroupedRemoveUnitsForPageTwoNOTAuto.drop(buyInStockDfFilteredGroupedRemoveUnitsForPageTwoNOTAutoIndexDrop, axis=0, inplace=True)
-                                    buyInStockDfFilteredGroupedRemoveUnitsForPageTwoNOTAuto.reset_index(inplace=True)
-                                    buyInStockDfFilteredGroupedRemoveUnitsForPageTwoNOTAuto.drop("index", axis=1, inplace=True)
-                                    buyInStockDfFilteredGroupedRemoveUnitsForPageTwoNOTAuto.columns = ["物品", "进货数量"]
-
-                                    pageTwoUnitPriceNOTAuto = pd.merge(right=buyInStockDfFilteredGroupedRemoveUnitsForPageTwoNOTAuto, left=pageTwoUnitPriceNOTAuto, how='outer')
-
-                                    buyInStockDfFilteredGroupedRemoveUnitsForPageTwoNOTAutoTurnZero = [0 if x is np.nan else x for x in pageTwoUnitPriceNOTAuto['进货数量'].values]
-                                    pageTwoUnitPriceNOTAuto['进货数量'] = buyInStockDfFilteredGroupedRemoveUnitsForPageTwoNOTAutoTurnZero
-                                    pageTwoUnitPriceNOTAuto['进货数量'] = pageTwoUnitPriceNOTAuto['进货数量'].astype(int)
-
-                                    pageTwoUnitPriceNOTAutoCurrentArray = np.repeat(None, len(pageTwoUnitPriceNOTAuto))
-
-                                    for name in range(len(pageTwoUnitPriceNOTAuto)):
-                                        pageTwoUnitPriceNOTAutoCurrentArray[name] = stockCountDfFilteredRemoveUnits[pageTwoUnitPriceNOTAuto['物品'].values[name]]
-
-                                    pageTwoUnitPriceNOTAuto['现有数量'] = pageTwoUnitPriceNOTAutoCurrentArray
-                                    pageTwoUnitPriceNOTAuto['现有数量'] = pageTwoUnitPriceNOTAuto['现有数量'].apply(lambda x: np.floor(float(x)))
-                                    pageTwoUnitPriceNOTAuto['现有数量'] = pageTwoUnitPriceNOTAuto['现有数量'].astype(int)
-
-                                    pageTwoUnitPriceNOTAutoPreviousStockArray = np.repeat(None, len(pageTwoUnitPriceNOTAuto))
-
-                                    for name in range(len(pageTwoUnitPriceNOTAuto)):
-                                        try:
-                                            pageTwoUnitPriceNOTAutoPreviousStockArray[name] = int(previousStockCountPageTwo[previousStockCountPageTwo['物品'] == pageTwoUnitPriceNOTAuto['物品'].values[name]]['现有数量'].values[0])
-                                        except IndexError:
-                                            pageTwoUnitPriceNOTAutoPreviousStockArray[name] = -404
-                                        except ValueError:
-                                            pageTwoUnitPriceNOTAutoPreviousStockArray[name] = -406
-
-                                    pageTwoUnitPriceNOTAuto['上月存货'] = pageTwoUnitPriceNOTAutoPreviousStockArray
-                                    pageTwoUnitPriceNOTAuto['上月存货'] = pageTwoUnitPriceNOTAuto['上月存货'].astype(int)
-
-                                    pageTwoUnitPriceNOTAuto['本月使用量'] = pageTwoUnitPriceNOTAuto['上月存货'] + pageTwoUnitPriceNOTAuto['进货数量'] - pageTwoUnitPriceNOTAuto['现有数量']
-                                    pageTwoUnitPriceNOTAuto['编号'] = np.arange(0, len(pageTwoUnitPriceNOTAuto))
-                                    pageTwoUnitPriceNOTAuto = pageTwoUnitPriceNOTAuto[['编号','物品', '单位', '单价', "上月存货",'进货数量','本月使用量', '现有数量']]
-
-                                    pageTwoDf = pd.concat([pageTwoUnitPriceAuto,pageTwoUnitPriceNOTAuto], ignore_index=True, axis=0)
-                                    pageTwoDf['编号'] = np.arange(1, len(pageTwoDf)+1)
-
-                                    pageTwoDfPriceRestructArray = [' ' if x is np.nan else '${}'.format(format(float(x), '.2f')) for x in pageTwoDf['单价'].values]
-                                    pageTwoDf['单价'] = pageTwoDfPriceRestructArray
-
-                                    pageThreeUnitPrice = pd.read_html(formURL, encoding='utf-8')[4]
-                                    pageThreeUnitPrice.drop("Unnamed: 0", axis=1, inplace=True)
-                                    pageThreeUnitPrice.columns = pageThreeUnitPrice.iloc[0,:]
-                                    pageThreeUnitPrice.drop(0, axis=0, inplace=True)
-                                    pageThreeUnitPrice.reset_index(inplace=True)
-                                    pageThreeUnitPrice.drop("index", axis=1, inplace=True)
-
-                                    pageThreeUnitPriceAuto = pageThreeUnitPrice.copy()
-                                    pageThreeUnitPriceAutoDropIndex = pageThreeUnitPrice[pageThreeUnitPrice['物品'] == 'BREAKLINE'].index[0]
-                                    pageThreeUnitPriceAuto.drop(np.arange(pageThreeUnitPriceAutoDropIndex, len(pageThreeUnitPrice)), axis=0, inplace=True)
-
-                                    drinkInventoryFile = pd.read_excel(databaseFileName,sheet_name=drinkInventorySheetName)
-                                    drinkInventoryFile['日期'] = drinkInventoryFile['日期'].apply(lambda x: x.replace("年", "-"))
-                                    drinkInventoryFile['日期'] = drinkInventoryFile['日期'].apply(lambda x: x.replace("月", "-"))
-                                    drinkInventoryFile['日期'] = drinkInventoryFile['日期'].apply(lambda x: x.replace("日", ""))
-                                    drinkInventoryFile = drinkInventoryFile[drinkInventoryFile['日期'].isin(dateRangeFilter)]
-
-                                    drinkInventoryFileStockInDropTitle = []
-
-                                    for title in drinkInventoryFile.columns:
-                                        if title not in ['日期']:
-                                            if '进' not in title:
-                                                drinkInventoryFileStockInDropTitle += [title]
-
-                                    drinkInventoryFileStockIn = drinkInventoryFile.copy()
-                                    drinkInventoryFileStockIn.drop(drinkInventoryFileStockInDropTitle, axis=1, inplace=True)
-
-                                    if drinkInventoryFileStockIn.empty:
-                                        drinkInventoryFileStockInSums = np.repeat(-404, len(pageThreeUnitPriceAuto))
+                                for name in range(len(buyInStockDfFilteredGroupedRemoveUnitsForPageTwoNOTAuto)):
+                                    if buyInStockDfFilteredGroupedRemoveUnitsForPageTwoNOTAuto['物品(单位)'].values[name] not in pageTwoUnitPriceNOTAuto['物品'].values:
+                                        buyInStockDfFilteredGroupedRemoveUnitsForPageTwoNOTAutoIndexDrop += [name]
                                     else:
-                                        drinkInventoryFileStockInSums = np.repeat(None, len(pageThreeUnitPriceAuto))
+                                        continue
 
-                                        for name in range(len(pageThreeUnitPriceAuto)):
-                                            drinkInventoryFileStockInSums[name] = int(drinkInventoryFileStockIn[pageThreeUnitPriceAuto['物品'].values[name]+'进'].sum())
+                                buyInStockDfFilteredGroupedRemoveUnitsForPageTwoNOTAuto.drop(buyInStockDfFilteredGroupedRemoveUnitsForPageTwoNOTAutoIndexDrop, axis=0, inplace=True)
+                                buyInStockDfFilteredGroupedRemoveUnitsForPageTwoNOTAuto.reset_index(inplace=True)
+                                buyInStockDfFilteredGroupedRemoveUnitsForPageTwoNOTAuto.drop("index", axis=1, inplace=True)
+                                buyInStockDfFilteredGroupedRemoveUnitsForPageTwoNOTAuto.columns = ["物品", "进货数量"]
 
-                                    pageThreeUnitPriceAuto['进货数量'] = drinkInventoryFileStockInSums
+                                pageTwoUnitPriceNOTAuto = pd.merge(right=buyInStockDfFilteredGroupedRemoveUnitsForPageTwoNOTAuto, left=pageTwoUnitPriceNOTAuto, how='outer')
 
-                                    drinkInventoryFileOutDropTitle = []
+                                buyInStockDfFilteredGroupedRemoveUnitsForPageTwoNOTAutoTurnZero = [0 if x is np.nan else x for x in pageTwoUnitPriceNOTAuto['进货数量'].values]
+                                pageTwoUnitPriceNOTAuto['进货数量'] = buyInStockDfFilteredGroupedRemoveUnitsForPageTwoNOTAutoTurnZero
+                                pageTwoUnitPriceNOTAuto['进货数量'] = pageTwoUnitPriceNOTAuto['进货数量'].astype(int)
 
-                                    for title in drinkInventoryFile.columns:
-                                        if title not in ['日期']:
-                                            if '出' not in title:
-                                                drinkInventoryFileOutDropTitle += [title]
+                                pageTwoUnitPriceNOTAutoCurrentArray = np.repeat(None, len(pageTwoUnitPriceNOTAuto))
 
-                                    drinkInventoryFileOut = drinkInventoryFile.copy()
-                                    drinkInventoryFileOut.drop(drinkInventoryFileOutDropTitle, axis=1, inplace=True)
+                                for name in range(len(pageTwoUnitPriceNOTAuto)):
+                                    pageTwoUnitPriceNOTAutoCurrentArray[name] = stockCountDfFilteredRemoveUnits[pageTwoUnitPriceNOTAuto['物品'].values[name]]
 
-                                    if drinkInventoryFileOut.empty:
-                                        drinkInventoryFileOutSums = np.repeat(-404, len(pageThreeUnitPriceAuto))
-                                    else:
-                                        drinkInventoryFileOutSums = np.repeat(None, len(pageThreeUnitPriceAuto))
+                                pageTwoUnitPriceNOTAuto['现有数量'] = pageTwoUnitPriceNOTAutoCurrentArray
+                                pageTwoUnitPriceNOTAuto['现有数量'] = pageTwoUnitPriceNOTAuto['现有数量'].apply(lambda x: np.floor(float(x)))
+                                pageTwoUnitPriceNOTAuto['现有数量'] = pageTwoUnitPriceNOTAuto['现有数量'].astype(int)
 
-                                        for name in range(len(pageThreeUnitPriceAuto)):
-                                            drinkInventoryFileOutSums[name] = int(drinkInventoryFileOut[pageThreeUnitPriceAuto['物品'].values[name]+'出'].sum())
+                                pageTwoUnitPriceNOTAutoPreviousStockArray = np.repeat(None, len(pageTwoUnitPriceNOTAuto))
 
-                                    pageThreeUnitPriceAuto['本月使用量'] = drinkInventoryFileOutSums
+                                for name in range(len(pageTwoUnitPriceNOTAuto)):
+                                    try:
+                                        pageTwoUnitPriceNOTAutoPreviousStockArray[name] = int(previousStockCountPageTwo[previousStockCountPageTwo['物品'] == pageTwoUnitPriceNOTAuto['物品'].values[name]]['现有数量'].values[0])
+                                    except IndexError:
+                                        pageTwoUnitPriceNOTAutoPreviousStockArray[name] = -404
+                                    except ValueError:
+                                        pageTwoUnitPriceNOTAutoPreviousStockArray[name] = -406
 
-                                    drinkInventoryCurrentDropTitle = []
+                                pageTwoUnitPriceNOTAuto['上月存货'] = pageTwoUnitPriceNOTAutoPreviousStockArray
+                                pageTwoUnitPriceNOTAuto['上月存货'] = pageTwoUnitPriceNOTAuto['上月存货'].astype(int)
 
-                                    for title in drinkInventoryFile.columns:
-                                        if title not in ['日期']:
-                                            if '实结存' not in title:
-                                                drinkInventoryCurrentDropTitle += [title]
+                                pageTwoUnitPriceNOTAuto['本月使用量'] = pageTwoUnitPriceNOTAuto['上月存货'] + pageTwoUnitPriceNOTAuto['进货数量'] - pageTwoUnitPriceNOTAuto['现有数量']
+                                pageTwoUnitPriceNOTAuto['编号'] = np.arange(0, len(pageTwoUnitPriceNOTAuto))
+                                pageTwoUnitPriceNOTAuto = pageTwoUnitPriceNOTAuto[['编号','物品', '单位', '单价', "上月存货",'进货数量','本月使用量', '现有数量']]
 
-                                    drinkInventoryCurrent = drinkInventoryFile.copy()
-                                    drinkInventoryCurrent.drop(drinkInventoryCurrentDropTitle, axis=1, inplace=True)
+                                pageTwoDf = pd.concat([pageTwoUnitPriceAuto,pageTwoUnitPriceNOTAuto], ignore_index=True, axis=0)
+                                pageTwoDf['编号'] = np.arange(1, len(pageTwoDf)+1)
 
-                                    if drinkInventoryCurrent.empty:
-                                        drinkInventoryCurrentSums = np.repeat(-404, len(pageThreeUnitPriceAuto))
-                                    else:
-                                        drinkInventoryCurrent.sort_values(by="日期", ascending=True, ignore_index=True, inplace=True)
-                                        maxDateFordrinkInventoryCurrent = drinkInventoryCurrent['日期'].values[-1]
+                                pageTwoDfPriceRestructArray = [' ' if x is np.nan else '${}'.format(format(float(x), '.2f')) for x in pageTwoDf['单价'].values]
+                                pageTwoDf['单价'] = pageTwoDfPriceRestructArray
 
-                                        drinkInventoryCurrent = drinkInventoryCurrent[drinkInventoryCurrent['日期'] == maxDateFordrinkInventoryCurrent]
+                                pageThreeUnitPrice = pd.read_html(formURL, encoding='utf-8')[4]
+                                pageThreeUnitPrice.drop("Unnamed: 0", axis=1, inplace=True)
+                                pageThreeUnitPrice.columns = pageThreeUnitPrice.iloc[0,:]
+                                pageThreeUnitPrice.drop(0, axis=0, inplace=True)
+                                pageThreeUnitPrice.reset_index(inplace=True)
+                                pageThreeUnitPrice.drop("index", axis=1, inplace=True)
 
-                                        drinkInventoryCurrentSums = np.repeat(None, len(pageThreeUnitPriceAuto))
-                                        for name in range(len(pageThreeUnitPriceAuto)):
-                                            drinkInventoryCurrentSums[name] = int(drinkInventoryCurrent[pageThreeUnitPriceAuto['物品'].values[name]+'实结存'].sum())
+                                pageThreeUnitPriceAuto = pageThreeUnitPrice.copy()
+                                pageThreeUnitPriceAutoDropIndex = pageThreeUnitPrice[pageThreeUnitPrice['物品'] == 'BREAKLINE'].index[0]
+                                pageThreeUnitPriceAuto.drop(np.arange(pageThreeUnitPriceAutoDropIndex, len(pageThreeUnitPrice)), axis=0, inplace=True)
 
-                                    pageThreeUnitPriceAuto['现有数量'] = drinkInventoryCurrentSums
+                                drinkInventoryFile = pd.read_excel(databaseFileName,sheet_name=drinkInventorySheetName)
+                                drinkInventoryFile['日期'] = drinkInventoryFile['日期'].apply(lambda x: x.replace("年", "-"))
+                                drinkInventoryFile['日期'] = drinkInventoryFile['日期'].apply(lambda x: x.replace("月", "-"))
+                                drinkInventoryFile['日期'] = drinkInventoryFile['日期'].apply(lambda x: x.replace("日", ""))
+                                drinkInventoryFile = drinkInventoryFile[drinkInventoryFile['日期'].isin(dateRangeFilter)]
 
-                                    previousStockCountPageThree = pd.read_excel('{}/盘点详情excel/{}.xlsx'.format(os.getcwd(), previousStockCountFileName),sheet_name="Sheet3")
-                                    previousStockCountPageThree.drop(['编号', '单位', '单价', '上月存货', '进货数量', '本月使用量','备注'], axis=1, inplace=True)
+                                drinkInventoryFileStockInDropTitle = []
 
-                                    pageThreeUnitPriceAutoPreviousStockCountArray = np.repeat(None, len(pageThreeUnitPriceAuto))
+                                for title in drinkInventoryFile.columns:
+                                    if title not in ['日期']:
+                                        if '进' not in title:
+                                            drinkInventoryFileStockInDropTitle += [title]
+
+                                drinkInventoryFileStockIn = drinkInventoryFile.copy()
+                                drinkInventoryFileStockIn.drop(drinkInventoryFileStockInDropTitle, axis=1, inplace=True)
+
+                                if drinkInventoryFileStockIn.empty:
+                                    drinkInventoryFileStockInSums = np.repeat(-404, len(pageThreeUnitPriceAuto))
+                                else:
+                                    drinkInventoryFileStockInSums = np.repeat(None, len(pageThreeUnitPriceAuto))
 
                                     for name in range(len(pageThreeUnitPriceAuto)):
-                                        try:
-                                            pageThreeUnitPriceAutoPreviousStockCountArray[name] = int(previousStockCountPageThree[previousStockCountPageThree['物品'] == pageThreeUnitPriceAuto['物品'].values[name]]['现有数量'].values[0])
-                                        except ValueError:
-                                            pageThreeUnitPriceAutoPreviousStockCountArray[name] = -406
-                                        except IndexError:
-                                            pageThreeUnitPriceAutoPreviousStockCountArray[name] = -404
-                                    pageThreeUnitPriceAuto['上月存货'] = pageThreeUnitPriceAutoPreviousStockCountArray
-                                    pageThreeUnitPriceAuto['编号'] = np.arange(1, len(pageThreeUnitPriceAuto)+1)
-                                    pageThreeUnitPriceAuto = pageThreeUnitPriceAuto[['编号', '物品', '单位', '单价', '上月存货', '进货数量', '本月使用量', '现有数量']]
+                                        drinkInventoryFileStockInSums[name] = int(drinkInventoryFileStockIn[pageThreeUnitPriceAuto['物品'].values[name]+'进'].sum())
 
-                                    pageThreeUnitPriceNOTAuto = pageThreeUnitPrice.copy()
-                                    pageThreeUnitPriceNOTAuto.drop(np.arange(0, pageThreeUnitPriceAutoDropIndex+1), axis=0, inplace=True)
+                                pageThreeUnitPriceAuto['进货数量'] = drinkInventoryFileStockInSums
 
-                                    pageThreeUnitPriceNOTAutoPreviousStockCountArray = np.repeat(None, len(pageThreeUnitPriceNOTAuto))
+                                drinkInventoryFileOutDropTitle = []
 
-                                    for name in range(len(pageThreeUnitPriceNOTAuto)):
-                                        try:
-                                            pageThreeUnitPriceNOTAutoPreviousStockCountArray[name] = int(previousStockCountPageThree[previousStockCountPageThree['物品'] == pageThreeUnitPriceNOTAuto['物品'].values[name]]['现有数量'].values[0])
-                                        except IndexError:
-                                            pageThreeUnitPriceNOTAutoPreviousStockCountArray[name] = -404
-                                        except ValueError:
-                                            pageThreeUnitPriceNOTAutoPreviousStockCountArray[name] = -406
+                                for title in drinkInventoryFile.columns:
+                                    if title not in ['日期']:
+                                        if '出' not in title:
+                                            drinkInventoryFileOutDropTitle += [title]
 
-                                    pageThreeUnitPriceNOTAuto['上月存货'] = pageThreeUnitPriceNOTAutoPreviousStockCountArray
+                                drinkInventoryFileOut = drinkInventoryFile.copy()
+                                drinkInventoryFileOut.drop(drinkInventoryFileOutDropTitle, axis=1, inplace=True)
 
-                                    buyInStockDfFilteredGroupedRemoveUnitsForPageThreeUnitPriceNOTAuto = buyInStockDfFilteredGroupedRemoveUnits.copy()
-                                    buyInStockDfFilteredGroupedRemoveUnitsForPageThreeUnitPriceNOTAutoDropIndex = []
+                                if drinkInventoryFileOut.empty:
+                                    drinkInventoryFileOutSums = np.repeat(-404, len(pageThreeUnitPriceAuto))
+                                else:
+                                    drinkInventoryFileOutSums = np.repeat(None, len(pageThreeUnitPriceAuto))
 
-                                    for name in range(len(buyInStockDfFilteredGroupedRemoveUnitsForPageThreeUnitPriceNOTAuto)):
-                                        if buyInStockDfFilteredGroupedRemoveUnitsForPageThreeUnitPriceNOTAuto['物品(单位)'].values[name] not in pageThreeUnitPriceNOTAuto['物品'].values:
-                                            buyInStockDfFilteredGroupedRemoveUnitsForPageThreeUnitPriceNOTAutoDropIndex += [name]
-                                    buyInStockDfFilteredGroupedRemoveUnitsForPageThreeUnitPriceNOTAuto.drop( buyInStockDfFilteredGroupedRemoveUnitsForPageThreeUnitPriceNOTAutoDropIndex, axis=0, inplace=True)
-                                    buyInStockDfFilteredGroupedRemoveUnitsForPageThreeUnitPriceNOTAuto.reset_index(inplace=True)
-                                    buyInStockDfFilteredGroupedRemoveUnitsForPageThreeUnitPriceNOTAuto.drop("index", axis=1, inplace=True)
-                                    buyInStockDfFilteredGroupedRemoveUnitsForPageThreeUnitPriceNOTAuto.columns = ['物品', '进货数量']
+                                    for name in range(len(pageThreeUnitPriceAuto)):
+                                        drinkInventoryFileOutSums[name] = int(drinkInventoryFileOut[pageThreeUnitPriceAuto['物品'].values[name]+'出'].sum())
 
-                                    pageThreeUnitPriceNOTAuto = pd.merge(right=buyInStockDfFilteredGroupedRemoveUnitsForPageThreeUnitPriceNOTAuto, left=pageThreeUnitPriceNOTAuto, how='outer')
+                                pageThreeUnitPriceAuto['本月使用量'] = drinkInventoryFileOutSums
 
-                                    buyInStockDfFilteredGroupedRemoveUnitsForPageThreeUnitPriceNOTAutoTurnZero = [0 if x is np.nan else x for x in pageThreeUnitPriceNOTAuto['进货数量'].values]
-                                    pageThreeUnitPriceNOTAuto['进货数量'] = buyInStockDfFilteredGroupedRemoveUnitsForPageThreeUnitPriceNOTAutoTurnZero
+                                drinkInventoryCurrentDropTitle = []
 
-                                    pageThreeUnitPriceNOTAutoCurrentArray = np.repeat(None,len(pageThreeUnitPriceNOTAuto))
+                                for title in drinkInventoryFile.columns:
+                                    if title not in ['日期']:
+                                        if '实结存' not in title:
+                                            drinkInventoryCurrentDropTitle += [title]
 
-                                    for name in range(len(pageThreeUnitPriceNOTAuto)):
-                                        pageThreeUnitPriceNOTAutoCurrentArray[name] = stockCountDfFilteredRemoveUnits[pageThreeUnitPriceNOTAuto['物品'].values[name]]
+                                drinkInventoryCurrent = drinkInventoryFile.copy()
+                                drinkInventoryCurrent.drop(drinkInventoryCurrentDropTitle, axis=1, inplace=True)
 
-                                    pageThreeUnitPriceNOTAuto['现有数量'] = pageThreeUnitPriceNOTAutoCurrentArray
-                                    pageThreeUnitPriceNOTAuto['现有数量'] = pageThreeUnitPriceNOTAuto['现有数量'].astype(int)
-                                    pageThreeUnitPriceNOTAuto['上月存货'] = pageThreeUnitPriceNOTAuto['上月存货'].astype(int)
-                                    pageThreeUnitPriceNOTAuto['进货数量'] = pageThreeUnitPriceNOTAuto['进货数量'].astype(int)
+                                if drinkInventoryCurrent.empty:
+                                    drinkInventoryCurrentSums = np.repeat(-404, len(pageThreeUnitPriceAuto))
+                                else:
+                                    drinkInventoryCurrent.sort_values(by="日期", ascending=True, ignore_index=True, inplace=True)
+                                    maxDateFordrinkInventoryCurrent = drinkInventoryCurrent['日期'].values[-1]
 
-                                    pageThreeUnitPriceNOTAuto['本月使用量'] = pageThreeUnitPriceNOTAuto['上月存货'] + pageThreeUnitPriceNOTAuto['进货数量'] - pageThreeUnitPriceNOTAuto['现有数量']
-                                    pageThreeUnitPriceNOTAuto['编号'] = np.arange(1, len(pageThreeUnitPriceNOTAuto)+1)
-                                    pageThreeUnitPriceNOTAuto = pageThreeUnitPriceNOTAuto[['编号', '物品', '单位', '单价', '上月存货', '进货数量', '本月使用量', '现有数量']]
+                                    drinkInventoryCurrent = drinkInventoryCurrent[drinkInventoryCurrent['日期'] == maxDateFordrinkInventoryCurrent]
 
-                                    pageThreeDf = pd.concat([pageThreeUnitPriceAuto, pageThreeUnitPriceNOTAuto], axis=0, ignore_index=True)
-                                    pageThreeDf['编号'] = np.arange(1, len(pageThreeDf)+1)
+                                    drinkInventoryCurrentSums = np.repeat(None, len(pageThreeUnitPriceAuto))
+                                    for name in range(len(pageThreeUnitPriceAuto)):
+                                        drinkInventoryCurrentSums[name] = int(drinkInventoryCurrent[pageThreeUnitPriceAuto['物品'].values[name]+'实结存'].sum())
 
-                                    pageThreeDfPriceRestruct = np.repeat(None, len(pageThreeDf))
+                                pageThreeUnitPriceAuto['现有数量'] = drinkInventoryCurrentSums
 
-                                    for price in range(len(pageThreeDf['单价'].values.astype(str))):
-                                        if pageThreeDf['单价'].values.astype(str)[price] == ' ':
-                                            pageThreeDfPriceRestruct[price] = ' '
-                                        else:
-                                            pageThreeDfPriceRestruct[price] = '${}'.format(format(float(pageThreeDf['单价'].values.astype(str)[price]), '.2f'))
+                                previousStockCountPageThree = pd.read_excel('{}/盘点详情excel/{}.xlsx'.format(os.getcwd(), previousStockCountFileName),sheet_name="Sheet3")
+                                previousStockCountPageThree.drop(['编号', '单位', '单价', '上月存货', '进货数量', '本月使用量','备注'], axis=1, inplace=True)
 
-                                    pageThreeDf['单价'] = pageThreeDfPriceRestruct
+                                pageThreeUnitPriceAutoPreviousStockCountArray = np.repeat(None, len(pageThreeUnitPriceAuto))
 
-                                    pageOneDf['备注'] = np.nan
-                                    pageTwoDf['备注'] = np.nan
-                                    pageThreeDf['备注'] = np.nan
+                                for name in range(len(pageThreeUnitPriceAuto)):
+                                    try:
+                                        pageThreeUnitPriceAutoPreviousStockCountArray[name] = int(previousStockCountPageThree[previousStockCountPageThree['物品'] == pageThreeUnitPriceAuto['物品'].values[name]]['现有数量'].values[0])
+                                    except ValueError:
+                                        pageThreeUnitPriceAutoPreviousStockCountArray[name] = -406
+                                    except IndexError:
+                                        pageThreeUnitPriceAutoPreviousStockCountArray[name] = -404
+                                pageThreeUnitPriceAuto['上月存货'] = pageThreeUnitPriceAutoPreviousStockCountArray
+                                pageThreeUnitPriceAuto['编号'] = np.arange(1, len(pageThreeUnitPriceAuto)+1)
+                                pageThreeUnitPriceAuto = pageThreeUnitPriceAuto[['编号', '物品', '单位', '单价', '上月存货', '进货数量', '本月使用量', '现有数量']]
 
-                                    prtdf(pageOneDf)
-                                    prtdf(pageTwoDf)
-                                    prtdf(pageThreeDf)
-                                    if os.path.exists('{}/盘点详情excel/{}年{}月盘点详情.xlsx'.format(os.getcwd(), stockForYear, stockForMonth)):
-                                        print("{}年{}月盘点详情的文件已经存在，是否覆盖?".format(stockForYear, stockForMonth))
-                                        print("你如果已经对该文件做了修改，你覆盖之后将会丢失所有你修改过的数据")
+                                pageThreeUnitPriceNOTAuto = pageThreeUnitPrice.copy()
+                                pageThreeUnitPriceNOTAuto.drop(np.arange(0, pageThreeUnitPriceAutoDropIndex+1), axis=0, inplace=True)
 
-                                        saveActions = option_num(['保存', '丢弃'])
-                                        userInputSix = option_limit(saveActions, input(": "))
-                                        if userInputSix == 0:
-                                            with pd.ExcelWriter('{}/盘点详情excel/{}年{}月盘点详情.xlsx'.format(os.getcwd(), stockForYear, stockForMonth)) as writer:
-                                                pageOneDf.to_excel(writer, sheet_name='Sheet1', index=False, header=True, encoding='GBK')
-                                                pageTwoDf.to_excel(writer, sheet_name='Sheet2', index=False, header=True, encoding='GBK')
-                                                pageThreeDf.to_excel(writer, sheet_name='Sheet3', index=False, header=True, encoding='GBK')
-                                            print("文件已覆盖")
-                                        elif userInputSix == 1:
-                                            print("文件已丢弃")
+                                pageThreeUnitPriceNOTAutoPreviousStockCountArray = np.repeat(None, len(pageThreeUnitPriceNOTAuto))
+
+                                for name in range(len(pageThreeUnitPriceNOTAuto)):
+                                    try:
+                                        pageThreeUnitPriceNOTAutoPreviousStockCountArray[name] = int(previousStockCountPageThree[previousStockCountPageThree['物品'] == pageThreeUnitPriceNOTAuto['物品'].values[name]]['现有数量'].values[0])
+                                    except IndexError:
+                                        pageThreeUnitPriceNOTAutoPreviousStockCountArray[name] = -404
+                                    except ValueError:
+                                        pageThreeUnitPriceNOTAutoPreviousStockCountArray[name] = -406
+
+                                pageThreeUnitPriceNOTAuto['上月存货'] = pageThreeUnitPriceNOTAutoPreviousStockCountArray
+
+                                buyInStockDfFilteredGroupedRemoveUnitsForPageThreeUnitPriceNOTAuto = buyInStockDfFilteredGroupedRemoveUnits.copy()
+                                buyInStockDfFilteredGroupedRemoveUnitsForPageThreeUnitPriceNOTAutoDropIndex = []
+
+                                for name in range(len(buyInStockDfFilteredGroupedRemoveUnitsForPageThreeUnitPriceNOTAuto)):
+                                    if buyInStockDfFilteredGroupedRemoveUnitsForPageThreeUnitPriceNOTAuto['物品(单位)'].values[name] not in pageThreeUnitPriceNOTAuto['物品'].values:
+                                        buyInStockDfFilteredGroupedRemoveUnitsForPageThreeUnitPriceNOTAutoDropIndex += [name]
+                                buyInStockDfFilteredGroupedRemoveUnitsForPageThreeUnitPriceNOTAuto.drop( buyInStockDfFilteredGroupedRemoveUnitsForPageThreeUnitPriceNOTAutoDropIndex, axis=0, inplace=True)
+                                buyInStockDfFilteredGroupedRemoveUnitsForPageThreeUnitPriceNOTAuto.reset_index(inplace=True)
+                                buyInStockDfFilteredGroupedRemoveUnitsForPageThreeUnitPriceNOTAuto.drop("index", axis=1, inplace=True)
+                                buyInStockDfFilteredGroupedRemoveUnitsForPageThreeUnitPriceNOTAuto.columns = ['物品', '进货数量']
+
+                                pageThreeUnitPriceNOTAuto = pd.merge(right=buyInStockDfFilteredGroupedRemoveUnitsForPageThreeUnitPriceNOTAuto, left=pageThreeUnitPriceNOTAuto, how='outer')
+
+                                buyInStockDfFilteredGroupedRemoveUnitsForPageThreeUnitPriceNOTAutoTurnZero = [0 if x is np.nan else x for x in pageThreeUnitPriceNOTAuto['进货数量'].values]
+                                pageThreeUnitPriceNOTAuto['进货数量'] = buyInStockDfFilteredGroupedRemoveUnitsForPageThreeUnitPriceNOTAutoTurnZero
+
+                                pageThreeUnitPriceNOTAutoCurrentArray = np.repeat(None,len(pageThreeUnitPriceNOTAuto))
+
+                                for name in range(len(pageThreeUnitPriceNOTAuto)):
+                                    pageThreeUnitPriceNOTAutoCurrentArray[name] = stockCountDfFilteredRemoveUnits[pageThreeUnitPriceNOTAuto['物品'].values[name]]
+
+                                pageThreeUnitPriceNOTAuto['现有数量'] = pageThreeUnitPriceNOTAutoCurrentArray
+                                pageThreeUnitPriceNOTAuto['现有数量'] = pageThreeUnitPriceNOTAuto['现有数量'].astype(int)
+                                pageThreeUnitPriceNOTAuto['上月存货'] = pageThreeUnitPriceNOTAuto['上月存货'].astype(int)
+                                pageThreeUnitPriceNOTAuto['进货数量'] = pageThreeUnitPriceNOTAuto['进货数量'].astype(int)
+
+                                pageThreeUnitPriceNOTAuto['本月使用量'] = pageThreeUnitPriceNOTAuto['上月存货'] + pageThreeUnitPriceNOTAuto['进货数量'] - pageThreeUnitPriceNOTAuto['现有数量']
+                                pageThreeUnitPriceNOTAuto['编号'] = np.arange(1, len(pageThreeUnitPriceNOTAuto)+1)
+                                pageThreeUnitPriceNOTAuto = pageThreeUnitPriceNOTAuto[['编号', '物品', '单位', '单价', '上月存货', '进货数量', '本月使用量', '现有数量']]
+
+                                pageThreeDf = pd.concat([pageThreeUnitPriceAuto, pageThreeUnitPriceNOTAuto], axis=0, ignore_index=True)
+                                pageThreeDf['编号'] = np.arange(1, len(pageThreeDf)+1)
+
+                                pageThreeDfPriceRestruct = np.repeat(None, len(pageThreeDf))
+
+                                for price in range(len(pageThreeDf['单价'].values.astype(str))):
+                                    if pageThreeDf['单价'].values.astype(str)[price] == ' ':
+                                        pageThreeDfPriceRestruct[price] = ' '
                                     else:
+                                        pageThreeDfPriceRestruct[price] = '${}'.format(format(float(pageThreeDf['单价'].values.astype(str)[price]), '.2f'))
+
+                                pageThreeDf['单价'] = pageThreeDfPriceRestruct
+
+                                pageOneDf['备注'] = np.nan
+                                pageTwoDf['备注'] = np.nan
+                                pageThreeDf['备注'] = np.nan
+
+                                prtdf(pageOneDf)
+                                prtdf(pageTwoDf)
+                                prtdf(pageThreeDf)
+                                if os.path.exists('{}/盘点详情excel/{}年{}月盘点详情.xlsx'.format(os.getcwd(), stockForYear, stockForMonth)):
+                                    print("{}年{}月盘点详情的文件已经存在，是否覆盖?".format(stockForYear, stockForMonth))
+                                    print("你如果已经对该文件做了修改，你覆盖之后将会丢失所有你修改过的数据")
+
+                                    saveActions = option_num(['保存', '丢弃'])
+                                    userInputSix = option_limit(saveActions, input(": "))
+                                    if userInputSix == 0:
                                         with pd.ExcelWriter('{}/盘点详情excel/{}年{}月盘点详情.xlsx'.format(os.getcwd(), stockForYear, stockForMonth)) as writer:
                                             pageOneDf.to_excel(writer, sheet_name='Sheet1', index=False, header=True, encoding='GBK')
                                             pageTwoDf.to_excel(writer, sheet_name='Sheet2', index=False, header=True, encoding='GBK')
                                             pageThreeDf.to_excel(writer, sheet_name='Sheet3', index=False, header=True, encoding='GBK')
-                                        print("文件已自动保存")
-                                        print("前往盘点详情excel的文件夹内查看，文件名为{}年{}月盘点详情.xlsx".format(stockForYear, stockForMonth))
+                                        print("文件已覆盖")
+                                    elif userInputSix == 1:
+                                        print("文件已丢弃")
                                 else:
-                                    print("打包盒名字转换的重要文件不存在")
-                                    print("盘点无法继续")
-
+                                    with pd.ExcelWriter('{}/盘点详情excel/{}年{}月盘点详情.xlsx'.format(os.getcwd(), stockForYear, stockForMonth)) as writer:
+                                        pageOneDf.to_excel(writer, sheet_name='Sheet1', index=False, header=True, encoding='GBK')
+                                        pageTwoDf.to_excel(writer, sheet_name='Sheet2', index=False, header=True, encoding='GBK')
+                                        pageThreeDf.to_excel(writer, sheet_name='Sheet3', index=False, header=True, encoding='GBK')
+                                    print("文件已自动保存")
+                                    print("前往盘点详情excel的文件夹内查看，文件名为{}年{}月盘点详情.xlsx".format(stockForYear, stockForMonth))
                             else:
                                 print("数据库文件不存在,请把文件{}复制到库存管理的根目录下".format(databaseFileName))
                                 print("盘点无法继续")
