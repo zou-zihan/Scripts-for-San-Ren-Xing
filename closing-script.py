@@ -901,7 +901,7 @@ if len(read) > int(FPara['minBookFileLenAllowable']):
 
         value_dict.update({'net_sales_deductibles' : float(float(value_dict['TRUEBLUE_SUM'])+float(value_dict['SANRENXING_SUM'])+float(value_dict['PANDABOX_SUM'])+float(value_dict['Chinatown_5']))})
         value_dict.update({'net_sales_aft_deduction' : float(float(value_dict['net_sales']) - float(value_dict['net_sales_deductibles']))})
-        value_dict['net_sales_aft_deduction'] = single_zero(normal_round(value_dict['net_sales_aft_deduction'], 2))
+        value_dict['net_sales_aft_deduction'] = single_zero(format(normal_round(value_dict['net_sales_aft_deduction'], 2), ".2f"))
 
         read_net_sales = pd.read_excel(FPara['databaseFileName'], thousands=',', sheet_name=FPara['salesRecordSheetName'])
         dfb_record_exist = read_net_sales[read_net_sales['Date'] == td_pd]
