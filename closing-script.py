@@ -910,7 +910,7 @@ if len(read) > int(FPara['minBookFileLenAllowable']):
                 if int(dfb.day) == 1:
                     cmns_ytd = 0.0
                     cmns_tdy = cmns_ytd + float(value_dict['net_sales_aft_deduction'])
-                    cmns_tdy_ = normal_round(cmns_tdy, 2)
+                    cmns_tdy_ = format(normal_round(cmns_tdy, 2), ".2f")
                     avg_daily_sales = cmns_tdy/int(dfb.day)
                     ads_rd1 = str(avg_daily_sales)[str(avg_daily_sales).find('.'):][:3]
                     ads_rd2 = str(avg_daily_sales)[:str(avg_daily_sales).find('.')]
@@ -919,7 +919,7 @@ if len(read) > int(FPara['minBookFileLenAllowable']):
                 else:
                     cmns_ytd = float(read_net_sales['cum net sales today'].values[-1])
                     cmns_tdy = cmns_ytd + float(value_dict['net_sales_aft_deduction'])
-                    cmns_tdy_ = normal_round(cmns_tdy, 2)
+                    cmns_tdy_ = format(normal_round(cmns_tdy, 2),".2f")
                     avg_daily_sales = cmns_tdy/int(dfb.day)
                     ads_rd1 = str(avg_daily_sales)[str(avg_daily_sales).find('.'):][:3]
                     ads_rd2 = str(avg_daily_sales)[:str(avg_daily_sales).find('.')]
