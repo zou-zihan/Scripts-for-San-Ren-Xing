@@ -60,6 +60,7 @@ Chinese food name|String Locator|Model to Use|Multiplier|active status
 特制锅贴|Pan-frieddumplings(6pcs)|boxTakeOverName2|1.0|1
 拔丝芋头|Stir-friedyamwithsesame|boxTakeOverName2|1.0|1
 杏仁脆皮鸡半只|Deepfriedchickenwithalmond(half)|boxTakeOverName2|1.0|1
+杏仁脆皮鸡一只分两盒|Deepfriedwholechickenwithalmond(intwoboxes)|boxTakeOverName2|2.0|1
 芙蓉蛋|Furongegg|boxTakeOverName2|1.0|1
 椒盐白饭鱼|Whitebaitfritters|boxTakeOverName3|1.0|1
 金沙鸡中翅|Saltedeggyolkchicken(deboned)|boxTakeOverName3|1.0|1
