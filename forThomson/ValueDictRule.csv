@@ -1,0 +1,73 @@
+title|string_to_look_for|look_up_df|look_up_rule|sum_rule|promotion_add_rule|is_money|active status
+promo1_count|Takeaway set for 4 $69.90|read|2|4|2|0|1
+promo2_count|LAZADA BENTO A X2|pay_breakdown|2|3|2|0|1
+promo3_count|LAZADA BRAISED NANPING NOODLE X2|pay_breakdown|2|3|2|0|1
+promo4_count|LAZADA PORK RIB SOUP AND RICE|pay_breakdown|1|3|2|0|1
+promo5_count|LAZADA CASH VOUCHER $50|pay_breakdown|2|3|2|0|1
+promo6_count|LAZADA BENTO D|pay_breakdown|1|3|2|0|1
+promo7_count|LAZADA HOMEMADE POPIAH WITH SHREDDED LEAN MEAT|pay_breakdown|1|3|2|0|1
+promo8_count|LAZADA HOT YAM PASTE IN COCONUT|pay_breakdown|1|3|2|0|1
+promo9_count|Bao Gong Pork Ribs Promotion|read|2|4|2|0|1
+promo10_count|LAZADA SPECIALTY HOMEMADE CHILLI SAUCE|pay_breakdown|1|3|2|0|1
+promo11_count|Takeaway Set for Four|read|2|4|2|0|1
+promo12_count|LAZADA SZECHUAN STYLE SPICY CHICKEN|pay_breakdown|1|3|2|0|1
+promo13_count|In order to be irreplaceable, one must always be different|pay_breakdown|1|3|2|0|1
+promo14_count|In order to be irreplaceable, one must always be different|pay_breakdown|1|3|2|0|1
+promo15_count|In order to be irreplaceable, one must always be different|pay_breakdown|1|3|2|0|1
+promo16_count|In order to be irreplaceable, one must always be different|pay_breakdown|1|3|2|0|1
+promo17_count|In order to be irreplaceable, one must always be different|pay_breakdown|1|3|2|0|1
+promo18_count|In order to be irreplaceable, one must always be different|pay_breakdown|1|3|2|0|1
+promo19_count|In order to be irreplaceable, one must always be different|pay_breakdown|1|3|2|0|1
+promo20_count|In order to be irreplaceable, one must always be different|pay_breakdown|1|3|2|0|1
+promo21_count|In order to be irreplaceable, one must always be different|pay_breakdown|1|3|2|0|1
+promo22_count|In order to be irreplaceable, one must always be different|pay_breakdown|1|3|2|0|1
+promo23_count|In order to be irreplaceable, one must always be different|pay_breakdown|1|3|2|0|1
+promo24_count|In order to be irreplaceable, one must always be different|pay_breakdown|1|3|2|0|1
+promo25_count|In order to be irreplaceable, one must always be different|pay_breakdown|1|3|2|0|1
+promo26_count|In order to be irreplaceable, one must always be different|pay_breakdown|1|3|2|0|1
+promo27_count|In order to be irreplaceable, one must always be different|pay_breakdown|1|3|2|0|1
+promo28_count|In order to be irreplaceable, one must always be different|pay_breakdown|1|3|2|0|1
+promo29_count|In order to be irreplaceable, one must always be different|pay_breakdown|1|3|2|0|1
+promo30_count|In order to be irreplaceable, one must always be different|pay_breakdown|1|3|2|0|1
+drinkTakeOverName0Sale|Coke|read|3|4|-1|0|1
+drinkTakeOverName1Sale|Tiger Beer (Can)|read|2|4|-1|0|1
+drinkTakeOverName2Sale|Heineken Beer (Can)|read|2|4|-1|0|1
+drinkTakeOverName3Sale|Evian Water|read|1|4|-1|0|1
+drinkTakeOverName4Sale|Levorato Nero|read|1|4|-1|0|1
+drinkTakeOverName5Sale|Old Coach Road Sauvignon Blanc|read|1|4|-1|0|1
+drinkTakeOverName6Sale|Free Red Wine - Albali|read|3|4|-1|0|1
+drinkTakeOverName7Sale|In order to be irreplaceable, one must always be different|read|3|4|-1|0|1
+drinkTakeOverName8Sale|In order to be irreplaceable, one must always be different|read|3|4|-1|0|1
+drinkTakeOverName9Sale|In order to be irreplaceable, one must always be different|read|3|4|-1|0|1
+drinkTakeOverName10Sale|In order to be irreplaceable, one must always be different|read|3|4|-1|0|1
+drinkTakeOverName11Sale|In order to be irreplaceable, one must always be different|read|3|4|-1|0|1
+FIRSTCOM|FIRSTCOM|pay_brkdwn|1|1|-1|1|1
+FOODPANDA|FOODPANDA DEPOSIT|pay_brkdwn|1|1|-1|1|1
+TANG|DELIVERYCHINATOWN|pay_brkdwn|1|1|-1|1|1
+DELIVEROO|DELIVEROO DEPOSIT|pay_brkdwn|1|1|-1|1|1
+GRABFOOD|GRABFOOD|pay_brkdwn|1|1|-1|1|1
+GETZ|GETZ|pay_brkdwn|1|2|-1|1|1
+ODDLE|ODDLE ME|pay_brkdwn|1|1|-1|1|1
+TRUEBLUE_SUM|TRUEBLU CASHBACK|pay_brkdwn|1|1|-1|1|1
+TRUEBLUE_COUNT|TRUEBLU CASHBACK|pay_breakdown|1|3|-1|0|1
+DISCOUNT_TOTAL|Discount Total|read|3|1|-1|1|1
+MMALL_SUM|M-MALL VOUCHER|pay_brkdwn|1|2|-1|1|1
+MMALL_COUNT|M-MALL VOUCHER|pay_breakdown|1|3|-1|0|1
+MMALLE_SUM|M-MALL E-VOUCHER|pay_brkdwn|1|2|-1|1|1
+MMALLE_COUNT|M-MALL E-VOUCHER|pay_breakdown|1|3|-1|0|1
+SANRENXING_SUM|SAN REN XING|pay_brkdwn|1|2|-1|1|1
+SANRENXING_COUNT|SAN REN XING|pay_breakdown|1|3|-1|0|1
+PANDABOX|PANDABOX|pay_breakdown|1|3|-1|0|1
+LUNCH_COUNT|Lunch Set Meal|read|1|4|-1|0|1
+FAVE_ECARD_SUM|FAVE E-CARD|pay_brkdwn|1|1|-1|1|1
+FAVE_ECARD_COUNT|FAVE E-CARD|pay_breakdown|1|3|-1|0|1
+SALES_TA|Sales (Takeaway)|read|4|1|-1|1|1
+SALES_DI|Sales (Dine In)|read|4|1|-1|1|1
+net_sales|Total Sales Before Tax & Srv Charge|read|3|1|-1|1|1
+svc|Service Charge 10%|read|1|1|-1|1|1
+gst|GST 7%|read|1|1|-1|1|1
+ETG_SUM|ETG|pay_brkdwn|1|2|-1|1|1
+ETG_COUNT|ETG|pay_breakdown|1|3|-1|0|1
+CASH|CASH|pay_brkdwn|1|1|-1|1|1
+Chinatown_5|$5 FOR FIRST PURCHASE|pay_brkdwn|2|1|-1|1|1
+PANDABOX_SUM|PANDABOX|pay_breakdown|1|1|-1|1|1

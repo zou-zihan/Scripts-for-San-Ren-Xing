@@ -274,18 +274,18 @@ def prtdf(df):
                            'display.colheader_justify', 'center'):
         return display(df)
 
-def readCsv(githubUserName, githubRepoName, githubBranchName, githubFileName, csvSep, csvEncoding, runLocally):
+def readCsv(githubUserName, githubRepoName, githubBranchName, githubFileName, githubFolderName, csvSep, csvEncoding, runLocally):
     if runLocally:
-        return pd.read_csv(githubFileName, sep=csvSep, encoding=csvEncoding)
+        return pd.read_csv("{}/{}/{}".format(os.getcwd(), githubFolderName, githubFileName), sep=csvSep, encoding=csvEncoding)
     else:
         githubPrefix = "https://raw.githubusercontent.com"
-        URL = "{}/{}/{}/{}/{}".format(githubPrefix, githubUserName, githubRepoName, githubBranchName, githubFileName)
+        URL = "{}/{}/{}/{}/{}/{}".format(githubPrefix, githubUserName, githubRepoName, githubBranchName, githubFolderName, githubFileName)
 
         resp = requests.get(URL)
         if resp.status_code == 200:
             return pd.read_csv(io.StringIO(resp.text), sep=csvSep, encoding=csvEncoding)
         else:
-            raise ConnectionError("访问错误")
+            raise ValueErorr("访问错误")
 
 #中午营业额
 #lun_sales = 0
@@ -369,6 +369,7 @@ def readCsv(githubUserName, githubRepoName, githubBranchName, githubFileName, cs
 #githubUserName = ""
 #githubRepoName = ""
 #githubBranchName = ""
+#githubFolderName = ""
 #emailSender = ''
 #emailSenderPassword = ''
 #emailReceiverList = ['']
@@ -424,6 +425,7 @@ functionRuleDf = readCsv(githubFileName=functionalityRuleCsvName,
                          githubUserName=githubUserName,
                          githubRepoName=githubRepoName,
                          githubBranchName=githubBranchName,
+                         githubFolderName=githubFolderName,
                          csvSep='|',
                          csvEncoding='utf-8',
                          runLocally=runLocally)
@@ -441,6 +443,7 @@ FPara['emailSenderPassword'] = emailSenderPassword
 FPara['githubUserName'] = githubUserName
 FPara['githubRepoName'] = githubRepoName
 FPara['githubBranchName'] = githubBranchName
+FPara['githubFolderName'] = githubFolderName
 FPara['takeawayBoxInventoryURL'] = takeawayBoxInventoryURL
 FPara['runLocally'] = runLocally
 
@@ -590,6 +593,7 @@ if len(read) > int(FPara['minBookFileLenAllowable']):
                        githubUserName=FPara['githubUserName'],
                        githubRepoName=FPara['githubRepoName'],
                        githubBranchName=FPara['githubBranchName'],
+                       githubFolderName=FPara['githubFolderName'],
                        csvSep='|',
                        csvEncoding='utf-8',
                        runLocally=FPara['runLocally'])
@@ -655,6 +659,7 @@ if len(read) > int(FPara['minBookFileLenAllowable']):
                            githubUserName=FPara['githubUserName'],
                            githubRepoName=FPara['githubRepoName'],
                            githubBranchName=FPara['githubBranchName'],
+                           githubFolderName=FPara['githubFolderName'],
                            csvSep='|',
                            csvEncoding='utf-8',
                            runLocally=FPara['runLocally'])
@@ -868,6 +873,7 @@ if len(read) > int(FPara['minBookFileLenAllowable']):
                        githubUserName=FPara['githubUserName'],
                        githubRepoName=FPara['githubRepoName'],
                        githubBranchName=FPara['githubBranchName'],
+                       githubFolderName=FPara['githubFolderName'],
                        csvSep='|',
                        csvEncoding='utf-8',
                        runLocally=FPara['runLocally'])
@@ -992,6 +998,7 @@ if len(read) > int(FPara['minBookFileLenAllowable']):
                            githubUserName=FPara['githubUserName'],
                            githubRepoName=FPara['githubRepoName'],
                            githubBranchName=FPara['githubBranchName'],
+                           githubFolderName=FPara['githubFolderName'],
                            csvSep='|',
                            csvEncoding='utf-8',
                            runLocally=FPara['runLocally'])
@@ -1249,6 +1256,7 @@ if len(read) > int(FPara['minBookFileLenAllowable']):
                            githubUserName=FPara['githubUserName'],
                            githubRepoName=FPara['githubRepoName'],
                            githubBranchName=FPara['githubBranchName'],
+                           githubFolderName=FPara['githubFolderName'],
                            csvSep='|',
                            csvEncoding='utf-8',
                            runLocally=FPara['runLocally'])
