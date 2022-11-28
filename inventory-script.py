@@ -636,6 +636,7 @@ while userInputOne != 3:
                                     buyInStockDfFilteredGrouped = pd.DataFrame(columns=['物品(单位)', '进货数量'])
 
                                 else:
+                                    buyInStockDfFiltered["进货数量"] = buyInStockDfFiltered["进货数量"].astype(int)
                                     buyInStockDfFilteredGrouped = buyInStockDfFiltered.groupby("进货物品(单位)")[['进货数量']].sum()
                                     buyInStockDfFilteredGrouped.reset_index(inplace=True)
                                     buyInStockDfFilteredGrouped.columns = ['物品(单位)', '进货数量']
@@ -651,6 +652,7 @@ while userInputOne != 3:
                                     breakages_dfFilteredGrouped = pd.DataFrame(columns=['物品(单位)', "破损数量"])
 
                                 else:
+                                    breakages_dfFiltered["破损数量"] = breakages_dfFiltered["破损数量"].astype(int)
                                     breakages_dfFilteredGrouped = breakages_dfFiltered.groupby("破损物品(单位)")[['破损数量']].sum()
                                     breakages_dfFilteredGrouped.reset_index(inplace=True)
                                     breakages_dfFilteredGrouped.columns = ['物品(单位)', "破损数量"]
