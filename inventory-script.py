@@ -631,7 +631,6 @@ while userInputOne != 3:
 
                                 buyInStockDfFiltered = buyInStockDf.copy()
                                 buyInStockDfFiltered = buyInStockDfFiltered[buyInStockDfFiltered['进货日期(年年年年-月月-日日)'].isin(dateRangeFilter)]
-                                buyInStockDfFiltered['进货数量'] = buyInStockDfFiltered['进货数量'].astype(int)
 
                                 if buyInStockDfFiltered.empty:
                                     buyInStockDfFilteredGrouped = pd.DataFrame(columns=['物品(单位)', '进货数量'])
@@ -647,7 +646,6 @@ while userInputOne != 3:
 
                                 breakages_dfFiltered = breakages_df.copy()
                                 breakages_dfFiltered = breakages_dfFiltered[breakages_dfFiltered["日期(年年年年-月月-日日)"].isin(dateRangeFilter)]
-                                breakages_dfFiltered["破损数量"] = breakages_dfFiltered["破损数量"].astype(int)
 
                                 if breakages_dfFiltered.empty:
                                     breakages_dfFilteredGrouped = pd.DataFrame(columns=['物品(单位)', "破损数量"])
@@ -656,7 +654,7 @@ while userInputOne != 3:
                                     breakages_dfFilteredGrouped = breakages_dfFiltered.groupby("破损物品(单位)")[['破损数量']].sum()
                                     breakages_dfFilteredGrouped.reset_index(inplace=True)
                                     breakages_dfFilteredGrouped.columns = ['物品(单位)', "破损数量"]
-            
+
 
                                 pageOneUnitPrice = pd.read_html(formURL, encoding='utf-8')[2]
                                 pageOneUnitPrice.drop("Unnamed: 0", axis=1, inplace=True)
