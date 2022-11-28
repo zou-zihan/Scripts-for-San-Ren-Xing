@@ -900,7 +900,7 @@ while userInputOne != 3:
 
                                 pageTwoUnitPriceNOTAuto = pd.merge(right=buyInStockDfFilteredGroupedRemoveUnitsForPageTwoNOTAuto, left=pageTwoUnitPriceNOTAuto, how='outer')
 
-                                buyInStockDfFilteredGroupedRemoveUnitsForPageTwoNOTAutoTurnZero = [0 if x is np.nan else x for x in pageTwoUnitPriceNOTAuto['进货数量'].values]
+                                buyInStockDfFilteredGroupedRemoveUnitsForPageTwoNOTAutoTurnZero = [0 if str(x) == 'nan' else x for x in pageTwoUnitPriceNOTAuto['进货数量'].values]
                                 pageTwoUnitPriceNOTAuto['进货数量'] = buyInStockDfFilteredGroupedRemoveUnitsForPageTwoNOTAutoTurnZero
                                 pageTwoUnitPriceNOTAuto['进货数量'] = pageTwoUnitPriceNOTAuto['进货数量'].astype(int)
 
