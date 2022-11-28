@@ -712,9 +712,9 @@ while userInputOne != 3:
 
                                 pageOneDf = pd.merge(right=breakages_dfFilteredGroupedForPageOne, left=pageOneDf, how="outer")
 
-                                breakagesColumnsTurnZero = [0 if x is np.nan else x for x in pageOneDf['破损数量'].values]
+                                breakagesColumnsTurnZero = [0 if str(x) == 'nan' else x for x in pageOneDf['破损数量'].values]
                                 pageOneDf['破损数量'] = breakagesColumnsTurnZero
-                                buyInStockColumnsTurnZero = [0 if x is np.nan else x for x in pageOneDf['进货数量'].values]
+                                buyInStockColumnsTurnZero = [0 if str(x) == 'nan' else x for x in pageOneDf['进货数量'].values]
                                 pageOneDf['进货数量'] = buyInStockColumnsTurnZero
 
                                 lockInStockDfForPageOne = lockInStockDf.copy()
