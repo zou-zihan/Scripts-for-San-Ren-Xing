@@ -589,55 +589,55 @@ if len(read) > int(FPara['minBookFileLenAllowable']):
         td_ytd = (dfb - dt.timedelta(days=1)).strftime('%Y-%m-%d')
         yesterday_date = (dfb - dt.timedelta(days=1)).strftime('%Y年%m月%d日')
 
-        TBRuleDf = readCsv(githubFileName=takeawayBoxRuleCsvName,
-                       githubUserName=FPara['githubUserName'],
-                       githubRepoName=FPara['githubRepoName'],
-                       githubBranchName=FPara['githubBranchName'],
-                       githubFolderName=FPara['githubFolderName'],
-                       csvSep='|',
-                       csvEncoding='utf-8',
-                       runLocally=FPara['runLocally'])
-
-        TBRuleDf['String Locator'] = TBRuleDf['String Locator'].apply(lambda a : unicodedata.normalize("NFKD", a))
-        TBRuleDf['String Locator'] = TBRuleDf['String Locator'].apply(lambda x : remove_spaces(x))
-        TBRuleDf['active status'] = TBRuleDf['active status'].astype(int)
-
-        model_listing = {}
-        for number in range(boxCounter):
-            modelName = FPara['boxTakeOverName{}'.format(number)]
-            model_listing.update({ modelName : TBRuleDf[(TBRuleDf['Model to Use'] == 'boxTakeOverName{}'.format(number)) & (TBRuleDf['active status'] == 1)]['String Locator'].values.tolist()})
-
-        html_df = pd.read_html(FPara['takeawayBoxInventoryURL'], encoding='utf-8')
-        model_df = html_df.copy()[0]
-        model_df.drop('Unnamed: 0', axis=1, inplace=True)
-        model_df.columns = model_df.iloc[0, :]
-        model_df.drop(0, axis=0, inplace=True)
-        model_df.reset_index(inplace=True)
-        model_df.drop('index', axis=1, inplace=True)
-
-
-        noti_df = html_df.copy()[1]
-        noti_df.drop('Unnamed: 0', axis=1, inplace=True)
-        noti_df.columns = noti_df.iloc[0,:]
-        noti_df.drop(0, axis=0, inplace=True)
-        noti_df.reset_index(inplace=True)
-        noti_df.drop('index', axis=1, inplace=True)
-
-        for i in noti_df.columns:
-            noti_df[i] = noti_df[i].astype(str)
-
-        noti_df[noti_df.columns[-1]] = noti_df[noti_df.columns[-1]].apply(lambda x : str(x[x.find('(')+1:x.find(')')]) )
-
-        tabox = pd.read_excel(FPara['databaseFileName'], sheet_name=FPara['takeawayBoxRecordSheetName'])
-
-        if len(tabox.columns) == len(databaseColumns[FPara['takeawayBoxRecordSheetName']]):
-            if tabox.columns.tolist() != databaseColumns[FPara['takeawayBoxRecordSheetName']]:
-                tabox.columns = databaseColumns[FPara['takeawayBoxRecordSheetName']]
-                print("The columns of {} had been updated.".format(FPara['takeawayBoxRecordSheetName']))
-
-        tabox_tdy_record = tabox[tabox['Date'] == td_pd]
-
         if takeawayBoxInventoryFunction:
+            TBRuleDf = readCsv(githubFileName=takeawayBoxRuleCsvName,
+                           githubUserName=FPara['githubUserName'],
+                           githubRepoName=FPara['githubRepoName'],
+                           githubBranchName=FPara['githubBranchName'],
+                           githubFolderName=FPara['githubFolderName'],
+                           csvSep='|',
+                           csvEncoding='utf-8',
+                           runLocally=FPara['runLocally'])
+
+            TBRuleDf['String Locator'] = TBRuleDf['String Locator'].apply(lambda a : unicodedata.normalize("NFKD", a))
+            TBRuleDf['String Locator'] = TBRuleDf['String Locator'].apply(lambda x : remove_spaces(x))
+            TBRuleDf['active status'] = TBRuleDf['active status'].astype(int)
+
+            model_listing = {}
+            for number in range(boxCounter):
+                modelName = FPara['boxTakeOverName{}'.format(number)]
+                model_listing.update({ modelName : TBRuleDf[(TBRuleDf['Model to Use'] == 'boxTakeOverName{}'.format(number)) & (TBRuleDf['active status'] == 1)]['String Locator'].values.tolist()})
+
+            html_df = pd.read_html(FPara['takeawayBoxInventoryURL'], encoding='utf-8')
+            model_df = html_df.copy()[0]
+            model_df.drop('Unnamed: 0', axis=1, inplace=True)
+            model_df.columns = model_df.iloc[0, :]
+            model_df.drop(0, axis=0, inplace=True)
+            model_df.reset_index(inplace=True)
+            model_df.drop('index', axis=1, inplace=True)
+
+
+            noti_df = html_df.copy()[1]
+            noti_df.drop('Unnamed: 0', axis=1, inplace=True)
+            noti_df.columns = noti_df.iloc[0,:]
+            noti_df.drop(0, axis=0, inplace=True)
+            noti_df.reset_index(inplace=True)
+            noti_df.drop('index', axis=1, inplace=True)
+
+            for i in noti_df.columns:
+                noti_df[i] = noti_df[i].astype(str)
+
+            noti_df[noti_df.columns[-1]] = noti_df[noti_df.columns[-1]].apply(lambda x : str(x[x.find('(')+1:x.find(')')]) )
+
+            tabox = pd.read_excel(FPara['databaseFileName'], sheet_name=FPara['takeawayBoxRecordSheetName'])
+
+            if len(tabox.columns) == len(databaseColumns[FPara['takeawayBoxRecordSheetName']]):
+                if tabox.columns.tolist() != databaseColumns[FPara['takeawayBoxRecordSheetName']]:
+                    tabox.columns = databaseColumns[FPara['takeawayBoxRecordSheetName']]
+                    print("The columns of {} had been updated.".format(FPara['takeawayBoxRecordSheetName']))
+
+            tabox_tdy_record = tabox[tabox['Date'] == td_pd]
+
             box_value = {}
             for index in range(len(model_df)):
                 box_value.update({
