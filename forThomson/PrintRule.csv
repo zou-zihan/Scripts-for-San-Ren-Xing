@@ -9,7 +9,7 @@ print_statement|key names in value_dict|active_status
 中午厨房员工人数: {}|lun_kwc|1
 ||1
 下午茶营业额: ${}|tb_sales|1
-下午茶顾客人数: ${}|tb_gc|1
+下午茶顾客人数: {}|tb_gc|1
 下午茶平均消费: ${}|tb_avg|1
 下午茶楼面员工人数: {}|tb_fwc|1
 下午茶厨房员工人数: {}|tb_kwc|1
