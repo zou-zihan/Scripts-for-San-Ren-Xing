@@ -1,5 +1,4 @@
 #! /usr/bin/env python3
-#encoding='GBK'
 
 import numpy as np
 import pandas as pd
@@ -15,6 +14,7 @@ from email.header import Header
 import requests
 from requests.structures import CaseInsensitiveDict
 import io
+import sys
 #import urllib
 
 def single_zero(x):
@@ -565,7 +565,14 @@ if len(read) > int(FPara['minBookFileLenAllowable']):
             })
 
         today_dt_format = dt.datetime.today()
-        today_date = today_dt_format.strftime("%Y年%m月%d日")
+        if sys.platform.strip().upper() == "IOS":
+            #it may not render strftime with Chinese characters correctly on ios app such as Juno
+            today_date = today_dt_format.strftime("%YNIAN%mYUE%RI")
+            today_date = today_date.replace("NIAN", "年")
+            today_date = today_date.replace("YUE", "月")
+            today_date = today_date.replace("RI", "日")
+        else:
+            today_date = today_dt_format.strftime("%Y年%m月%d日")
 
         #raw_date_from_book
         rdfb = read[read['0'].str.contains('Date:')].dropna(axis=1).values[0][0]
@@ -575,7 +582,15 @@ if len(read) > int(FPara['minBookFileLenAllowable']):
                 #date_from_book
                 dfb = '{} {} {}'.format(rdfb[1],rdfb[2],rdfb[3])
                 dfb = dt.datetime.strptime(dfb, '%d %b %Y')
-                take_date = dfb.strftime("%Y年%m月%d日")
+
+                if sys.platform.strip().upper() == "IOS":
+                    #it may not render strftime with Chinese characters correctly on ios app such as Juno
+                    take_date = dfb.strftime("%YNIAN%mYUE%dRI")
+                    take_date = take_date.replace("NIAN", "年")
+                    take_date = take_date.replace("YUE", "月")
+                    take_date = take_date.replace("RI", "日")
+                else:
+                    take_date = dfb.strftime("%Y年%m月%d日")
             else:
                 print('不支持跨日期。\n报表日期将以今天日期为标准。')
                 dfb = dt.datetime.today().strptime(dfb, '%d %b %Y')
@@ -587,7 +602,14 @@ if len(read) > int(FPara['minBookFileLenAllowable']):
 
         td_pd = dfb.strftime('%Y-%m-%d')
         td_ytd = (dfb - dt.timedelta(days=1)).strftime('%Y-%m-%d')
-        yesterday_date = (dfb - dt.timedelta(days=1)).strftime('%Y年%m月%d日')
+
+        if sys.platform.strip().upper() == "IOS":
+            yesterday_date = (dfb - dt.timedelta(days=1)).strftime('%YNIAN%mYUE%dRI')
+            yesterday_date = yesterday_date.replace("NIAN", "年")
+            yesterday_date = yesterday_date.replace("YUE", "月")
+            yesterday_date = yesterday_date.replace("RI", "日")
+        else:
+            yesterday_date = (dfb - dt.timedelta(days=1)).strftime('%Y年%m月%d日')
 
 
         TBRuleDf = readCsv(githubFileName=takeawayBoxRuleCsvName,
@@ -1226,32 +1248,13 @@ if len(read) > int(FPara['minBookFileLenAllowable']):
 
             with pd.ExcelWriter(FPara['databaseFileName']) as writer:
                 for file in range(len(concaFile)):
-                    concaFile[file].to_excel(writer, sheet_name=concaFileName[file], index=False, header=True, encoding="GBK")
+                    concaFile[file].to_excel(writer, sheet_name=concaFileName[file], index=False, header=True)
 
             drink_conca = pd.read_excel(FPara['databaseFileName'], sheet_name=FPara['drinkRecordSheetName'])
             tabox_concat = pd.read_excel(FPara['databaseFileName'], sheet_name=FPara['takeawayBoxRecordSheetName'])
             conca_sales = pd.read_excel(FPara['databaseFileName'], sheet_name=FPara['salesRecordSheetName'])
             conca_cash_record = pd.read_excel(FPara['databaseFileName'], sheet_name=FPara['cashRecordSheetName'])
             promo_conca = pd.read_excel(FPara['databaseFileName'], sheet_name=FPara['promoRecordSheetName'])
-
-            if 'Unnamed: 0' in drink_conca.columns:
-                drink_conca.drop(['Unnamed: 0'], axis=1, inplace=True)
-
-            if 'Unnamed: 0' in tabox_concat.columns:
-                tabox_concat.drop(['Unnamed: 0'], axis=1, inplace=True)
-
-            if 'Unnamed: 0' in conca_sales.columns:
-                conca_sales.drop(['Unnamed: 0'], axis=1, inplace=True)
-
-            if 'Unnamed: 0' in conca_cash_record.columns:
-                conca_cash_record.drop(['Unnamed: 0'], axis=1, inplace=True)
-
-            if 'Unnamed: 0' in promo_conca.columns:
-                promo_conca.drop(['Unnamed: 0'], axis=1, inplace=True)
-
-            with pd.ExcelWriter(FPara['databaseFileName']) as writer:
-                for file in range(len(concaFile)):
-                    concaFile[file].to_excel(writer, sheet_name=concaFileName[file], index=False, header=True, encoding="GBK")
 
             NameConverter = readCsv(githubFileName=NameConverterForShowingDfCsvName,
                            githubUserName=FPara['githubUserName'],
