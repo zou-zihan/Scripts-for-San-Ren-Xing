@@ -1,5 +1,4 @@
 #! /usr/bin/env python3
-#encoding='GBK'
 
 import numpy as np
 import pandas as pd
@@ -1106,17 +1105,17 @@ while userInputOne != 3:
                                     userInputSix = option_limit(saveActions, input(": "))
                                     if userInputSix == 0:
                                         with pd.ExcelWriter('{}/盘点详情excel/{}年{}月盘点详情.xlsx'.format(os.getcwd(), stockForYear, stockForMonth)) as writer:
-                                            pageOneDf.to_excel(writer, sheet_name='Sheet1', index=False, header=True, encoding='GBK')
-                                            pageTwoDf.to_excel(writer, sheet_name='Sheet2', index=False, header=True, encoding='GBK')
-                                            pageThreeDf.to_excel(writer, sheet_name='Sheet3', index=False, header=True, encoding='GBK')
+                                            pageOneDf.to_excel(writer, sheet_name='Sheet1', index=False, header=True)
+                                            pageTwoDf.to_excel(writer, sheet_name='Sheet2', index=False, header=True)
+                                            pageThreeDf.to_excel(writer, sheet_name='Sheet3', index=False, header=True)
                                         print("文件已覆盖")
                                     elif userInputSix == 1:
                                         print("文件已丢弃")
                                 else:
                                     with pd.ExcelWriter('{}/盘点详情excel/{}年{}月盘点详情.xlsx'.format(os.getcwd(), stockForYear, stockForMonth)) as writer:
-                                        pageOneDf.to_excel(writer, sheet_name='Sheet1', index=False, header=True, encoding='GBK')
-                                        pageTwoDf.to_excel(writer, sheet_name='Sheet2', index=False, header=True, encoding='GBK')
-                                        pageThreeDf.to_excel(writer, sheet_name='Sheet3', index=False, header=True, encoding='GBK')
+                                        pageOneDf.to_excel(writer, sheet_name='Sheet1', index=False, header=True)
+                                        pageTwoDf.to_excel(writer, sheet_name='Sheet2', index=False, header=True)
+                                        pageThreeDf.to_excel(writer, sheet_name='Sheet3', index=False, header=True)
                                     print("文件已自动保存")
                                     print("前往盘点详情excel的文件夹内查看，文件名为{}年{}月盘点详情.xlsx".format(stockForYear, stockForMonth))
                             else:
