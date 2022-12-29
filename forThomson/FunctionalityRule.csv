@@ -4,7 +4,7 @@ databaseFileName|Thomson Database.xlsx
 minBookFileLenAllowable|100
 takeawayBoxInventoryFunction|True
 stockAlertFunction|True
-stockEverydayFunction|True
+stockEverydayFunction|False
 cashRecordShowFunction|True
 drinkInventoryFunction|True
 drinkRecordSheetName|drink_record
