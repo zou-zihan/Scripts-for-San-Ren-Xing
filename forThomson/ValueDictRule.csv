@@ -65,7 +65,7 @@ SALES_TA|Sales (Takeaway)|read|4|1|-1|1|1
 SALES_DI|Sales (Dine In)|read|4|1|-1|1|1
 net_sales|Total Sales Before Tax & Srv Charge|read|3|1|-1|1|1
 svc|Service Charge 10%|read|1|1|-1|1|1
-gst|GST 7%|read|1|1|-1|1|1
+gst|GST 8%|read|1|1|-1|1|1
 ETG_SUM|ETG|pay_brkdwn|1|2|-1|1|1
 ETG_COUNT|ETG|pay_breakdown|1|3|-1|0|1
 CASH|CASH|pay_brkdwn|1|1|-1|1|1
