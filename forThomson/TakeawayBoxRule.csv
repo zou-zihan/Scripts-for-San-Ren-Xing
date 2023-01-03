@@ -206,3 +206,7 @@ Chinese food name|String Locator|Model to Use|Multiplier|active status
 桃胶|Freenourishingpeachgumdessert(cold)|boxTakeOverName20|1.0|1
 桃胶|Freenourishingpeachgumdessert(hot)|boxTakeOverName20|1.0|1
 便当A|BentoA|boxTakeOverName20|0.15|1
+另加鲍鱼(1粒)|Additionalabalone|boxTakeOverName5|1.0|1
+金猪报喜(半只)|Crispyroastedpig(half)|boxTakeOverName9|1.0|1
+金猪报喜(一只分2盒)|Crispyroastedpig(wholeintwoboxes)|boxTakeOverName9|2.0|1
+金猪报喜(一只)|Crispyroastedpig(whole)|boxTakeOverName24|1.0|1
