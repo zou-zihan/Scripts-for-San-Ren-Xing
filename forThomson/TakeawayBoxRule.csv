@@ -236,3 +236,13 @@ Chinese food name|String Locator|Model to Use|Multiplier|active status
 极品花胶炖甘榜鸡|Doubleboiledkampongchickensoupwithpremiumfishmaw|boxTakeOverName4|1.0|1
 红豆沙汤圆|Glutinousredbeanriceballs(min 2 orders)|boxTakeOverName4|1.0|1
 红豆沙汤圆|Freeglutinousredbeanriceball|boxTakeOverName4|1.0|1
+新年2人套餐|CNYsetmenufor2(takeaway)|boxTakeOverName1|2.0|1
+新年2人套餐|CNYsetmenufor2(takeaway)|boxTakeOverName4|3.0|1
+新年2人套餐|CNYsetmenufor2(takeaway)|boxTakeOverName11|2.0|1
+新年2人套餐|CNYsetmenufor2(takeaway)|boxTakeOverName5|1.0|1
+新年4人套餐A|CNYsetmenufor4A(takeaway)|boxTakeOverName1|1.0|1
+新年4人套餐A|CNYsetmenufor4A(takeaway)|boxTakeOverName3|1.0|1
+新年4人套餐A|CNYsetmenufor4A(takeaway)|boxTakeOverName12|1.0|1
+新年4人套餐A|CNYsetmenufor4A(takeaway)|boxTakeOverName9|1.0|1
+新年4人套餐A|CNYsetmenufor4A(takeaway)|boxTakeOverName5|2.0|1
+新年4人套餐A|CNYsetmenufor4A(takeaway)|boxTakeOverName4|4.0|1
