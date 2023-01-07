@@ -85,7 +85,8 @@ Chinese food name|String Locator|Model to Use|Multiplier|active status
 沙葛|freeturnip|boxTakeOverName4|1.0|1
 沙葛|Turnips|boxTakeOverName4|1.0|1
 辣妹子|SpecialtyChiliSauce|boxTakeOverName4|1.0|1
-红烧鲍鱼|Braisedabalone(2pcs)|boxTakeOverName4|2.0|1
+红烧鲍鱼|Braisedabalone(2pcs)|boxTakeOverName4|1.0|1
+红烧鲍鱼1份|Braisedabalone(1pc)|boxTakeOverName4|1.0|1
 排骨汤配饭|Lazadadoubleboiledporkribsoupwithrice|boxTakeOverName4|1.0|1
 宫廷海鲜狮子头|Seafoodwithporkandsaltedeggyolkinchickenbroth(min2orders)|boxTakeOverName4|1.0|1
 白米饭|Steamedwhiterice|boxTakeOverName4|1.0|1
