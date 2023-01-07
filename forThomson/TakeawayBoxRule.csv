@@ -89,7 +89,7 @@ Chinese food name|String Locator|Model to Use|Multiplier|active status
 红烧鲍鱼1份|Braisedabalone(1pc)|boxTakeOverName4|1.0|1
 排骨汤配饭|Lazadadoubleboiledporkribsoupwithrice|boxTakeOverName4|1.0|1
 宫廷海鲜狮子头|Seafoodwithporkandsaltedeggyolkinchickenbroth(min2orders)|boxTakeOverName4|1.0|1
-白米饭|Steamedwhiterice|boxTakeOverName4|1.0|1
+白米饭|Steamedwhiterice|boxTakeOverName4|0.5|1
 手工薄饼|Handmadepopiahwithshreddedleanmeat(10pcs)|boxTakeOverName5|1.0|1
 手工薄饼|Handmadepopiahwithshreddedleanmeat(10pcs)-platform|boxTakeOverName5|1.0|1
 脆皮大肠|Deepfriedpig'sintestine|boxTakeOverName5|1.0|1
