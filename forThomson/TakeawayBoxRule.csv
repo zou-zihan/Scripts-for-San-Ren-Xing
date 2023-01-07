@@ -206,7 +206,7 @@ Chinese food name|String Locator|Model to Use|Multiplier|active status
 桃胶|Freenourishingpeachgumdessert(cold)|boxTakeOverName20|1.0|1
 桃胶|Freenourishingpeachgumdessert(hot)|boxTakeOverName20|1.0|1
 便当A|BentoA|boxTakeOverName20|0.15|1
-另加鲍鱼(1粒)|Additionalabalone|boxTakeOverName4|1.0|1
+另加鲍鱼(1粒)|Additionalabalone|boxTakeOverName5|1.0|1
 金猪报喜(半只)|Crispyroastedpig(half)|boxTakeOverName9|1.0|1
 金猪报喜(一只分两盒)|Crispyroastedpig(wholeintwoboxes)|boxTakeOverName9|2.0|1
 金猪报喜(一只)|Crispyroastedpig(whole)|boxTakeOverName24|1.0|1
@@ -231,6 +231,7 @@ Chinese food name|String Locator|Model to Use|Multiplier|active status
 蜜汁烧鸭一只分两盒|Honeyroastedduck(wholeintwoboxes)|boxTakeOverName2|1.0|1
 蜜汁烧鸭半只|Honeyroastedduck(half)|boxTakeOverName9|1.0|1
 白灼活虾|Steamedliveprawns|boxTakeOverName0|1.0|1
+白灼活虾|Steamedliveprawns|boxTakeOverName5|1.0|1
 10人传统盆菜|Traditionaltreasurepotfor10|boxTakeOverName11|1.0|1
 4人传统盆菜|Traditionaltreasurepotfor4|boxTakeOverName4|1.0|1
 6人传统盆菜|Traditionaltreasurepotfor6|boxTakeOverName4|1.0|1
