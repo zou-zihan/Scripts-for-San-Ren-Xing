@@ -46,6 +46,7 @@ Chinese food name|String Locator|Model to Use|Multiplier|active status
 蒜蓉瓜尖|Stirfriedpumpkinleaveswithgarlic|boxTakeOverName0|1.0|1
 啤酒鸭|Beerbraisedduck|boxTakeOverName0|1.0|1
 炸馒头|Friedmantou(2pcs)|boxTakeOverName0|0.5|1
+叁巴炒啦啦|Stir-friedsambalclams|boxTakeOverName0|1.0|1
 家乡焖年糕中|Hometownbraisedricecake(medium)|boxTakeOverName1|1.0|1
 南平炒面中|Nanpingfriednoodles(medium)|boxTakeOverName1|1.0|1
 三人行炒饭中|Sanrenxingfriedrice(medium)|boxTakeOverName1|1.0|1
@@ -206,7 +207,7 @@ Chinese food name|String Locator|Model to Use|Multiplier|active status
 桃胶|Nourishingpeachgumdessert-cold|boxTakeOverName20|1.0|1
 桃胶|Freenourishingpeachgumdessert(cold)|boxTakeOverName20|1.0|1
 桃胶|Freenourishingpeachgumdessert(hot)|boxTakeOverName20|1.0|1
-便当A|BentoA|boxTakeOverName20|0.15|1
+便当A|BentoA|boxTakeOverName20|0.10|1
 另加鲍鱼(1粒)|Additionalabalone|boxTakeOverName5|1.0|1
 金猪报喜(半只)|Crispyroastedpig(half)|boxTakeOverName9|1.0|1
 金猪报喜(一只分两盒)|Crispyroastedpig(wholeintwoboxes)|boxTakeOverName9|2.0|1
