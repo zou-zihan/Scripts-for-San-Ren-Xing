@@ -528,7 +528,7 @@ if len(read) > int(FPara['minBookFileLenAllowable']):
         except NameError:
             continue_ = False
 
-        tsbt_index = int(read[read["0"] == 'Total Sales Before Tax'].index[0])
+        tsbt_index = int(read[read["0"] == 'Total Sales Before Tax & Srv Chg'].index[0])
         read.iloc[tsbt_index, 0] = 'Total Sales Before Tax & Srv Charge'
 
         gst_index= int(read[read["0"] == "GST 8%"].index[0])
