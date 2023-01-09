@@ -366,6 +366,12 @@ def readCsv(githubUserName, githubRepoName, githubBranchName, githubFileName, gi
 #结束日期不能早于起始日期
 #cash_end_date = 'default'
 
+#--------本地book分割线----------#
+#如果后台数据跟前台数据不一样,则需使用前台数据关帐
+#前台数据需要定义门店名,即theOutlet
+#门店
+#theOutlet = "Thomson"
+
 #githubUserName = ""
 #githubRepoName = ""
 #githubBranchName = ""
@@ -513,26 +519,50 @@ read.columns = columnsRename
 read['0'] = read['0'].astype(str)
 
 if len(read) > int(FPara['minBookFileLenAllowable']):
-    try:
-        bi = int(read[read['0'].str.contains('Date:')].index.values[0])
-        ei = int(read[read['0'] == 'Total Sales'].index.values[0])
-        outlet_loc = str(read.iloc[(bi+1):(ei),:].dropna(axis=1).values[0][0])
-        continue_ = True
-    except IndexError:
-        continue_ = False
+    isLocalBook = not read[read["0"].str.contains("GST Reg No")].empty
+
+    if isLocalBook:
+        try:
+            outlet_loc = theOutlet
+            continue_ = True
+        except NameError:
+            continue_ = False
+
+        tsbt_index = int(read[read["0"] == 'Total Sales Before Tax'].index[0])
+        read.iloc[tsbt_index, 0] = 'Total Sales Before Tax & Srv Charge'
+
+        gst_index= int(read[read["0"] == "GST 8%"].index[0])
+        read.iloc[int(gst_index), 0] = "GST"
+
+    else:
+        try:
+            bi = int(read[read['0'].str.contains('Date:')].index.values[0])
+            ei = int(read[read['0'] == 'Total Sales'].index.values[0])
+            outlet_loc = str(read.iloc[(bi+1):(ei),:].dropna(axis=1).values[0][0])
+            continue_ = True
+        except IndexError:
+            continue_ = False
 
     if continue_:
         pbi = int(read[read['0'].str.contains('PAYMENT BREAKDOWN:')].index[0])
 
-        try:
-            pei = int(read[read['0'].str.contains('PAYMENT BREAKDOWN (POS):', regex=False)].index[0])
-        except IndexError:
-            pei = int(read[read['0'].str.contains('Transaction Void Items')].index[0])
+        if isLocalBook:
+            pei = int(read[read['0'].str.contains('OPENING CASH BALANCE:')].index[0])
+
+        else:
+            try:
+                pei = int(read[read['0'].str.contains('PAYMENT BREAKDOWN (POS):', regex=False)].index[0])
+            except IndexError:
+                pei = int(read[read['0'].str.contains('Transaction Void Items')].index[0])
 
         pay_breakdown = read.copy()
         pay_breakdown = pay_breakdown.iloc[(pbi+1):(pei), :]
         resetAxis(pay_breakdown, axis=0)
         pay_breakdown['0'] = pay_breakdown['0'].astype(str)
+
+        if isLocalBook:
+            drop_index = min(pay_breakdown[pay_breakdown['0'].str.contains('nan')].index)
+            pay_breakdown = pay_breakdown.iloc[:drop_index]
 
         dropColumns = []
         for columnIndex in range(len(pay_breakdown.columns)):
@@ -575,30 +605,40 @@ if len(read) > int(FPara['minBookFileLenAllowable']):
             today_date = today_dt_format.strftime("%Y年%m月%d日")
 
         #raw_date_from_book
-        rdfb = read[read['0'].str.contains('Date:')].dropna(axis=1).values[0][0]
-        rdfb = rdfb.split()
-        if len(rdfb) == 8:
-            if rdfb[1] == rdfb[5] and rdfb[2] == rdfb[6] and rdfb[3] == rdfb[7]:
-                #date_from_book
-                dfb = '{} {} {}'.format(rdfb[1],rdfb[2],rdfb[3])
-                dfb = dt.datetime.strptime(dfb, '%d %b %Y')
+        if isLocalBook:
+            read_date = read.iloc[int(read[read["0"].str.contains('X/Shift Report')].index[0])+1,0]
+            rdfb = read_date.split()
 
-                if sys.platform.strip().upper() == "IOS":
-                    #it may not render strftime with Chinese characters correctly on ios app such as Juno
-                    take_date = dfb.strftime("%YNIAN%mYUE%dRI")
-                    take_date = take_date.replace("NIAN", "年")
-                    take_date = take_date.replace("YUE", "月")
-                    take_date = take_date.replace("RI", "日")
-                else:
-                    take_date = dfb.strftime("%Y年%m月%d日")
-            else:
-                print('不支持跨日期。\n报表日期将以今天日期为标准。')
-                dfb = dt.datetime.today().strptime(dfb, '%d %b %Y')
-                take_date = today_date
         else:
-            print('日期格式不符，报表将以今天的日期为标准。')
-            dfb = dt.datetime.today().strptime(dfb, '%d %b %Y')
-            take_date = today_date
+            rdfb = read[read['0'].str.contains('Date:')].dropna(axis=1).values[0][0]
+            rdfb = rdfb.split()
+
+        if isLocalBook:
+            dfb = '{} {} {}'.format(rdfb[1], rdfb[2], rdfb[3])
+            dfb = dt.datetime.strptime(dfb, '%d %b %Y')
+
+        else:
+            if len(rdfb) == 8:
+                if rdfb[1] == rdfb[5] and rdfb[2] == rdfb[6] and rdfb[3] == rdfb[7]:
+                    #date_from_book
+                    dfb = '{} {} {}'.format(rdfb[1],rdfb[2],rdfb[3])
+                    dfb = dt.datetime.strptime(dfb, '%d %b %Y')
+
+                else:
+                    print('不支持跨日期。\n报表日期将以今天日期为标准。')
+                    dfb = dt.datetime.today().strptime(dfb, '%d %b %Y')
+            else:
+                print('日期格式不符，报表将以今天的日期为标准。')
+                dfb = dt.datetime.today().strptime(dfb, '%d %b %Y')
+
+        if sys.platform.strip().upper() == "IOS":
+            #it may not render strftime with Chinese characters correctly on ios app such as Juno
+            take_date = dfb.strftime("%YNIAN%mYUE%dRI")
+            take_date = take_date.replace("NIAN", "年")
+            take_date = take_date.replace("YUE", "月")
+            take_date = take_date.replace("RI", "日")
+        else:
+            take_date = dfb.strftime("%Y年%m月%d日")
 
         td_pd = dfb.strftime('%Y-%m-%d')
         td_ytd = (dfb - dt.timedelta(days=1)).strftime('%Y-%m-%d')
@@ -610,7 +650,6 @@ if len(read) > int(FPara['minBookFileLenAllowable']):
             yesterday_date = yesterday_date.replace("RI", "日")
         else:
             yesterday_date = (dfb - dt.timedelta(days=1)).strftime('%Y年%m月%d日')
-
 
         TBRuleDf = readCsv(githubFileName=takeawayBoxRuleCsvName,
                        githubUserName=FPara['githubUserName'],
@@ -835,33 +874,73 @@ if len(read) > int(FPara['minBookFileLenAllowable']):
             tabox_msg = "{}的打包盒信息无法存入或无法再次存入数据库".format(take_date)
 
         print("计算中...请耐心等待")
-        lun_sales = float(lun_sales)
-        tb_sales = float(tb_sales)
-        if lun_gc == 0:
-            lun_avg = 0
-        else:
-            lun_avg = lun_sales/lun_gc
-
-        if tb_gc == 0:
-            tb_avg = 0
-        else:
-            tb_avg = tb_sales/tb_gc
-
         total_sales = float(resetAxis(read[read['0'] == 'Total Sales'].dropna(axis=1), axis=1)['1'].values[0])
         no_of_cover = int(resetAxis(read[read['0'] == 'No. Of Cover'].dropna(axis=1), axis=1)['1'].values[0])
 
-        night_sales = total_sales - lun_sales - tb_sales
-        night_gc = no_of_cover - lun_gc - tb_gc
+        if isLocalBook:
+            lun_start_index = int(read[read['0'].str.contains('LUNCH')].index[0])
+            lun_end_index = int(read[read['0'].str.contains('TEA TIME')].index[0])
+            lunch_df = read.copy()
+            lunch_df = lunch_df.iloc[(lun_start_index+1):(lun_end_index), :]
+            lunch_df.dropna(axis=1, inplace=True)
 
-        if night_gc == 0:
-            night_avg = 0
+            lun_sales = float(lunch_df[lunch_df['0'].str.contains('Total Amount')]['1'].values[0])
+            lun_avg = float(lunch_df[lunch_df['0'].str.contains('Average/Pax')]['1'].values[0])
+            lun_gc = int(lunch_df[lunch_df['0'].str.contains('Total Pax')]['1'].values[0])
+
         else:
-            night_avg = night_sales/night_gc
+            lun_sales = float(lun_sales)
 
-        lun_avg = normal_round(lun_avg, 2)
-        tb_avg = normal_round(tb_avg, 2)
-        night_sales = normal_round(night_sales, 2)
-        night_avg = normal_round(night_avg, 2)
+            if lun_gc == 0:
+                lun_avg = 0
+            else:
+                lun_avg = lun_sales/lun_gc
+
+            lun_avg = normal_round(lun_avg, 2)
+
+        if isLocalBook:
+            tb_start_index = lun_end_index
+            tb_end_index = int(read[read['0'].str.contains('DINNER')].index[0])
+            tb_df = read.copy()
+            tb_df = tb_df.iloc[(tb_start_index)+1:(tb_end_index), :]
+            tb_df.dropna(axis=1, inplace=True)
+
+            tb_sales = float(tb_df[tb_df['0'].str.contains('Total Amount')]['1'].values[0])
+            tb_avg = float(tb_df[tb_df['0'].str.contains('Average/Pax')]['1'].values[0])
+            tb_gc = int(tb_df[tb_df['0'].str.contains('Total Pax')]['1'].values[0])
+
+        else:
+            tb_sales = float(tb_sales)
+
+            if tb_gc == 0:
+                tb_avg = 0
+            else:
+                tb_avg = tb_sales/tb_gc
+
+            tb_avg = normal_round(tb_avg, 2)
+
+        if isLocalBook:
+            night_start_index = tb_end_index
+            night_end_index = night_start_index+6
+            night_df = read.copy()
+            night_df = night_df.iloc[(night_start_index+1):(night_end_index), :]
+            night_df.dropna(axis=1, inplace=True)
+
+            night_sales = float(night_df[night_df['0'].str.contains('Total Amount')]['1'].values[0])
+            night_avg = float(night_df[night_df['0'].str.contains('Average/Pax')]['1'].values[0])
+            night_gc = int(night_df[night_df['0'].str.contains('Total Pax')]['1'].values[0])
+
+        else:
+            night_sales = total_sales - lun_sales - tb_sales
+            night_gc = no_of_cover - lun_gc - tb_gc
+
+            if night_gc == 0:
+                night_avg = 0
+            else:
+                night_avg = night_sales/night_gc
+
+            night_sales = normal_round(night_sales, 2)
+            night_avg = normal_round(night_avg, 2)
 
         lun_sales = single_zero(format(lun_sales, '.2f'))
         lun_avg = single_zero(format(lun_avg, '.2f'))
