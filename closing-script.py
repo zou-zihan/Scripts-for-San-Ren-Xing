@@ -531,8 +531,14 @@ if len(read) > int(FPara['minBookFileLenAllowable']):
         tsbt_index = int(read[read["0"] == 'Total Sales Before Tax & Srv Chg'].index[0])
         read.iloc[tsbt_index, 0] = 'Total Sales Before Tax & Srv Charge'
 
-        gst_index= int(read[read["0"] == "GST 8%"].index[0])
+        gst_index = int(read[read["0"] == "GST 8%"].index[0])
         read.iloc[int(gst_index), 0] = "GST"
+
+        svc_index = int(read[read["0"] == "SCV CHG 10%"].index[0])
+        read.iloc[int(svc_index), 0] = "Service Charge 10%"
+
+        gstReg_index = int(read[read["0"].str.contains("GST Reg No")].index[0])
+        read.iloc[int(gstReg_index), 0] = "Goods and Services Tax Reg No"
 
     else:
         try:
