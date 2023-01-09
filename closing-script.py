@@ -1521,5 +1521,6 @@ if len(read) > int(FPara['minBookFileLenAllowable']):
     else:
         print("导出的报表无法识别来自哪家门店")
         print("请选择门店导出报表后再运行一遍吧")
+        print("如果用机器上的报表关帐的,请定义theOutlet后再运行一遍")
 else:
     print("你应该没有复制所有的后台数据,复制完所有的数据再运行一遍吧")
