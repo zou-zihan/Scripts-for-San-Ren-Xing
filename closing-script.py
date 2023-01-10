@@ -620,7 +620,7 @@ if len(read) > int(FPara['minBookFileLenAllowable']):
             try:
                 read_date = read.iloc[int(read[read["0"].str.contains('X/Shift Report')].index[0])+1,0]
             except IndexError:
-                read_date = read.iloc[int(read[read["0"].str.contains('Z/Shift Report')].index[0])+1,0]
+                read_date = read.iloc[int(read[read["0"].str.contains('Z/Closing Report')].index[0])+1,0]
                 
             rdfb = read_date.split()
 
