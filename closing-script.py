@@ -616,7 +616,12 @@ if len(read) > int(FPara['minBookFileLenAllowable']):
 
         #raw_date_from_book
         if isLocalBook:
-            read_date = read.iloc[int(read[read["0"].str.contains('X/Shift Report')].index[0])+1,0]
+            
+            try:
+                read_date = read.iloc[int(read[read["0"].str.contains('X/Shift Report')].index[0])+1,0]
+            except IndexError:
+                read_date = read.iloc[int(read[read["0"].str.contains('Z/Shift Report')].index[0])+1,0]
+                
             rdfb = read_date.split()
 
         else:
