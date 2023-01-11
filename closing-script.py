@@ -586,11 +586,13 @@ if len(read) > int(FPara['minBookFileLenAllowable']):
         resetAxis(pay_breakdown, axis=1)
         pay_breakdown = pay_breakdown[pay_breakdown['0'] != 'nan']
 
+        pay_brkdwn = pay_breakdown.copy()
+
         if pay_breakdown.empty:
             print("无任何付款信息")
 
-        pay_brkdwn = pay_breakdown.copy()
-        pay_brkdwn['0'] = pay_brkdwn['0'].apply(lambda x:x[:x.find('(')])
+        else:
+            pay_brkdwn['0'] = pay_brkdwn['0'].apply(lambda x:x[:x.find('(')])
 
         read_ = read.copy()
         read_['0'] = read_['0'].apply(lambda a : unicodedata.normalize("NFKD", a))
@@ -888,6 +890,7 @@ if len(read) > int(FPara['minBookFileLenAllowable']):
             tabox_concat.sort_values(by='Date', ascending=True, ignore_index=True, inplace=True)
             tabox_msg = "{}的打包盒信息无法存入或无法再次存入数据库".format(take_date)
 
+        print("警告: 因为大年初一关店,大年初二晚上生成报表之前请先在Database手动录入2023年1月22日的各项数据! 否则导致报表生成错误!")
         print("计算中...请耐心等待")
         total_sales = float(resetAxis(read[read['0'] == 'Total Sales'].dropna(axis=1), axis=1)['1'].values[0])
         no_of_cover = int(resetAxis(read[read['0'] == 'No. Of Cover'].dropna(axis=1), axis=1)['1'].values[0])
