@@ -527,12 +527,12 @@ if len(read) > int(FPara['minBookFileLenAllowable']):
             continue_ = True
         except NameError:
             continue_ = False
-        
+
         try:
             tsbt_index = int(read[read["0"] == 'Total Sales Before Tax & Srv Chg'].index[0])
         except IndexError:
             tsbt_index = int(read[read["0"] == "Total Sales Before Tax"].index[0])
-            
+
         read.iloc[tsbt_index, 0] = 'Total Sales Before Tax & Srv Charge'
 
         gst_index = int(read[read["0"] == "GST 8%"].index[0])
@@ -616,12 +616,12 @@ if len(read) > int(FPara['minBookFileLenAllowable']):
 
         #raw_date_from_book
         if isLocalBook:
-            
+
             try:
                 read_date = read.iloc[int(read[read["0"].str.contains('X/Shift Report')].index[0])+1,0]
             except IndexError:
                 read_date = read.iloc[int(read[read["0"].str.contains('Z/Closing Report')].index[0])+1,0]
-                
+
             rdfb = read_date.split()
 
         else:
@@ -641,10 +641,10 @@ if len(read) > int(FPara['minBookFileLenAllowable']):
 
                 else:
                     print('不支持跨日期。\n报表日期将以今天日期为标准。')
-                    dfb = dt.datetime.today().strptime(dfb, '%d %b %Y')
+                    dfb = today_dt_format
             else:
                 print('日期格式不符，报表将以今天的日期为标准。')
-                dfb = dt.datetime.today().strptime(dfb, '%d %b %Y')
+                dfb = today_dt_format
 
         if sys.platform.strip().upper() == "IOS":
             #it may not render strftime with Chinese characters correctly on ios app such as Juno
