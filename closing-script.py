@@ -368,7 +368,7 @@ def readCsv(githubUserName, githubRepoName, githubBranchName, githubFileName, gi
 
 #--------本地book分割线----------#
 #如果网站上的数据跟机器上的数据不一样,则需使用机器上的数据关帐
-#前台数据需要定义门店名,即theOutlet
+#机器上的数据需要定义门店名,即theOutlet
 #门店
 #theOutlet = "Thomson"
 
