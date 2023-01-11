@@ -855,7 +855,7 @@ while userInputOne != 3:
                                                                 githubRepoName=githubRepoName,
                                                                 githubBranchName=githubBranchName,
                                                                 githubFileName=pageTwoNameReplaceFileName,
-                                                                csvSep='|',
+                                                                csvSep=',',
                                                                 csvEncoding='utf-8')
 
 

@@ -1,22 +1,22 @@
-物品|item name to show
-RC750|RC750
-RC1000|RC1000
-PaLB3A|PaLB3A纸盒
-M950|M950纸盒
-MS20|MS20
-MS250|MS250
-cornFishHalf|玉米鱼半只盒
-styrofoamCup|泡沫塑料杯
-barleyBottle|薏米水瓶子
-ms1800a|MS1800A
-ms1200a|MS1200A
-msSw8|MS SW8
-ms1600|MS1600
-bento3|3格便当盒
-bento4|4格便当盒
-ms2500|MS2500
-ms3000|MS3000
-glass|辣妹子罐
-wetTowel|湿纸巾
-sw500|500方盒
-ms12b|MS 12B
+物品,item name to show
+RC750,RC750
+RC1000,RC1000
+PaLB3A,PaLB3A纸盒
+M950,M950纸盒
+MS20,MS20
+MS250,MS250
+cornFishHalf,玉米鱼半只盒
+styrofoamCup,泡沫塑料杯
+barleyBottle,薏米水瓶子
+ms1800a,MS1800A
+ms1200a,MS1200A
+msSw8,MS SW8
+ms1600,MS1600
+bento3,3格便当盒
+bento4,4格便当盒
+ms2500,MS2500
+ms3000,MS3000
+glass,辣妹子罐
+wetTowel,湿纸巾
+sw500,500方盒
+ms12b,MS 12B

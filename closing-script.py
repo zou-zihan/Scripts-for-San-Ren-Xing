@@ -432,7 +432,7 @@ functionRuleDf = readCsv(githubFileName=functionalityRuleCsvName,
                          githubRepoName=githubRepoName,
                          githubBranchName=githubBranchName,
                          githubFolderName=githubFolderName,
-                         csvSep='|',
+                         csvSep=',',
                          csvEncoding='utf-8',
                          runLocally=runLocally)
 
@@ -671,7 +671,7 @@ if len(read) > int(FPara['minBookFileLenAllowable']):
                        githubRepoName=FPara['githubRepoName'],
                        githubBranchName=FPara['githubBranchName'],
                        githubFolderName=FPara['githubFolderName'],
-                       csvSep='|',
+                       csvSep=',',
                        csvEncoding='utf-8',
                        runLocally=FPara['runLocally'])
 
@@ -737,7 +737,7 @@ if len(read) > int(FPara['minBookFileLenAllowable']):
                            githubRepoName=FPara['githubRepoName'],
                            githubBranchName=FPara['githubBranchName'],
                            githubFolderName=FPara['githubFolderName'],
-                           csvSep='|',
+                           csvSep=',',
                            csvEncoding='utf-8',
                            runLocally=FPara['runLocally'])
 
@@ -991,7 +991,7 @@ if len(read) > int(FPara['minBookFileLenAllowable']):
                        githubRepoName=FPara['githubRepoName'],
                        githubBranchName=FPara['githubBranchName'],
                        githubFolderName=FPara['githubFolderName'],
-                       csvSep='|',
+                       csvSep=',',
                        csvEncoding='utf-8',
                        runLocally=FPara['runLocally'])
 
@@ -1116,7 +1116,7 @@ if len(read) > int(FPara['minBookFileLenAllowable']):
                            githubRepoName=FPara['githubRepoName'],
                            githubBranchName=FPara['githubBranchName'],
                            githubFolderName=FPara['githubFolderName'],
-                           csvSep='|',
+                           csvSep=',',
                            csvEncoding='utf-8',
                            runLocally=FPara['runLocally'])
 
@@ -1355,7 +1355,7 @@ if len(read) > int(FPara['minBookFileLenAllowable']):
                            githubRepoName=FPara['githubRepoName'],
                            githubBranchName=FPara['githubBranchName'],
                            githubFolderName=FPara['githubFolderName'],
-                           csvSep='|',
+                           csvSep=',',
                            csvEncoding='utf-8',
                            runLocally=FPara['runLocally'])
 
