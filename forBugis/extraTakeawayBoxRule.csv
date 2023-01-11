@@ -1,3 +1,3 @@
-box_value to operate on|operation|value|active status
-styrofoamCup_sale|plus equal|barleyBottle_sale|0
-barleyBottle_sale|zero||0
+box_value to operate on,operation,value,active status
+styrofoamCup_sale,plus equal,barleyBottle_sale,0
+barleyBottle_sale,zero,,0
