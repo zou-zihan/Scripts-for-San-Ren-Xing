@@ -250,14 +250,12 @@ Chinese food name,String Locator,Model to Use,Multiplier,active status
 8人传统盆菜,Traditionaltreasurepotfor8,boxTakeOverName12,1.0,1
 10人鲍鱼盆菜,Treasurepotwithabalonefor10,boxTakeOverName12,1.0,1
 10人鲍鱼盆菜,Treasurepotwithabalonefor10,boxTakeOverName4,2.0,1
-4人鲍鱼盆菜,Treasurepotwithabalonefor4,boxTakeOverName5,1.0,1
-4人鲍鱼盆菜,Treasurepotwithabalonefor4,boxTakeOverName11,2.0,1
-6人鲍鱼盆菜,Treasurepotwithabalonefor6,boxTakeOverName4,2.0,1
+4人鲍鱼盆菜,Treasurepotwithabalonefor4,boxTakeOverName5,1.5,1
+4人鲍鱼盆菜,Treasurepotwithabalonefor4,boxTakeOverName11,1.0,1
+6人鲍鱼盆菜,Treasurepotwithabalonefor6,boxTakeOverName4,1.0,1
 6人鲍鱼盆菜,Treasurepotwithabalonefor6,boxTakeOverName11,1.0,1
 8人鲍鱼盆菜,Treasurepotwithabalonefor8,boxTakeOverName4,1.0,1
 8人鲍鱼盆菜,Treasurepotwithabalonefor8,boxTakeOverName12,1.0,1
-10人鲍鱼盆菜,Treasurepotwithabalonefor10,boxTakeOverName12,1.0,1
-10人鲍鱼盆菜,Treasurepotwithabalonefor10,boxTakeOverName4,1.0,1
 极品花胶炖甘榜鸡,Doubleboiledkampongchickensoupwithpremiumfishmaw,boxTakeOverName4,1.0,1
 红豆沙汤圆,Glutinousredbeanriceballs(min2orders),boxTakeOverName20,1.0,1
 红豆沙汤圆,Freeglutinousredbeanriceball,boxTakeOverName20,1.0,1
