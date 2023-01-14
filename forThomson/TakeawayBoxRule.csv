@@ -246,6 +246,7 @@ Chinese food name,String Locator,Model to Use,Multiplier,active status
 蜜汁烧鸭一只分两盒,Honeyroastedduck(wholeintwoboxes),boxTakeOverName5,1.0,1
 蜜汁烧鸭半只,Honeyroastedduck(half),boxTakeOverName5,1.0,1
 白灼活虾,Steamedliveprawns,boxTakeOverName0,1.0,1
+白灼活虾,Steamedliveprawns,boxTakeOverName1,1.0,1
 白灼活虾,Steamedliveprawns,boxTakeOverName5,1.0,1
 10人传统盆菜,Traditionaltreasurepotfor10,boxTakeOverName12,1.0,1
 4人传统盆菜,Traditionaltreasurepotfor4,boxTakeOverName11,1.0,1
