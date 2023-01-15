@@ -303,7 +303,7 @@ Chinese food name,String Locator,Model to Use,Multiplier,active status
 新年8人套餐A,CNYsetmenufor8A(takeaway),boxTakeOverName10,1.0,1
 新年8人套餐A,CNYsetmenufor8A(takeaway),boxTakeOverName9,1.0,1
 新年8人套餐A,CNYsetmenufor8A(takeaway),boxTakeOverName5,2.0,1
-新年8人套餐A,CNYsetmenufor8A(takeaway),boxTakeOverName15,1.0,1
+新年8人套餐A,CNYsetmenufor8A(takeaway),boxTakeOverName15,2.0,1
 新年8人套餐B,CNYsetmenufor8B(takeaway),boxTakeOverName12,1.0,1
 新年8人套餐B,CNYsetmenufor8B(takeaway),boxTakeOverName4,2.0,1
 新年8人套餐B,CNYsetmenufor8B(takeaway),boxTakeOverName9,2.0,1
