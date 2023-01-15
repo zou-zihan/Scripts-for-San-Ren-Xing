@@ -337,6 +337,7 @@ Chinese food name,String Locator,Model to Use,Multiplier,active status
 新年十全十美套餐,Perfectsetfor10(takeaway),boxTakeOverName16,5.0,1
 新年十全十美套餐,Perfectsetfor10(takeaway),boxTakeOverName5,2.0,1
 新年十全十美套餐,Perfectsetfor10(takeaway),boxTakeOverName10,2.0,1
+新年十全十美套餐,Perfectsetfor10(takeaway),boxTakeOverName15,2.0,1
 白米饭,SteamedWhiteRice,boxTakeOverName20,0.05,1
 四川冰粉,Freesichuanstylejelly,boxTakeOverName4,1.0,1
 四川冰粉,Freesichuanstylejelly,boxTakeOverName20,1.0,1
