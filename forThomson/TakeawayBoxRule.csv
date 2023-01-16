@@ -300,6 +300,7 @@ Chinese food name,String Locator,Model to Use,Multiplier,active status
 新年6人套餐B,CNYsetmenufor6B(takeaway),boxTakeOverName15,2.0,1
 新年8人套餐A,CNYsetmenufor8A(takeaway),boxTakeOverName16,3.0,1
 新年8人套餐A,CNYsetmenufor8A(takeaway),boxTakeOverName3,1.0,1
+新年8人套餐A,CNYsetmenufor8A(takeaway),boxTakeOverName2,1.0,1
 新年8人套餐A,CNYsetmenufor8A(takeaway),boxTakeOverName4,2.0,1
 新年8人套餐A,CNYsetmenufor8A(takeaway),boxTakeOverName12,1.0,1
 新年8人套餐A,CNYsetmenufor8A(takeaway),boxTakeOverName10,1.0,1
