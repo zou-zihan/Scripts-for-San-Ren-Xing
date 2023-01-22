@@ -528,6 +528,20 @@ if len(read) > int(FPara['minBookFileLenAllowable']):
         except NameError:
             continue_ = False
 
+        print("The programme had detected that you are using a book from local machine to do closing")
+        print()
+        print("Important messages to take note:")
+        print("In order to copy all content from HTML correctly you have to use a computer for copy-and-paste action")
+        print("Open the HTML file in a browser, press CTRL A and CTRL C on Windows/Linux")
+        print("CMD A and CMD C on Mac for copy")
+        print()
+        print("DO NOT use mouse to drag and select to copy, this programme will raise errors if you do that.")
+        print()
+        print("Create a new excel file, and CTRL V directly on Windows/Linux for paste")
+        print("If you did pasting on a Mac, you have to Select 'Paste Special' -> 'Paste Special...'")
+        print("Source is 'paste', as is 'Unicode Text', then click 'ok' to paste the texts into an excel file.")
+        print()
+
         try:
             tsbt_index = int(read[read["0"] == 'Total Sales Before Tax & Srv Chg'].index[0])
         except IndexError:
@@ -571,7 +585,12 @@ if len(read) > int(FPara['minBookFileLenAllowable']):
         pay_breakdown['0'] = pay_breakdown['0'].astype(str)
 
         if isLocalBook:
-            drop_index = min(pay_breakdown[pay_breakdown['0'].str.contains('nan')].index)
+            if len(pay_breakdown[pay_breakdown['0'].str.contains('nan')].index) <= 0:
+                drop_index = min(pay_breakdown[pay_breakdown['0'] == ' '].index)
+
+            else:
+                drop_index = min(pay_breakdown[pay_breakdown['0'].str.contains('nan')].index)
+
             pay_breakdown = pay_breakdown.iloc[:drop_index]
 
         dropColumns = []
