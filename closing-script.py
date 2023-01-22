@@ -531,7 +531,7 @@ if len(read) > int(FPara['minBookFileLenAllowable']):
         print("The programme had detected that you are using a book from local machine to do closing")
         print()
         print("Important messages to take note:")
-        print("In order to copy all content from HTML correctly you have to use a computer for copy-and-paste action")
+        print("In order to copy all contents from HTML correctly you have to use a computer for copy-and-paste action")
         print("Open the HTML file in a browser, press CTRL A and CTRL C on Windows/Linux")
         print("CMD A and CMD C on Mac for copy")
         print()
@@ -539,7 +539,7 @@ if len(read) > int(FPara['minBookFileLenAllowable']):
         print()
         print("Create a new excel file, and CTRL V directly on Windows/Linux for paste")
         print("If you did pasting on a Mac, you have to Select 'Paste Special' -> 'Paste Special...'")
-        print("Source is 'paste', as is 'Unicode Text', then click 'ok' to paste the texts into an excel file.")
+        print("'Source:' is 'paste', 'As:' is 'Unicode Text', then click 'ok' to paste the texts into an excel file.")
         print()
 
         try:
