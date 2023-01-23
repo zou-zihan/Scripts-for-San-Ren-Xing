@@ -909,9 +909,6 @@ if len(read) > int(FPara['minBookFileLenAllowable']):
             tabox_concat.sort_values(by='Date', ascending=True, ignore_index=True, inplace=True)
             tabox_msg = "{}的打包盒信息无法存入或无法再次存入数据库".format(take_date)
 
-        print("警告: 因为大年初一关店,大年初二晚上生成报表之前请先在Database手动录入2023年1月22日的各项数据! 否则导致报表生成错误和以后都无法正常使用!")
-        print()
-
         print("计算中...请耐心等待")
         total_sales = float(resetAxis(read[read['0'] == 'Total Sales'].dropna(axis=1), axis=1)['1'].values[0])
         no_of_cover = int(resetAxis(read[read['0'] == 'No. Of Cover'].dropna(axis=1), axis=1)['1'].values[0])
