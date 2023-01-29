@@ -23,7 +23,6 @@ print_statement,key names in value_dict,active_status
 熊猫外卖: ${},FOODPANDA,1
 袋鼠外卖: ${},DELIVEROO,1
 Getz: ${},GETZ,1
-Oddle Me: ${},ODDLE,1
 Grabfood: ${},GRABFOOD,1
 唐人街: ${},TANG,1
 官网订单: ${},FIRSTCOM,1
