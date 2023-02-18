@@ -5,7 +5,7 @@ minBookFileLenAllowable,100
 takeawayBoxInventoryFunction,True
 stockAlertFunction,True
 stockEverydayFunction,False
-cashRecordShowFunction,True
+cashRecordShowFunction,False
 drinkInventoryFunction,True
 drinkRecordSheetName,drink_record
 takeawayBoxRecordSheetName,takeaway_box_record
