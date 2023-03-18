@@ -6,7 +6,7 @@ takeawayBoxInventoryFunction,False
 stockAlertFunction,False
 stockEverydayFunction,False
 cashRecordShowFunction,False
-drinkInventoryFunction,False
+drinkInventoryFunction,True
 drinkRecordSheetName,drink_record
 takeawayBoxRecordSheetName,takeaway_box_record
 salesRecordSheetName,sales_record
