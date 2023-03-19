@@ -2,8 +2,8 @@ function,status
 bookFileName,book.xlsx
 databaseFileName,Thomson Database.xlsx
 minBookFileLenAllowable,100
-takeawayBoxInventoryFunction,False
-stockAlertFunction,False
+takeawayBoxInventoryFunction,True
+stockAlertFunction,True
 stockEverydayFunction,False
 cashRecordShowFunction,False
 drinkInventoryFunction,True
