@@ -717,7 +717,13 @@ while userInputOne != 3:
                                 pageOneDf['进货数量'] = buyInStockColumnsTurnZero
 
                                 lockInStockDfForPageOne = lockInStockDf.copy()
-                                lockInStockDfForPageOne.drop(['23下','23壁橱', '66下', '68下','15下','28下','28壁橱','63壁橱','61壁橱','传菜口','制冰机上',88], axis=1, inplace=True)
+                                
+                                if storeOutlet == "Thomson":
+                                    lockInStockDfForPageOne.drop(['23下','23壁橱', '66下', '68下','15下','28下','28壁橱','63壁橱','61壁橱','传菜口','制冰机上',88], axis=1, inplace=True)
+                                
+                                elif storeOutlet == "Bugis":
+                                    lockInStockDfForPageOne.drop(["26下", "11下", "82壁橱", "83壁橱"], axis=1, inplace=True)
+                                    
                                 lockInStockDfForPageOne.columns = ['物品(单位)', '总数']
 
                                 pageOneCurrentArray = np.repeat(None, len(pageOneDf))
