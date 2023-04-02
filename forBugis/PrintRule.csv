@@ -28,11 +28,9 @@ Grabfood: ${},GRABFOOD,1
 唐人街: ${},TANG,1
 官网订单: ${},FIRSTCOM,1
 ,,1
-促销: ,,0
-同心同行: 今售: {} 累: {},"promo1_count,promo1_tdy",0
-同心同行(A&B): 今售: {} 累: {},"promo11_count,promo11_tdy",0
-包公排骨$4.90: 今售: {} 累: {},"promo9_count,promo9_tdy",0
-,,0
+促销: ,,1
+油浸金目鲈促销: 今售: {} 累: {},"promo9_count,promo9_tdy",1
+,,1
 午市套餐: {}套,LUNCH_COUNT,1
 ,,1
 LAZADA促销活动:,,0
