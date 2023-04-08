@@ -29,8 +29,8 @@ Chinese food name,String Locator,Model to Use,Multiplier,active status
 毛氏红烧肉,Redbraisedporkbelly-platform,boxTakeOverName0,1.0,1
 煎酿苦瓜,Panfriedbittergourdwithmeat,boxTakeOverName0,1.0,1
 手工薄饼,Lazadahandmadepopiahwithshreddedleanmeat(10pcs),boxTakeOverName0,1.0,1
-红焖鳕鱼小,Redbraisedcodfish(small),boxTakeOverName0,1.0,1
-红焖顺壳鱼小,Redbraisedsoonhockfish(small),boxTakeOverName0,1.0,1
+红焖鳕鱼小,Redbraisedcodfish(small),boxTakeOverName11,1.0,1
+红焖顺壳鱼小,Redbraisedsoonhockfish(small),boxTakeOverName11,1.0,1
 流沙包3粒,Goldencustardbuns(3pcs),boxTakeOverName0,1.0,1
 蘑菇包,Steamedtrufflemushroombuns(3pcs),boxTakeOverName0,1.0,1
 北方水饺,Steamedchives&porkdumplings(10pcs),boxTakeOverName0,1.0,1
@@ -150,8 +150,8 @@ Chinese food name,String Locator,Model to Use,Multiplier,active status
 南平焖面小,Braisednanpingnoodle(s)-Campaign,boxTakeOverName11,1.0,1
 南平焖面小,Braisednanpingnoodle(s)-DailySalesPrice,boxTakeOverName11,1.0,1
 南平焖面小,Braisednanpingnoodle(s)-FlashDeal,boxTakeOverName11,1.0,1
-红焖鳕鱼大,Redbraisedcodfish(large),boxTakeOverName11,1.0,1
-红焖顺壳鱼大,Redbraisedsoonhockfish(large),boxTakeOverName11,1.0,1
+红焖鳕鱼大,Redbraisedcodfish(large),boxTakeOverName12,1.0,1
+红焖顺壳鱼大,Redbraisedsoonhockfish(large),boxTakeOverName12,1.0,1
 原味排骨汤面,Handmadenoddleservedwithdouble-boiledporkribsoup,boxTakeOverName11,1.0,1
 原味鸡汤面,Handmadenoodleservedwithchickensoup,boxTakeOverName11,1.0,1
 剑津笋宴,Bambooshootwithvermicelliseafoodthicksoup,boxTakeOverName12,1.0,1
