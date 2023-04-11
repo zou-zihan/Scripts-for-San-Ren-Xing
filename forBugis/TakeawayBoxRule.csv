@@ -45,7 +45,7 @@ Chinese food name,String Locator,Model to Use,Multiplier,active status
 东坡肉,Dongpobraisedporkbellywithminimantou4pcs,boxTakeOverName0,2.0,1
 蒜蓉瓜尖,Stirfriedpumpkinleaveswithgarlic,boxTakeOverName0,1.0,1
 啤酒鸭,Beerbraisedduck,boxTakeOverName0,1.0,1
-炸馒头,Friedmantou(2pcs),boxTakeOverName0,0.5,1
+蒸馒头,Steamedmantou(2pcs),boxTakeOverName0,0.5,1
 叁巴炒啦啦,Stir-friedsambalclams,boxTakeOverName0,1.0,1
 家乡焖年糕中,Hometownbraisedricecake(medium),boxTakeOverName1,1.0,1
 南平炒面中,Nanpingfriednoodles(medium),boxTakeOverName1,1.0,1
@@ -70,7 +70,7 @@ Chinese food name,String Locator,Model to Use,Multiplier,active status
 金瓜奶油虾,Pumpkincreamybutterprawns-platform,boxTakeOverName3,1.0,1
 肉松茄子,Deep-friedeggplantwithporkfloss,boxTakeOverName3,1.0,1
 双味卷,Saltedeggfritters,boxTakeOverName3,1.0,1
-蒸馒头,Steamedmantou(2pcs),boxTakeOverName3,0.5,1
+炸馒头,Friedmantou(2pcs),boxTakeOverName3,0.5,1
 旺梨脆皮蛋,Centuryeggswithpineapple,boxTakeOverName4,1.0,1
 凉拌海蜇,Jellyfishsalad,boxTakeOverName4,1.0,1
 口水鸡,Mouthwateringchicken,boxTakeOverName4,1.0,1
