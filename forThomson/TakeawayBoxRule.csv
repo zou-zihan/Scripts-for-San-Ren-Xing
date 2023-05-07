@@ -29,8 +29,8 @@ Chinese food name,String Locator,Model to Use,Multiplier,active status
 毛氏红烧肉,Redbraisedporkbelly-platform,boxTakeOverName0,1.0,1
 煎酿苦瓜,Panfriedbittergourdwithmeat,boxTakeOverName0,1.0,1
 手工薄饼,Lazadahandmadepopiahwithshreddedleanmeat(10pcs),boxTakeOverName0,1.0,1
-红焖鳕鱼小,Redbraisedcodfish(small),boxTakeOverName0,1.0,1
-红焖顺壳鱼小,Redbraisedsoonhockfish(small),boxTakeOverName0,1.0,1
+红焖鳕鱼小,Redbraisedcodfish(small),boxTakeOverName11,1.0,1
+红焖顺壳鱼小,Redbraisedsoonhockfish(small),boxTakeOverName11,1.0,1
 流沙包3粒,Goldencustardbuns(3pcs),boxTakeOverName0,1.0,1
 蘑菇包,Steamedtrufflemushroombuns(3pcs),boxTakeOverName0,1.0,1
 北方水饺,Steamedchives&porkdumplings(10pcs),boxTakeOverName0,1.0,1
@@ -45,7 +45,7 @@ Chinese food name,String Locator,Model to Use,Multiplier,active status
 东坡肉,Dongpobraisedporkbellywithminimantou4pcs,boxTakeOverName0,2.0,1
 蒜蓉瓜尖,Stirfriedpumpkinleaveswithgarlic,boxTakeOverName0,1.0,1
 啤酒鸭,Beerbraisedduck,boxTakeOverName0,1.0,1
-炸馒头,Friedmantou(2pcs),boxTakeOverName0,0.5,1
+蒸馒头,Steamedmantou(2pcs),boxTakeOverName0,0.5,1
 叁巴炒啦啦,Stir-friedsambalclams,boxTakeOverName0,1.0,1
 家乡焖年糕中,Hometownbraisedricecake(medium),boxTakeOverName1,1.0,1
 南平炒面中,Nanpingfriednoodles(medium),boxTakeOverName1,1.0,1
@@ -70,7 +70,7 @@ Chinese food name,String Locator,Model to Use,Multiplier,active status
 金瓜奶油虾,Pumpkincreamybutterprawns-platform,boxTakeOverName3,1.0,1
 肉松茄子,Deep-friedeggplantwithporkfloss,boxTakeOverName3,1.0,1
 双味卷,Saltedeggfritters,boxTakeOverName3,1.0,1
-蒸馒头,Steamedmantou(2pcs),boxTakeOverName3,0.5,1
+炸馒头,Friedmantou(2pcs),boxTakeOverName3,0.5,1
 旺梨脆皮蛋,Centuryeggswithpineapple,boxTakeOverName4,1.0,1
 凉拌海蜇,Jellyfishsalad,boxTakeOverName4,1.0,1
 口水鸡,Mouthwateringchicken,boxTakeOverName4,1.0,1
@@ -150,8 +150,8 @@ Chinese food name,String Locator,Model to Use,Multiplier,active status
 南平焖面小,Braisednanpingnoodle(s)-Campaign,boxTakeOverName11,1.0,1
 南平焖面小,Braisednanpingnoodle(s)-DailySalesPrice,boxTakeOverName11,1.0,1
 南平焖面小,Braisednanpingnoodle(s)-FlashDeal,boxTakeOverName11,1.0,1
-红焖鳕鱼大,Redbraisedcodfish(large),boxTakeOverName11,1.0,1
-红焖顺壳鱼大,Redbraisedsoonhockfish(large),boxTakeOverName11,1.0,1
+红焖鳕鱼大,Redbraisedcodfish(large),boxTakeOverName12,1.0,1
+红焖顺壳鱼大,Redbraisedsoonhockfish(large),boxTakeOverName12,1.0,1
 原味排骨汤面,Handmadenoddleservedwithdouble-boiledporkribsoup,boxTakeOverName11,1.0,1
 原味鸡汤面,Handmadenoodleservedwithchickensoup,boxTakeOverName11,1.0,1
 剑津笋宴,Bambooshootwithvermicelliseafoodthicksoup,boxTakeOverName12,1.0,1
@@ -349,3 +349,4 @@ Chinese food name,String Locator,Model to Use,Multiplier,active status
 四川冰粉,Sichuanstylejelly,boxTakeOverName4,1.0,1
 金猪报喜半只,CrispyRoastedPig(Half),boxTakeOverName10,0.8,1
 金猪报喜一只,CrispyRoastedPig(Whole),boxTakeOverName9,0.8,1
+辣椒酱和腰果一套,Freesetofchiliandcashew,boxTakeOverName17,2.0,1
