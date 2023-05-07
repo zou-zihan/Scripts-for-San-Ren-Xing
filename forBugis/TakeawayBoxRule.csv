@@ -349,3 +349,4 @@ Chinese food name,String Locator,Model to Use,Multiplier,active status
 四川冰粉,Sichuanstylejelly,boxTakeOverName4,1.0,1
 金猪报喜半只,CrispyRoastedPig(Half),boxTakeOverName10,0.8,1
 金猪报喜一只,CrispyRoastedPig(Whole),boxTakeOverName9,0.8,1
+辣椒酱和腰果一套,Freesetofchiliandcashew,boxTakeOverName17,2.0,1
