@@ -2,8 +2,8 @@ function,status
 bookFileName,book.xlsx
 databaseFileName,Bugis Database.xlsx
 minBookFileLenAllowable,100
-takeawayBoxInventoryFunction,True
-stockAlertFunction,True
+takeawayBoxInventoryFunction,False
+stockAlertFunction,False
 stockEverydayFunction,False
 cashRecordShowFunction,False
 drinkInventoryFunction,True
