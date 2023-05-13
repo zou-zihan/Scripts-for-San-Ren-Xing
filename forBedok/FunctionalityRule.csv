@@ -1,6 +1,6 @@
 function,status
 bookFileName,book.xlsx
-databaseFileName,Bugis Database.xlsx
+databaseFileName,Bedok Database.xlsx
 minBookFileLenAllowable,100
 takeawayBoxInventoryFunction,False
 stockAlertFunction,False
