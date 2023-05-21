@@ -370,3 +370,15 @@ Chinese food name,String Locator,Model to Use,Multiplier,active status
 叁巴炒饭(小),Sambalfriedrice(s),boxTakeOverName0,1.0,1
 叁巴炒饭(中),Sambalfriedrice(m),boxTakeOverName1,1.0,1
 叁巴炒饭(大),Sambalfriedrice(l),boxTakeOverName15,1.0,1
+外婆酸甜肉小,Ahposweetsourpork(s),boxTakeOverName0,1.0,1
+外婆酸甜肉大,Ahposweetsourpork(l),boxTakeOverName1,1.0,1
+包公排骨大,Baogongporkribs(l),boxTakeOverName1,1.0,1
+包公排骨小,Baogongporkribs(s),boxTakeOverName0,1.0,1
+金沙鸡中翅小,Saltedeggyolkchicken(deboned)(s),boxTakeOverName3,1.0,1
+金沙鸡中翅大,Saltedeggyolkchicken(deboned)(l),boxTakeOverName2,1.0,1
+蒜蓉粉丝开边虾小,Steamedgarlicprawnswithvermicelli(s),boxTakeOverName10,1.0,1
+蒜蓉粉丝开边虾大,Steamedgarlicprawnswithvermicelli(l),boxTakeOverName10,1.0,1
+金瓜奶油虾小,Pumpkincreamybutterprawns(s),boxTakeOverName3,1.0,1
+金瓜奶油虾小,Pumpkincreamybutterprawns(s),boxTakeOverName5,1.0,1
+金瓜奶油虾大,Pumpkincreamybutterprawns(l),boxTakeOverName2,1.0,1
+金瓜奶油虾大,Pumpkincreamybutterprawns(l),boxTakeOverName5,1.0,1
