@@ -382,3 +382,5 @@ Chinese food name,String Locator,Model to Use,Multiplier,active status
 金瓜奶油虾小,Pumpkincreamybutterprawns(s),boxTakeOverName5,1.0,1
 金瓜奶油虾大,Pumpkincreamybutterprawns(l),boxTakeOverName2,1.0,1
 金瓜奶油虾大,Pumpkincreamybutterprawns(l),boxTakeOverName5,1.0,1
+蒜蓉西兰花小,Stir-friedbroccoliwithgarlic(s),boxTakeOverName0,1.0,1
+蒜蓉西兰花大,Stir-friedbroccoliwithgarlic(l),boxTakeOverName1,1.0,1
