@@ -103,4 +103,25 @@ for index in range(len(df)):
                               bonus_or_penalty = df.iloc[index, 6])
     
 df["Annual Leave"] = arr
+
+#form_url = ""
+
+df1 = pd.read_html(form_url, encoding="utf-8")[0]
+df1.drop("Unnamed: 0", axis=1, inplace=True)
+df1.columns = df1.iloc[0,:].values.tolist()
+df1.drop([0,1], axis=0, inplace=True)
+df1.reset_index(inplace=True)
+df1.drop("index", axis=1, inplace=True)
+
+df1["Date of Birth 出生日期"] = pd.to_datetime(df1["Date of Birth 出生日期"], format="%m/%d/%Y")
+df1.sort_values(by="Timestamp", ascending=False, inplace=True)
+
+print("Annual Leave Calculator 年假计算器")
 prtdf(df)
+
+print()
+print()
+print()
+
+print("Employee Information 员工资料")
+prtdf(df1)
