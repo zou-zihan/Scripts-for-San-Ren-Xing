@@ -32,7 +32,6 @@ Grabfood: ${},GRABFOOD,1
 ,,1
 Trueblue折扣: ${} ({}张),"TRUEBLUE_SUM,TRUEBLUE_COUNT",1
 折扣: ${},DISCOUNT_TOTAL,1
-大厦礼券: ${} ({}张),"MMALL_SUM,MMALL_COUNT",1
 大厦E-Voucher: ${} ({}张),"MMALLE_SUM,MMALLE_COUNT",1
 三人行礼券: ${} ({}张),"SANRENXING_SUM,SANRENXING_COUNT",1
 三人行现金礼券: $0 (0张),,1
