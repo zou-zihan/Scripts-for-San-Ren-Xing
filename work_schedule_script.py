@@ -797,7 +797,7 @@ else:
                                 end_date = None
                 
                 elif userInputTwo == 2:
-                    start_date = shift_datebase["DATE"].min()
+                    start_date = shift_database["DATE"].min()
                     end_date = shift_database["DATE"].max()
                     
                 
