@@ -807,13 +807,15 @@ else:
                                                              end_date = pd.to_datetime(end_date),
                                                              employee_info_df=employee_info)
 
+                    payslip_time_df.reset_index(inplace=True)
+                    payslip_time_df.drop("index", axis=1, inplace=True)
+                    
                     statement_dict = payslip_time_statement(concat_df = payslip_time_df,
                                                             employee_info_df = employee_info,
                                                             start_date = pd.to_datetime(start_date),
                                                             end_date = pd.to_datetime(end_date) )
 
-                    payslip_time_df.reset_index(inplace=True)
-                    payslip_time_df.drop("index", axis=1, inplace=True)
+                    
                     prtdf(payslip_time_df)
 
                     print()
