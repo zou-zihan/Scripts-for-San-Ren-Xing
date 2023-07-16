@@ -2687,7 +2687,7 @@ def backup_script(script_backup_filename, script):
         fernet_key = keyfile.read()
 
     f_handler = Fernet(fernet_key)
-    encrypted_script = f.encrypt(script.encode())
+    encrypted_script = f_handler.encrypt(script.encode())
     
     with open(script_backup_filename, "wb") as sfile:
         sfile.write(encrypted_script)    
