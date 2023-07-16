@@ -23,7 +23,7 @@ from tqdm import tqdm
 '''
 import requests
 import urllib
-from cryptocode.fernet import Fernet
+from cryptography.fernet import Fernet
 
 def on_internet():
     url = "https://www.google.com.sg/"
