@@ -2802,7 +2802,7 @@ def night_audit_main(on_duty, database_url, db_setting_url, serialized_rule_file
                 db_writables = db_write(write_drink_db, tabox_write_db, write_finance_db, write_promo_db)
                 pbar.update(5)
 
-                take_databases, send_dict = pending_upload_db(take_databases, k_dict, box_value, drink_dict, value_dict, db_writables, date_dict, drink_num, promo_num, get_columns, backup_foldername)
+                take_databases, send_dict = pending_upload_db(take_databases, k_dict, box_value, drink_dict, value_dict, db_writables, date_dict, drink_num, promo_num, get_columns)
                 pbar.update(5)
 
                 upload_db(database_url, take_databases, k_dict, fernet_key, google_auth, box_num, drink_num, wifi, outlet, backup_foldername)
