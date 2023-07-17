@@ -2309,7 +2309,7 @@ def parse_sending(on_duty, google_auth, outlet, send_dict, drink_message_string,
             rcv_df = pd.read_html(rcv_url, encoding="utf-8")[2]
             parseGoogleHTMLSheet(rcv_df)
         except:
-            local_database_filename = k_dict["local_database_filename"]
+            local_db_filename = k_dict["local_database_filename"]
             rcv_df = pd.read_excel("{}/{}/{}".format(os.getcwd(), backup_foldername, local_db_filename), sheet_name=rcv_sheetname)
 
 
