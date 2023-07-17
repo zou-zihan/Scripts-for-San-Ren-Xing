@@ -434,7 +434,7 @@ if NOW  < STOP_TIME:
     print("This programme will stop service from 1 August 2023, as a new version had been roll out, ask Zihan to find out more!")
     print("此程序将于2023年8月1日停止服务，新的关帐程序已发布，欲知详情，联系子韩!")
     print()
-    print("按任意键继续运行")
+    print("按回车键继续运行")
     input(":")
     functionRuleDf = readCsv(githubFileName=functionalityRuleCsvName,
                              githubUserName=githubUserName,
