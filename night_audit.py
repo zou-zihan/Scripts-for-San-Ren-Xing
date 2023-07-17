@@ -74,8 +74,8 @@ if not on_net:
         else:
             print("无效命令")
 
-    except:
-        print("无效命令")
+    except Exception as e:
+        print(e)
 
 else:
     wifi = True
