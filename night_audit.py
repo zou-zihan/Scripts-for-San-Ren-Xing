@@ -23,6 +23,7 @@ from tqdm import tqdm
 '''
 import requests
 import urllib
+import os
 from cryptography.fernet import Fernet
 
 def on_internet():
@@ -38,6 +39,7 @@ githubUserName = ""
 githubRepoName = ""
 githubBranchName = "main"
 script_backup_filename = ""
+backup_foldername = ""
 
 on_net = on_internet()
 
@@ -59,7 +61,7 @@ if not on_net:
             with open("fernet_key.txt", "rb") as keyfile:
                 fernet_key = keyfile.read()
             
-            with open(script_backup_filename, "rb") as sfile:
+            with open("{}/{}/{}".format(os.getcwd(), backup_foldername, script_backup_filename), "rb") as sfile:
                 script = sfile.read()
             
             fernet_handler = Fernet(fernet_key)
@@ -229,7 +231,7 @@ def option_limit(options_list, user_input):
                 while user_input in range(len(options_list)):
                     return user_input
 
-def get_dfs(google_auth, db_setting_url, service_filename, constants_sheetname, serialized_rule_filename, outlet, fernet_key, wifi):
+def get_dfs(google_auth, db_setting_url, service_filename, constants_sheetname, serialized_rule_filename, outlet, fernet_key, wifi backup_foldername):
 
     if wifi:
         try:
@@ -307,7 +309,7 @@ def get_dfs(google_auth, db_setting_url, service_filename, constants_sheetname, 
                            }
 
             backup_list = [k_df, rule_df_dict]
-            with open(serialized_rule_filename, "wb") as f:
+            with open("{}/{}/{}".format(os.getcwd(), backup_foldername, serialized_rule_filename), "wb") as f:
                 pickle.dump(backup_list, f)
 
         except Exception as e:
@@ -316,7 +318,7 @@ def get_dfs(google_auth, db_setting_url, service_filename, constants_sheetname, 
             print()
             print(e)
 
-            with open(serialized_rule_filename, "rb") as f:
+            with open("{}/{}/{}".format(os.getcwd(), backup_foldername, serialized_rule_filename), "rb") as f:
                 backup_list = pickle.load(f)
 
             k_df = backup_list[0]
@@ -331,7 +333,7 @@ def get_dfs(google_auth, db_setting_url, service_filename, constants_sheetname, 
             print("已采用本地备份规则文件数据")
 
     else:
-        with open(serialized_rule_filename, "rb") as f:
+        with open("{}/{}/{}".format(os.getcwd(), backup_foldername, serialized_rule_filename), "rb") as f:
             backup_list = pickle.load(f) #a list of two objects, 0 is k_df, 1 is rule_df_dict
 
         k_df = backup_list[0]
@@ -610,7 +612,7 @@ def get_db_columns(k_dict, drink_num, box_num, promo_num):
 
     return get_columns
 
-def retrieve_database(k_dict, google_auth, fernet_key, wifi, database_url):
+def retrieve_database(k_dict, google_auth, fernet_key, wifi, database_url, backup_foldername):
 
     local_db_filename = k_dict["local_database_filename"]
 
@@ -636,8 +638,8 @@ def retrieve_database(k_dict, google_auth, fernet_key, wifi, database_url):
                 db_df = online_db_sheet[db_index].get_as_df()
                 online_databases.update({ "online_{}".format(name) : db_df })
 
-                if os.path.exists("{}/{}".format(os.getcwd(), local_db_filename)):
-                    local_db_df = pd.read_excel("{}/{}".format(os.getcwd(), local_db_filename), sheet_name=name)
+                if os.path.exists("{}/{}/{}".format(os.getcwd(), backup_foldername, local_db_filename)):
+                    local_db_df = pd.read_excel("{}/{}/{}".format(os.getcwd(), backup_foldername, local_db_filename), sheet_name=name)
                     local_databases.update({ "local_{}".format(name) : local_db_df })
 
             if len(local_databases) == 0:
@@ -668,7 +670,7 @@ def retrieve_database(k_dict, google_auth, fernet_key, wifi, database_url):
             print(e)
             take_databases = {}
             for name in sheet_names:
-                local_db_df = pd.read_excel("{}/{}".format(os.getcwd(), local_db_filename), sheet_name=name)
+                local_db_df = pd.read_excel("{}/{}/{}".format(os.getcwd(), backup_foldername, local_db_filename), sheet_name=name)
                 take_databases.update({ name : local_db_df })
 
             print("已采用本地备份的数据库信息")
@@ -676,7 +678,7 @@ def retrieve_database(k_dict, google_auth, fernet_key, wifi, database_url):
     else:
         take_databases = {}
         for name in sheet_names:
-            local_db_df = pd.read_excel("{}/{}".format(os.getcwd(), local_db_filename), sheet_name=name)
+            local_db_df = pd.read_excel("{}/{}/{}".format(os.getcwd(), backup_foldername, local_db_filename), sheet_name=name)
             take_databases.update({ name : local_db_df })
 
     return take_databases
@@ -772,7 +774,7 @@ def box_now(tb_data, box_name, box_value, yesterday):
 
     return value
 
-def parse_tabox(k_dict, google_auth, fernet_key, box_num, rule_df_dict, take_databases, book_dict, date_dict, wifi):
+def parse_tabox(k_dict, google_auth, fernet_key, box_num, rule_df_dict, take_databases, book_dict, date_dict, wifi, backup_foldername):
     read_ = book_dict["read_"]
     dfb = date_dict["dfb"]
     yesterday = date_dict["yesterday"]
@@ -828,10 +830,10 @@ def parse_tabox(k_dict, google_auth, fernet_key, box_num, rule_df_dict, take_dat
                 print(e)
                 print()
 
-                local_database_filename = str(k_dict["local_database_filename"])
+                local_db_filename = str(k_dict["local_database_filename"])
                 tabox_sheet_name = str(k_dict["takeaway_box_sheetname"])
 
-                tabox_df = pd.read_excel(local_database_filename, sheet_name=tabox_sheet_name)
+                tabox_df = pd.read_excel("{}/{}/{}".format(os.getcwd(), backup_foldername, local_db_filename), sheet_name=tabox_sheet_name)
 
                 print("已采用本地备份的打包盒出入库数据。")
                 print("注意确保本地备份的打包盒名字和数据库里的是一模一样的，当天所有出入库的数据是正确的。")
@@ -839,10 +841,10 @@ def parse_tabox(k_dict, google_auth, fernet_key, box_num, rule_df_dict, take_dat
                 print("如果无需更改任何数据, 按任意键继续运行程序")
                 input(":")
     else:
-        local_database_filename = str(k_dict["local_database_filename"])
+        local_db_filename = str(k_dict["local_database_filename"])
         tabox_sheet_name = str(k_dict["takeaway_box_sheetname"])
 
-        tabox_df = pd.read_excel(local_database_filename, sheet_name=tabox_sheet_name)
+        tabox_df = pd.read_excel("{}/{}/{}".format(os.getcwd(), backup_foldername, local_db_filename), sheet_name=tabox_sheet_name)
 
         print()
         print("无网络连接，已采用本地备份的打包盒出入库数据")
@@ -1549,7 +1551,7 @@ def drink_remarks(drink_out, drink_inv_function):
     else:
         return None
 
-def parse_drink_stock(k_dict, fernet_key, google_auth, drink_num, value_dict, take_databases, date_dict, wifi):
+def parse_drink_stock(k_dict, fernet_key, google_auth, drink_num, value_dict, take_databases, date_dict, wifi, backup_foldername):
     dfb = date_dict["dfb"]
     yesterday = date_dict["yesterday"]
 
@@ -1601,10 +1603,10 @@ def parse_drink_stock(k_dict, fernet_key, google_auth, drink_num, value_dict, ta
                 print("网络仅读模式获取酒水出入库数据失败, 错误描述如下: ")
                 print(e)
                 print()
-                local_database_filename = str(k_dict["local_database_filename"])
+                local_db_filename = str(k_dict["local_database_filename"])
                 drink_stock_sheetname = str(k_dict["drink_stock_sheetname"])
 
-                drink_df = pd.read_excel(local_database_filename, sheet_name=drink_stock_sheetname)
+                drink_df = pd.read_excel("{}/{}/{}".format(os.getcwd(), backup_foldername, local_db_filename), sheet_name=drink_stock_sheetname)
 
                 print("已采用本地备份的酒水出入库数据。")
                 print("注意确保本地备份的酒水名字和数据库里的是一模一样的，当天所有出入库的数据是正确的。")
@@ -1612,10 +1614,10 @@ def parse_drink_stock(k_dict, fernet_key, google_auth, drink_num, value_dict, ta
                 print("如果无需更改任何数据, 按任意键继续运行程序")
                 input(":")
     else:
-        local_database_filename = str(k_dict["local_database_filename"])
+        local_db_filename = str(k_dict["local_database_filename"])
         drink_stock_sheetname = str(k_dict["drink_stock_sheetname"])
 
-        drink_df = pd.read_excel(local_database_filename, sheet_name=drink_stock_sheetname)
+        drink_df = pd.read_excel("{}/{}/{}".format(os.getcwd(), backup_foldername, local_db_filename), sheet_name=drink_stock_sheetname)
 
         print("无网络连接，已采用本地备份的酒水出入库数据")
         print("注意确保本地备份的酒水名字和数据库里的是一模一样的，当天所有出入库的数据是正确的。")
@@ -1947,7 +1949,7 @@ def pending_upload_db(take_databases, k_dict, box_value, drink_dict, value_dict,
 
     return take_databases, send_dict
 
-def upload_db(database_url, take_databases, k_dict, fernet_key, google_auth, box_num, drink_num, wifi, outlet):
+def upload_db(database_url, take_databases, k_dict, fernet_key, google_auth, box_num, drink_num, wifi, outlet, backup_foldername):
     #print("正在上传数据...")
 
     auto_hour = 20
@@ -1956,7 +1958,7 @@ def upload_db(database_url, take_databases, k_dict, fernet_key, google_auth, box
     NOW = dt.datetime.now()
     AUTO_TIME = dt.datetime(NOW.year, NOW.month, NOW.day, auto_hour, auto_min)
 
-    local_database_filename = str(k_dict["local_database_filename"])
+    local_db_filename = str(k_dict["local_database_filename"])
     online_database_url = database_url
     online_database_url = fernet_decrypt(online_database_url, fernet_key)
 
@@ -2161,8 +2163,8 @@ def upload_db(database_url, take_databases, k_dict, fernet_key, google_auth, box
             print()
 
     else:
-        tabox_df = pd.read_excel(local_database_filename, sheet_name=takeaway_box_sheetname)
-        drink_df = pd.read_excel(local_database_filename, sheet_name=drink_stock_sheetname)
+        tabox_df = pd.read_excel("{}/{}/{}".format(os.getcwd(), backup_foldername, local_db_filename), sheet_name=takeaway_box_sheetname)
+        drink_df = pd.read_excel("{}/{}/{}".format(os.getcwd(), backup_foldername, local_db_filename), sheet_name=drink_stock_sheetname)
 
         tabox_names = []
         for index in range(box_num):
@@ -2192,9 +2194,9 @@ def upload_db(database_url, take_databases, k_dict, fernet_key, google_auth, box
                 rcv_df = pd.read_html(rcv_url, encoding="utf-8")[2]
                 parseGoogleHTMLSheet(rcv_df)
             except:
-                rcv_df = pd.read_excel(local_database_filename, sheet_name=receivers_sheetname)
+                rcv_df = pd.read_excel("{}/{}/{}".format(os.getcwd(), backup_foldername, local_db_filename), sheet_name=receivers_sheetname)
     else:
-        rcv_df = pd.read_excel(local_database_filename, sheet_name=receivers_sheetname)
+        rcv_df = pd.read_excel("{}/{}/{}".format(os.getcwd(), backup_foldername, local_db_filename), sheet_name=receivers_sheetname)
 
     #online database sheet
     if wifi:
@@ -2231,13 +2233,13 @@ def upload_db(database_url, take_databases, k_dict, fernet_key, google_auth, box
             print("通过机器人从网络获取排班数据失败! 错误描述如下: ")
             print(e)
             print()
-            shift_db = pd.read_excel(local_database_filename, sheet_name=shift_db_sheetname)
+            shift_db = pd.read_excel("{}/{}/{}".format(os.getcwd(), backup_foldername, local_db_filename), sheet_name=shift_db_sheetname)
             print("已采用本地备份的排班数据")
     else:
-        shift_db = pd.read_excel(local_database_filename, sheet_name=shift_db_sheetname)
+        shift_db = pd.read_excel("{}/{}/{}".format(os.getcwd(), backup_foldername, local_db_filename), sheet_name=shift_db_sheetname)
 
 
-    with pd.ExcelWriter(local_database_filename) as writer:
+    with pd.ExcelWriter("{}/{}/{}".format(os.getcwd(), backup_foldername, local_db_filename)) as writer:
         for name in sheet_names:
             df = take_databases[name]
             df["DATE"] = pd.to_datetime(df["DATE"])
@@ -2308,7 +2310,7 @@ def parse_sending(on_duty, google_auth, outlet, send_dict, drink_message_string,
             parseGoogleHTMLSheet(rcv_df)
         except:
             local_database_filename = k_dict["local_database_filename"]
-            rcv_df = pd.read_excel(local_database_filename, sheet_name=rcv_sheetname)
+            rcv_df = pd.read_excel("{}/{}/{}".format(os.getcwd(), backup_foldername, local_db_filename), sheet_name=rcv_sheetname)
 
 
     rcv_dict = {}
@@ -2473,7 +2475,7 @@ def parse_sending(on_duty, google_auth, outlet, send_dict, drink_message_string,
     else:
         pass
 
-def parse_display_df(value_dict, rule_df_dict, k_dict, google_auth, db_writables, fernet_key, take_databases, database_url):
+def parse_display_df(value_dict, rule_df_dict, k_dict, google_auth, db_writables, fernet_key, take_databases, database_url, backup_foldername):
     tabox_inv_function = eval(k_dict["takeaway_box_inventory"].strip().capitalize())
     drink_inv_function = eval(k_dict["drink_inventory"].strip().capitalize())
 
@@ -2490,7 +2492,7 @@ def parse_display_df(value_dict, rule_df_dict, k_dict, google_auth, db_writables
     tabox_sheetname = k_dict["takeaway_box_sheetname"]
     drink_stock_sheetname = k_dict["drink_stock_sheetname"]
 
-    local_database_filename = k_dict["local_database_filename"]
+    local_db_filename = k_dict["local_database_filename"]
 
     database_url = fernet_decrypt(database_url, fernet_key)
 
@@ -2563,7 +2565,7 @@ def parse_display_df(value_dict, rule_df_dict, k_dict, google_auth, db_writables
                     tabox_df = pd.read_html(tabox_url, encoding="utf-8")[0]
                     parseGoogleHTMLSheet(tabox_df)
                 except:
-                    tabox_df = pd.read_excel(local_database_filename, sheet_name=tabox_sheetname)
+                    tabox_df = pd.read_excel("{}/{}/{}".format(os.getcwd(), backup_foldername, local_db_filename), sheet_name=tabox_sheetname)
 
 
             try:
@@ -2572,7 +2574,7 @@ def parse_display_df(value_dict, rule_df_dict, k_dict, google_auth, db_writables
                 tabox_db = tabox_db_sheet[tabox_db_sheetname_index].get_as_df()
 
             except:
-                tabox_db = pd.read_excel(local_database_filename, sheet_name = takeaway_box_database_sheetname)
+                tabox_db = pd.read_excel("{}/{}/{}".format(os.getcwd(), backup_foldername, local_db_filename), sheet_name = takeaway_box_database_sheetname)
 
             tabox_db["DATE"] = pd.to_datetime(tabox_db["DATE"])
             tabox_max_date = tabox_db["DATE"].max()
@@ -2624,14 +2626,14 @@ def parse_display_df(value_dict, rule_df_dict, k_dict, google_auth, db_writables
                     drink_df = pd.read_html(drink_url, encoding="utf-8")[1]
                     parseGoogleHTMLSheet(drink_df)
                 except:
-                    drink_df = pd.read_excel(local_database_filename, sheet_name=drink_stock_sheetname)
+                    drink_df = pd.read_excel("{}/{}/{}".format(os.getcwd(), backup_foldername, local_db_filename), sheet_name=drink_stock_sheetname)
 
             try:
                 drink_db_sheet = google_auth.open_by_url(database_url)
                 drink_db_sheetname_index = drink_db_sheet.worksheet(property="title", value=drink_db_sheetname).index
                 drink_db = drink_db_sheet[drink_db_sheetname_index].get_as_df()
             except:
-                drink_db = pd.read_excel(local_database_filename, sheet_name=drink_db_sheetname)
+                drink_db = pd.read_excel("{}/{}/{}".format(os.getcwd(), backup_foldername, local_db_filename), sheet_name=drink_db_sheetname)
 
             drink_db["DATE"] = pd.to_datetime(drink_db["DATE"])
             drink_db_max_date = drink_db["DATE"].max()
@@ -2682,17 +2684,17 @@ def prtdf(df):
                            'display.colheader_justify', 'center'):
         return display(df)
 
-def backup_script(script_backup_filename, script):
+def backup_script(script_backup_filename, script, backup_foldername):
     with open("fernet_key.txt", "rb") as keyfile:
         fernet_key = keyfile.read()
 
     f_handler = Fernet(fernet_key)
     encrypted_script = f_handler.encrypt(script.encode())
     
-    with open(script_backup_filename, "wb") as sfile:
+    with open("{}/{}/{}".format(os.getcwd(), backup_foldername, script_backup_filename), "wb") as sfile:
         sfile.write(encrypted_script)    
     
-def night_audit_main(on_duty, database_url, db_setting_url, serialized_rule_filename, service_filename, constants_sheetname, google_auth, box_num, drink_num, promo_num, lun_sales, lun_gc, tb_sales, tb_gc, lun_fwc, lun_kwc, tb_fwc, tb_kwc, night_fwc, night_kwc, script_backup_filename, script, wifi):
+def night_audit_main(on_duty, database_url, db_setting_url, serialized_rule_filename, service_filename, constants_sheetname, google_auth, box_num, drink_num, promo_num, lun_sales, lun_gc, tb_sales, tb_gc, lun_fwc, lun_kwc, tb_fwc, tb_kwc, night_fwc, night_kwc, script_backup_filename, script, wifi, backup_foldername):
     on_duty = on_duty
     database_url = database_url
     db_setting_url = db_setting_url
@@ -2716,13 +2718,14 @@ def night_audit_main(on_duty, database_url, db_setting_url, serialized_rule_file
     script_backup_filename = script_backup_filename
     script = script
     wifi = wifi
+    backup_foldername = backup_foldername
 
     fernet_key = get_key()
 
     if fernet_key == 0:
         print("安全密钥错误! ")
     else:
-        backup_script(script_backup_filename, script)
+        backup_script(script_backup_filename, script, backup_foldername)
 
         if wifi:
             print("云端模式, 程序运行中, 请耐心等待...")
@@ -2730,7 +2733,7 @@ def night_audit_main(on_duty, database_url, db_setting_url, serialized_rule_file
             print("离线模式, 程序运行中, 请耐心等待...")
         with tqdm(total=100) as pbar:
             outlet = get_outlet()
-            k_dict, rule_df_dict = get_dfs(google_auth, db_setting_url, service_filename, constants_sheetname, serialized_rule_filename, outlet, fernet_key, wifi)
+            k_dict, rule_df_dict = get_dfs(google_auth, db_setting_url, service_filename, constants_sheetname, serialized_rule_filename, outlet, fernet_key, wifi, backup_foldername)
             book_dict = get_book_dfs(k_dict)
 
             if len(book_dict) == 0:
@@ -2742,13 +2745,13 @@ def night_audit_main(on_duty, database_url, db_setting_url, serialized_rule_file
                 get_columns = get_db_columns(k_dict, drink_num, box_num, promo_num)
                 pbar.update(3)
 
-                take_databases = retrieve_database(k_dict, google_auth, fernet_key, wifi, database_url)
+                take_databases = retrieve_database(k_dict, google_auth, fernet_key, wifi, database_url, backup_foldername)
                 pbar.update(3)
 
                 take_databases = update_columns(take_databases, get_columns, k_dict)
                 pbar.update(3)
 
-                tabox_write_db, box_value, box_unparsed_alert = parse_tabox(k_dict, google_auth, fernet_key, box_num, rule_df_dict, take_databases, book_dict, date_dict, wifi)
+                tabox_write_db, box_value, box_unparsed_alert = parse_tabox(k_dict, google_auth, fernet_key, box_num, rule_df_dict, take_databases, book_dict, date_dict, wifi, backup_foldername)
                 pbar.update(10)
 
                 box_stock_alert = eval(str(k_dict["box_stock_alert"]).strip().capitalize())
@@ -2768,7 +2771,7 @@ def night_audit_main(on_duty, database_url, db_setting_url, serialized_rule_file
                 value_dict, write_finance_db, write_promo_db = parse_value_dict(promo_num, lun_sales, lun_gc, tb_sales, tb_gc, lun_fwc, lun_kwc, tb_fwc, tb_kwc, night_fwc, night_kwc, rule_df_dict, take_databases, date_dict, book_dict, k_dict)
                 pbar.update(4)
 
-                write_drink_db, drink_dict, drink_unparsed_alert = parse_drink_stock(k_dict, fernet_key, google_auth, drink_num, value_dict, take_databases, date_dict, wifi)
+                write_drink_db, drink_dict, drink_unparsed_alert = parse_drink_stock(k_dict, fernet_key, google_auth, drink_num, value_dict, take_databases, date_dict, wifi, backup_foldername)
                 pbar.update(4)
 
                 drink_stock_alert = eval(str(k_dict["drink_stock_alert"]).strip().capitalize())
@@ -2799,16 +2802,16 @@ def night_audit_main(on_duty, database_url, db_setting_url, serialized_rule_file
                 db_writables = db_write(write_drink_db, tabox_write_db, write_finance_db, write_promo_db)
                 pbar.update(5)
 
-                take_databases, send_dict = pending_upload_db(take_databases, k_dict, box_value, drink_dict, value_dict, db_writables, date_dict, drink_num, promo_num, get_columns)
+                take_databases, send_dict = pending_upload_db(take_databases, k_dict, box_value, drink_dict, value_dict, db_writables, date_dict, drink_num, promo_num, get_columns, backup_foldername)
                 pbar.update(5)
 
-                upload_db(database_url, take_databases, k_dict, fernet_key, google_auth, box_num, drink_num, wifi, outlet)
+                upload_db(database_url, take_databases, k_dict, fernet_key, google_auth, box_num, drink_num, wifi, outlet, backup_foldername)
                 pbar.update(5)
 
                 parse_sending(on_duty, google_auth, outlet, send_dict, drink_message_string, tabox_message_string, print_result, k_dict, fernet_key, wifi, date_dict, value_dict, db_writables)
                 pbar.update(5)
 
-                bk_df, show_box_df, show_drink_df, tabox_max_date, drink_db_max_date = parse_display_df(value_dict, rule_df_dict, k_dict, google_auth, db_writables, fernet_key, take_databases, database_url)
+                bk_df, show_box_df, show_drink_df, tabox_max_date, drink_db_max_date = parse_display_df(value_dict, rule_df_dict, k_dict, google_auth, db_writables, fernet_key, take_databases, database_url, backup_foldername)
                 pbar.update(5)
 
                 print()
@@ -2854,4 +2857,4 @@ def night_audit_main(on_duty, database_url, db_setting_url, serialized_rule_file
 
 
 if __name__ == "__main__":
-    night_audit_main(on_duty, database_url, db_setting_url, serialized_rule_filename, service_filename, constants_sheetname, google_auth, box_num, drink_num, promo_num, lun_sales, lun_gc, tb_sales, tb_gc, lun_fwc, lun_kwc, tb_fwc, tb_kwc, night_fwc, night_kwc, script_backup_filename, script, wifi)
+    night_audit_main(on_duty, database_url, db_setting_url, serialized_rule_filename, service_filename, constants_sheetname, google_auth, box_num, drink_num, promo_num, lun_sales, lun_gc, tb_sales, tb_gc, lun_fwc, lun_kwc, tb_fwc, tb_kwc, night_fwc, night_kwc, script_backup_filename, script, wifi, backup_foldername)
