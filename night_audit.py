@@ -35,11 +35,17 @@ def on_internet():
     except (requests.ConnectionError, requests.Timeout) as exception:
         return False
 
-githubUserName = ""
-githubRepoName = ""
+githubUserName = "zou-zihan"
+githubRepoName = "Scripts-for-San-Ren-Xing"
 githubBranchName = "main"
-script_backup_filename = ""
-backup_foldername = ""
+script_backup_filename = "Encryted Script.txt"
+backup_foldername = "NABK"
+
+#打包盒管理负责人(加引号)
+box_on_duty = ""
+
+#酒水管理负责人(加引号)
+drink_on_duty = ""
 
 on_net = on_internet()
 
@@ -56,30 +62,30 @@ if not on_net:
 
     try:    
         userInputOne = int(input(": "))
+    except:
+        userInputOne = 1
+        print("无效命令")
 
-        if userInputOne == 0:
-            with open("fernet_key.txt", "rb") as keyfile:
-                fernet_key = keyfile.read()
-            
-            with open("{}/{}/{}".format(os.getcwd(), backup_foldername, script_backup_filename), "rb") as sfile:
-                script = sfile.read()
-            
-            fernet_handler = Fernet(fernet_key)
-            script = fernet_handler.decrypt(script).decode()
-            exec(script)
+    if userInputOne == 0:
+        with open("fernet_key.txt", "rb") as keyfile:
+            fernet_key = keyfile.read()
+        
+        with open("{}/{}/{}".format(os.getcwd(), backup_foldername, script_backup_filename), "rb") as sfile:
+            script = sfile.read()
+        
+        fernet_handler = Fernet(fernet_key)
+        script = fernet_handler.decrypt(script).decode()
+        exec(script)
 
-        elif userInputOne == 1:
-            pass
+    elif userInputOne == 1:
+        pass
 
-        else:
-            print("无效命令")
-
-    except Exception as e:
-        print(e)
-
+    else:
+        print("无效命令")
+        
 else:
     wifi = True
-    URL = "{}/{}/{}/{}/{}".format("https://raw.githubusercontent.com", githubUserName, githubRepoName, githubBranchName, "night-audit.py")
+    URL = "{}/{}/{}/{}/{}".format("https://raw.githubusercontent.com", githubUserName, githubRepoName, githubBranchName, "night_audit.py")
     script = urllib.request.urlopen(URL).read().decode()
     exec(script)
 
@@ -114,7 +120,7 @@ night_fwc = ""
 night_kwc = ""
 
 #收银员(加引号)
-on_duty = ""
+cashier_on_duty = ""
 
 exec(open("Local Script.py", encoding="utf-8").read())
 
@@ -1088,7 +1094,7 @@ def parse_alert(stock_alert_bool, date_dict, unparsed_alert, understock_alert_bo
                     for t in range(len(understock_alert)):
                         message_string += "{} \n".format(understock_alert[t])
 
-                    message_string += "###################\n"
+                    message_string += "------------------------ \n"
                     message_string += "{} \n".format(title_dict["understock_other"])
 
                     for s in range(len(understock_other)):
@@ -1107,7 +1113,7 @@ def parse_alert(stock_alert_bool, date_dict, unparsed_alert, understock_alert_bo
                 message_string = ""
 
             if len(overstock_alert) > 0:
-                message_string += "###################\n"
+                message_string += "------------------------ \n"
                 message_string += "{} \n".format(title_dict["overstock_alert"])
                 for t in range(len(overstock_alert)):
                     message_string += "{} \n".format(overstock_alert[t])
@@ -2277,7 +2283,7 @@ def sending_telegram(is_pr, message, api, receiver, wifi):
     else:
         pass
 
-def parse_sending(on_duty, google_auth, outlet, send_dict, drink_message_string, tabox_message_string, print_result, k_dict, fernet_key, wifi, date_dict, value_dict, db_write):
+def parse_sending(drink_on_duty, box_on_duty, cashier_on_duty, google_auth, outlet, send_dict, drink_message_string, tabox_message_string, print_result, k_dict, fernet_key, wifi, date_dict, value_dict, db_write):
     date = date_dict["dfb"].strftime("%Y-%m-%d")
 
     drink_stock_alert = eval(k_dict["drink_stock_alert"].strip().capitalize())
@@ -2295,7 +2301,9 @@ def parse_sending(on_duty, google_auth, outlet, send_dict, drink_message_string,
     rcv_sheetname = k_dict["receivers_sheetname"]
     box_drink_in_out_url = fernet_decrypt(k_dict["box_drink_in_out_url"], fernet_key)
 
-    on_duty = str(on_duty).strip().upper()
+    cashier_on_duty = str(cashier_on_duty).strip().upper()
+    drink_on_duty = str(drink_on_duty).strip().upper()
+    box_on_duty = str(box_on_duty).strip().upper()
 
     write_finance_db = db_write["write_finance_db"]
 
@@ -2327,7 +2335,7 @@ def parse_sending(on_duty, google_auth, outlet, send_dict, drink_message_string,
         if send_drink_msg:
             if len(drink_message_string) > 0:
                 if drink_send_channel.strip().capitalize() == "Telegram":
-                    receivers = ast.literal_eval(rcv_dict["drink_telegram_receivers"])[on_duty]
+                    receivers = ast.literal_eval(rcv_dict["drink_telegram_receivers"])[drink_on_duty]
                     sending_telegram(is_pr=False,
                                       message=drink_message_string,
                                       api = drink_stock_telegram_bot_api,
@@ -2361,8 +2369,7 @@ def parse_sending(on_duty, google_auth, outlet, send_dict, drink_message_string,
         if send_tabox_msg:
             if len(tabox_message_string) > 0:
                 if tabox_send_channel.strip().capitalize() == "Telegram":
-                    receivers = ast.literal_eval(rcv_dict["box_telegram_receivers"])[on_duty]
-                    #receivers = ast_literal_eval(str(rcv_dict["box_telegram_receivers"]))[on_duty]
+                    receivers = ast.literal_eval(rcv_dict["box_telegram_receivers"])[box_on_duty]
                     sending_telegram(is_pr=False,
                                       message=tabox_message_string,
                                       api = box_stock_telegram_bot_api,
@@ -2370,7 +2377,6 @@ def parse_sending(on_duty, google_auth, outlet, send_dict, drink_message_string,
                                       wifi=wifi)
                 elif tabox_send_channel.strip().capitalize() == "Email":
                     receivers = fernet_decrypt(rcv_dict["box_mail_receivers"], fernet_key).strip().split(",")
-                    #receivers = ast.literal_eval(str(rcv_dict["box_mail_receivers"]))[on_duty]
                     sending_email(is_pr=False,
                                   mail_server=box_stock_email_server,
                                   mail_sender=box_stock_email_sender,
@@ -2402,8 +2408,7 @@ def parse_sending(on_duty, google_auth, outlet, send_dict, drink_message_string,
         if send_print_result:
             if len(print_result) > 0:
                 if night_audit_send_channel.strip().capitalize() == "Telegram":
-                    #receivers = fernet_decrypt(rcv_dict["night_audit_telegram_receivers"], fernet_key).strip().split(",")
-                    receivers = ast.literal_eval(str(rcv_dict["night_audit_telegram_receivers"]))[on_duty]
+                    receivers = ast.literal_eval(str(rcv_dict["night_audit_telegram_receivers"]))[cashier_on_duty]
                     sending_telegram(is_pr=True,
                                       message=print_result,
                                       api = night_audit_telegram_bot_api,
@@ -2420,8 +2425,7 @@ def parse_sending(on_duty, google_auth, outlet, send_dict, drink_message_string,
                 elif night_send_channel.strip().capitalize() == "Email":
                     print_result += ["——————————————", "服务费: ${}".format(svc),
                                      "GST: ${}".format(gst), "日均营业额: ${}".format(ads)]
-                    #receivers = fernet_decrypt(rcv_dict["night_audit_mail_receivers"], fernet_key).strip().split(",")
-                    receivers = ast.literal_eval(str(rcv_dict["night_audit_mail_receivers"]))[on_duty]
+                    receivers = ast.literal_eval(str(rcv_dict["night_audit_mail_receivers"]))[cashier_on_duty]
                     sending_email(is_pr=True,
                                   mail_server=night_audit_email_server,
                                   mail_sender=night_audit_email_sender,
@@ -2442,8 +2446,7 @@ def parse_sending(on_duty, google_auth, outlet, send_dict, drink_message_string,
 
                         if user_input == 0:
                             if night_audit_send_channel.strip().capitalize() == "Telegram":
-                                #receivers = fernet_decrypt(rcv_dict["night_audit_telegram_receivers"], fernet_key).strip().split(",")
-                                receivers = ast.literal_eval(str(rcv_dict["night_audit_telegram_receivers"]))[on_duty]
+                                receivers = ast.literal_eval(str(rcv_dict["night_audit_telegram_receivers"]))[cashier_on_duty]
                                 sending_telegram(is_pr=True,
                                                   message=print_result,
                                                   api = night_audit_telegram_bot_api,
@@ -2460,8 +2463,7 @@ def parse_sending(on_duty, google_auth, outlet, send_dict, drink_message_string,
                             elif night_send_channel.strip().capitalize() == "Email":
                                 print_result += ["——————————————", "服务费: ${}".format(svc),
                                                  "GST: ${}".format(gst), "日均营业额: ${}".format(ads)]
-                                #receivers = fernet_decrypt(rcv_dict["night_audit_mail_receivers"], fernet_key).strip().split(",")
-                                receivers = ast.literal_eval(str(rcv_dict["night_audit_mail_receivers"]))[on_duty]
+                                receivers = ast.literal_eval(str(rcv_dict["night_audit_mail_receivers"]))[cashier_on_duty]
                                 sending_email(is_pr=True,
                                               mail_server=night_audit_email_server,
                                               mail_sender=night_audit_email_sender,
@@ -2694,8 +2696,7 @@ def backup_script(script_backup_filename, script, backup_foldername):
     with open("{}/{}/{}".format(os.getcwd(), backup_foldername, script_backup_filename), "wb") as sfile:
         sfile.write(encrypted_script)    
     
-def night_audit_main(on_duty, database_url, db_setting_url, serialized_rule_filename, service_filename, constants_sheetname, google_auth, box_num, drink_num, promo_num, lun_sales, lun_gc, tb_sales, tb_gc, lun_fwc, lun_kwc, tb_fwc, tb_kwc, night_fwc, night_kwc, script_backup_filename, script, wifi, backup_foldername):
-    on_duty = on_duty
+def night_audit_main(database_url, db_setting_url, serialized_rule_filename, service_filename, constants_sheetname, google_auth, box_num, drink_num, promo_num, lun_sales, lun_gc, tb_sales, tb_gc, lun_fwc, lun_kwc, tb_fwc, tb_kwc, night_fwc, night_kwc, script_backup_filename, script, wifi, backup_foldername,cashier_on_duty, drink_on_duty, box_on_duty):
     database_url = database_url
     db_setting_url = db_setting_url
     serialized_rule_filename = serialized_rule_filename
@@ -2719,6 +2720,9 @@ def night_audit_main(on_duty, database_url, db_setting_url, serialized_rule_file
     script = script
     wifi = wifi
     backup_foldername = backup_foldername
+    cashier_on_duty = cashier_on_duty
+    drink_on_duty = drink_on_duty
+    box_on_duty = box_on_duty
 
     fernet_key = get_key()
 
@@ -2808,7 +2812,7 @@ def night_audit_main(on_duty, database_url, db_setting_url, serialized_rule_file
                 upload_db(database_url, take_databases, k_dict, fernet_key, google_auth, box_num, drink_num, wifi, outlet, backup_foldername)
                 pbar.update(5)
 
-                parse_sending(on_duty, google_auth, outlet, send_dict, drink_message_string, tabox_message_string, print_result, k_dict, fernet_key, wifi, date_dict, value_dict, db_writables)
+                parse_sending(drink_on_duty, box_on_duty, cashier_on_duty, google_auth, outlet, send_dict, drink_message_string, tabox_message_string, print_result, k_dict, fernet_key, wifi, date_dict, value_dict, db_write)
                 pbar.update(5)
 
                 bk_df, show_box_df, show_drink_df, tabox_max_date, drink_db_max_date = parse_display_df(value_dict, rule_df_dict, k_dict, google_auth, db_writables, fernet_key, take_databases, database_url, backup_foldername)
@@ -2857,4 +2861,5 @@ def night_audit_main(on_duty, database_url, db_setting_url, serialized_rule_file
 
 
 if __name__ == "__main__":
-    night_audit_main(on_duty, database_url, db_setting_url, serialized_rule_filename, service_filename, constants_sheetname, google_auth, box_num, drink_num, promo_num, lun_sales, lun_gc, tb_sales, tb_gc, lun_fwc, lun_kwc, tb_fwc, tb_kwc, night_fwc, night_kwc, script_backup_filename, script, wifi, backup_foldername)
+    night_audit_main(database_url, db_setting_url, serialized_rule_filename, service_filename, constants_sheetname, google_auth, box_num, drink_num, promo_num, lun_sales, lun_gc, tb_sales, tb_gc, lun_fwc, lun_kwc, tb_fwc, tb_kwc, night_fwc, night_kwc, script_backup_filename, script, wifi, backup_foldername,cashier_on_duty, drink_on_duty, box_on_duty)
+    
