@@ -2283,7 +2283,7 @@ def sending_telegram(is_pr, message, api, receiver, wifi):
     else:
         pass
 
-def parse_sending(drink_on_duty, box_on_duty, cashier_on_duty, google_auth, outlet, send_dict, drink_message_string, tabox_message_string, print_result, k_dict, fernet_key, wifi, date_dict, value_dict, db_write):
+def parse_sending(drink_on_duty, box_on_duty, cashier_on_duty, google_auth, outlet, send_dict, drink_message_string, tabox_message_string, print_result, k_dict, fernet_key, wifi, date_dict, value_dict, db_writables):
     date = date_dict["dfb"].strftime("%Y-%m-%d")
 
     drink_stock_alert = eval(k_dict["drink_stock_alert"].strip().capitalize())
@@ -2305,7 +2305,7 @@ def parse_sending(drink_on_duty, box_on_duty, cashier_on_duty, google_auth, outl
     drink_on_duty = str(drink_on_duty).strip().upper()
     box_on_duty = str(box_on_duty).strip().upper()
 
-    write_finance_db = db_write["write_finance_db"]
+    write_finance_db = db_writables["write_finance_db"]
 
     try:
         box_drink_sheet = google_auth.open_by_url(box_drink_in_out_url)
@@ -2815,7 +2815,7 @@ def night_audit_main(database_url, db_setting_url, serialized_rule_filename, ser
                 upload_db(database_url, take_databases, k_dict, fernet_key, google_auth, box_num, drink_num, wifi, outlet, backup_foldername)
                 pbar.update(5)
 
-                parse_sending(drink_on_duty, box_on_duty, cashier_on_duty, google_auth, outlet, send_dict, drink_message_string, tabox_message_string, print_result, k_dict, fernet_key, wifi, date_dict, value_dict, db_write)
+                parse_sending(drink_on_duty, box_on_duty, cashier_on_duty, google_auth, outlet, send_dict, drink_message_string, tabox_message_string, print_result, k_dict, fernet_key, wifi, date_dict, value_dict, db_writables)
                 pbar.update(5)
 
                 bk_df, show_box_df, show_drink_df, tabox_max_date, drink_db_max_date = parse_display_df(value_dict, rule_df_dict, k_dict, google_auth, db_writables, fernet_key, take_databases, database_url, backup_foldername)
