@@ -55,7 +55,7 @@ if not on_net:
     try:    
         userInputOne = int(input(": "))
 
-        if userInputOne == 1:
+        if userInputOne == 0:
             with open("fernet_key.txt", "rb") as keyfile:
                 fernet_key = keyfile.read()
             
@@ -66,7 +66,7 @@ if not on_net:
             script = fernet_handler.decrypt(script).decode()
             exec(script)
 
-        elif userInputOne == 0:
+        elif userInputOne == 1:
             pass
 
         else:
