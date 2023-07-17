@@ -231,7 +231,7 @@ def option_limit(options_list, user_input):
                 while user_input in range(len(options_list)):
                     return user_input
 
-def get_dfs(google_auth, db_setting_url, service_filename, constants_sheetname, serialized_rule_filename, outlet, fernet_key, wifi backup_foldername):
+def get_dfs(google_auth, db_setting_url, service_filename, constants_sheetname, serialized_rule_filename, outlet, fernet_key, wifi, backup_foldername):
 
     if wifi:
         try:
