@@ -2692,6 +2692,9 @@ def backup_script(script_backup_filename, script, backup_foldername):
 
     f_handler = Fernet(fernet_key)
     encrypted_script = f_handler.encrypt(script.encode())
+
+    if not os.path.exists("{}/{}".format(os.getcwd(), backup_foldername)):
+        os.makedirs("{}/{}".format(os.getcwd(), backup_foldername))
     
     with open("{}/{}/{}".format(os.getcwd(), backup_foldername, script_backup_filename), "wb") as sfile:
         sfile.write(encrypted_script)    
