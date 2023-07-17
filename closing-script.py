@@ -427,333 +427,276 @@ drinkTakeOverName11Ziyong = 0
 #script = urllib.request.urlopen(URL).read().decode()
 #exec(script)
 
-functionRuleDf = readCsv(githubFileName=functionalityRuleCsvName,
-                         githubUserName=githubUserName,
-                         githubRepoName=githubRepoName,
-                         githubBranchName=githubBranchName,
-                         githubFolderName=githubFolderName,
-                         csvSep=',',
-                         csvEncoding='utf-8',
-                         runLocally=runLocally)
+NOW = dt.datetime.now()
+STOP_TIME = dt.datetime(2023, 8, 1)
 
-FPara = {}
-for row in range(len(functionRuleDf)):
-    if str(functionRuleDf.iloc[row, 1]) in ['True', 'False']:
-        FPara.update({ str(functionRuleDf.iloc[row, 0]) : eval(str(functionRuleDf.iloc[row, 1])) })
-    else:
-        FPara.update({ str(functionRuleDf.iloc[row, 0]) : str(functionRuleDf.iloc[row, 1]) })
+if NOW  < STOP_TIME:
+    print("This programme will stop service from 1 August 2023, as a new version had been roll out, ask Zihan to find out more!")
+    print("此程序将于2023年8月1日停止服务，新的关帐程序已发布，欲知详情，联系子韩!")
+    print()
+    print("按任意键继续运行")
+    input(":")
+    functionRuleDf = readCsv(githubFileName=functionalityRuleCsvName,
+                             githubUserName=githubUserName,
+                             githubRepoName=githubRepoName,
+                             githubBranchName=githubBranchName,
+                             githubFolderName=githubFolderName,
+                             csvSep=',',
+                             csvEncoding='utf-8',
+                             runLocally=runLocally)
 
-FPara['emailReceiverList'] = emailReceiverList
-FPara['emailSender'] = emailSender
-FPara['emailSenderPassword'] = emailSenderPassword
-FPara['githubUserName'] = githubUserName
-FPara['githubRepoName'] = githubRepoName
-FPara['githubBranchName'] = githubBranchName
-FPara['githubFolderName'] = githubFolderName
-FPara['takeawayBoxInventoryURL'] = takeawayBoxInventoryURL
-FPara['runLocally'] = runLocally
+    FPara = {}
+    for row in range(len(functionRuleDf)):
+        if str(functionRuleDf.iloc[row, 1]) in ['True', 'False']:
+            FPara.update({ str(functionRuleDf.iloc[row, 0]) : eval(str(functionRuleDf.iloc[row, 1])) })
+        else:
+            FPara.update({ str(functionRuleDf.iloc[row, 0]) : str(functionRuleDf.iloc[row, 1]) })
 
-takeawayBoxInventoryFunction = FPara['takeawayBoxInventoryFunction']
-stockAlertFunction = FPara['stockAlertFunction']
-stockEverydayFunction = FPara['stockEverydayFunction']
-cashRecordShowFunction = FPara['cashRecordShowFunction']
-drinkInventoryFunction = FPara['drinkInventoryFunction']
+    FPara['emailReceiverList'] = emailReceiverList
+    FPara['emailSender'] = emailSender
+    FPara['emailSenderPassword'] = emailSenderPassword
+    FPara['githubUserName'] = githubUserName
+    FPara['githubRepoName'] = githubRepoName
+    FPara['githubBranchName'] = githubBranchName
+    FPara['githubFolderName'] = githubFolderName
+    FPara['takeawayBoxInventoryURL'] = takeawayBoxInventoryURL
+    FPara['runLocally'] = runLocally
 
-
-chineseFunction = ["打包盒库存功能", "打包盒库存电邮提醒功能",
-                   "每日打包盒库存电邮提醒功能",
-                   "显示每日现金记录功能", "酒水库存功能",]
-functionVarList = [takeawayBoxInventoryFunction,
-                   stockAlertFunction,
-                   stockEverydayFunction,
-                   cashRecordShowFunction,
-                   drinkInventoryFunction]
-
-print()
-for index in range(len(chineseFunction)):
-    if functionVarList[index]:
-        print("{}已开启".format(chineseFunction[index]))
-    else:
-        print("{}已关闭".format(chineseFunction[index]))
-
-print()
-drinkCounter = 0
-boxCounter = 0
-for key in FPara.keys():
-    if key.startswith("drinkTakeOverName"):
-        drinkCounter += 1
-    elif key.startswith("boxTakeOverName"):
-        boxCounter += 1
-    else:
-        continue
-
-databaseColumns = {}
-
-drinkRecordColumns = ['日期']
-for num in range(drinkCounter):
-    drinkRecordColumns += [
-                           '{}上日存货'.format(FPara['drinkTakeOverName{}'.format(num)]),
-                           '{}进'.format(FPara['drinkTakeOverName{}'.format(num)]),
-                           '{}出'.format(FPara['drinkTakeOverName{}'.format(num)]),
-                           '{}实结存'.format(FPara['drinkTakeOverName{}'.format(num)]),
-                           '{}备注'.format(FPara['drinkTakeOverName{}'.format(num)])
-                          ]
+    takeawayBoxInventoryFunction = FPara['takeawayBoxInventoryFunction']
+    stockAlertFunction = FPara['stockAlertFunction']
+    stockEverydayFunction = FPara['stockEverydayFunction']
+    cashRecordShowFunction = FPara['cashRecordShowFunction']
+    drinkInventoryFunction = FPara['drinkInventoryFunction']
 
 
-databaseColumns[FPara['drinkRecordSheetName']] = drinkRecordColumns
+    chineseFunction = ["打包盒库存功能", "打包盒库存电邮提醒功能",
+                       "每日打包盒库存电邮提醒功能",
+                       "显示每日现金记录功能", "酒水库存功能",]
+    functionVarList = [takeawayBoxInventoryFunction,
+                       stockAlertFunction,
+                       stockEverydayFunction,
+                       cashRecordShowFunction,
+                       drinkInventoryFunction]
 
-boxRecordColumns = ['Date']
-for num in range(boxCounter):
-    boxRecordColumns += [
-                         '{}入库'.format(FPara['boxTakeOverName{}'.format(num)]),
-                         '{}出库'.format(FPara['boxTakeOverName{}'.format(num)]),
-                         '{}现有数量'.format(FPara['boxTakeOverName{}'.format(num)])
+    print()
+    for index in range(len(chineseFunction)):
+        if functionVarList[index]:
+            print("{}已开启".format(chineseFunction[index]))
+        else:
+            print("{}已关闭".format(chineseFunction[index]))
 
-                        ]
+    print()
+    drinkCounter = 0
+    boxCounter = 0
+    for key in FPara.keys():
+        if key.startswith("drinkTakeOverName"):
+            drinkCounter += 1
+        elif key.startswith("boxTakeOverName"):
+            boxCounter += 1
+        else:
+            continue
 
-databaseColumns[FPara['takeawayBoxRecordSheetName']] = boxRecordColumns
+    databaseColumns = {}
 
-read = pd.read_excel(FPara['bookFileName'],thousands=',')
-columnsRename = np.arange(0, len(read.columns)).astype(str)
-read.columns = columnsRename
-read['0'] = read['0'].astype(str)
+    drinkRecordColumns = ['日期']
+    for num in range(drinkCounter):
+        drinkRecordColumns += [
+                               '{}上日存货'.format(FPara['drinkTakeOverName{}'.format(num)]),
+                               '{}进'.format(FPara['drinkTakeOverName{}'.format(num)]),
+                               '{}出'.format(FPara['drinkTakeOverName{}'.format(num)]),
+                               '{}实结存'.format(FPara['drinkTakeOverName{}'.format(num)]),
+                               '{}备注'.format(FPara['drinkTakeOverName{}'.format(num)])
+                              ]
 
-if len(read) > int(FPara['minBookFileLenAllowable']):
-    isLocalBook = not read[read["0"].str.contains("GST Reg No")].empty
 
-    if isLocalBook:
-        try:
-            outlet_loc = theOutlet
-            continue_ = True
-        except NameError:
-            continue_ = False
+    databaseColumns[FPara['drinkRecordSheetName']] = drinkRecordColumns
 
-        print("The programme had detected that you are using a book from local machine to do closing")
-        print()
-        print("Important messages to take note:")
-        print("In order to copy all contents from HTML correctly you have to use a computer for copy-and-paste action")
-        print("Open the HTML file in a browser, press CTRL A and CTRL C on Windows/Linux")
-        print("CMD A and CMD C on Mac for copy")
-        print()
-        print("DO NOT use mouse to drag and select to copy, this programme will raise errors if you do that.")
-        print()
-        print("Create a new excel file, and CTRL V directly on Windows/Linux for paste")
-        print("If you did pasting on a Mac, you have to Select 'Paste Special' -> 'Paste Special...'")
-        print("'Source:' is 'paste', 'As:' is 'Unicode Text', then click 'ok' to paste the texts into an excel file.")
-        print()
+    boxRecordColumns = ['Date']
+    for num in range(boxCounter):
+        boxRecordColumns += [
+                             '{}入库'.format(FPara['boxTakeOverName{}'.format(num)]),
+                             '{}出库'.format(FPara['boxTakeOverName{}'.format(num)]),
+                             '{}现有数量'.format(FPara['boxTakeOverName{}'.format(num)])
 
-        try:
-            tsbt_index = int(read[read["0"] == 'Total Sales Before Tax & Srv Chg'].index[0])
-        except IndexError:
-            tsbt_index = int(read[read["0"] == "Total Sales Before Tax"].index[0])
+                            ]
 
-        read.iloc[tsbt_index, 0] = 'Total Sales Before Tax & Srv Charge'
+    databaseColumns[FPara['takeawayBoxRecordSheetName']] = boxRecordColumns
 
-        gst_index = int(read[read["0"] == "GST 8%"].index[0])
-        read.iloc[int(gst_index), 0] = "GST"
+    read = pd.read_excel(FPara['bookFileName'],thousands=',')
+    columnsRename = np.arange(0, len(read.columns)).astype(str)
+    read.columns = columnsRename
+    read['0'] = read['0'].astype(str)
 
-        svc_index = int(read[read["0"] == "SCV CHG 10%"].index[0])
-        read.iloc[int(svc_index), 0] = "Service Charge 10%"
-
-        gstReg_index = int(read[read["0"].str.contains("GST Reg No")].index[0])
-        read.iloc[int(gstReg_index), 0] = "Goods and Services Tax Reg No"
-
-    else:
-        try:
-            bi = int(read[read['0'].str.contains('Date:')].index.values[0])
-            ei = int(read[read['0'] == 'Total Sales'].index.values[0])
-            outlet_loc = str(read.iloc[(bi+1):(ei),:].dropna(axis=1).values[0][0])
-            continue_ = True
-        except IndexError:
-            continue_ = False
-
-    if continue_:
-        pbi = int(read[read['0'].str.contains('PAYMENT BREAKDOWN:')].index[0])
+    if len(read) > int(FPara['minBookFileLenAllowable']):
+        isLocalBook = not read[read["0"].str.contains("GST Reg No")].empty
 
         if isLocalBook:
-            pei = int(read[read['0'].str.contains('OPENING CASH BALANCE:')].index[0])
+            try:
+                outlet_loc = theOutlet
+                continue_ = True
+            except NameError:
+                continue_ = False
+
+            print("The programme had detected that you are using a book from local machine to do closing")
+            print()
+            print("Important messages to take note:")
+            print("In order to copy all contents from HTML correctly you have to use a computer for copy-and-paste action")
+            print("Open the HTML file in a browser, press CTRL A and CTRL C on Windows/Linux")
+            print("CMD A and CMD C on Mac for copy")
+            print()
+            print("DO NOT use mouse to drag and select to copy, this programme will raise errors if you do that.")
+            print()
+            print("Create a new excel file, and CTRL V directly on Windows/Linux for paste")
+            print("If you did pasting on a Mac, you have to Select 'Paste Special' -> 'Paste Special...'")
+            print("'Source:' is 'paste', 'As:' is 'Unicode Text', then click 'ok' to paste the texts into an excel file.")
+            print()
+
+            try:
+                tsbt_index = int(read[read["0"] == 'Total Sales Before Tax & Srv Chg'].index[0])
+            except IndexError:
+                tsbt_index = int(read[read["0"] == "Total Sales Before Tax"].index[0])
+
+            read.iloc[tsbt_index, 0] = 'Total Sales Before Tax & Srv Charge'
+
+            gst_index = int(read[read["0"] == "GST 8%"].index[0])
+            read.iloc[int(gst_index), 0] = "GST"
+
+            svc_index = int(read[read["0"] == "SCV CHG 10%"].index[0])
+            read.iloc[int(svc_index), 0] = "Service Charge 10%"
+
+            gstReg_index = int(read[read["0"].str.contains("GST Reg No")].index[0])
+            read.iloc[int(gstReg_index), 0] = "Goods and Services Tax Reg No"
 
         else:
             try:
-                pei = int(read[read['0'].str.contains('PAYMENT BREAKDOWN (POS):', regex=False)].index[0])
+                bi = int(read[read['0'].str.contains('Date:')].index.values[0])
+                ei = int(read[read['0'] == 'Total Sales'].index.values[0])
+                outlet_loc = str(read.iloc[(bi+1):(ei),:].dropna(axis=1).values[0][0])
+                continue_ = True
             except IndexError:
-                pei = int(read[read['0'].str.contains('Transaction Void Items')].index[0])
+                continue_ = False
 
-        pay_breakdown = read.copy()
-        pay_breakdown = pay_breakdown.iloc[(pbi+1):(pei), :]
-        resetAxis(pay_breakdown, axis=0)
-        pay_breakdown['0'] = pay_breakdown['0'].astype(str)
+        if continue_:
+            pbi = int(read[read['0'].str.contains('PAYMENT BREAKDOWN:')].index[0])
 
-        if isLocalBook:
-            if len(pay_breakdown[pay_breakdown['0'].str.contains('nan')].index) <= 0:
-                drop_index = min(pay_breakdown[pay_breakdown['0'] == ' '].index)
+            if isLocalBook:
+                pei = int(read[read['0'].str.contains('OPENING CASH BALANCE:')].index[0])
 
             else:
-                drop_index = min(pay_breakdown[pay_breakdown['0'].str.contains('nan')].index)
+                try:
+                    pei = int(read[read['0'].str.contains('PAYMENT BREAKDOWN (POS):', regex=False)].index[0])
+                except IndexError:
+                    pei = int(read[read['0'].str.contains('Transaction Void Items')].index[0])
 
-            pay_breakdown = pay_breakdown.iloc[:drop_index]
+            pay_breakdown = read.copy()
+            pay_breakdown = pay_breakdown.iloc[(pbi+1):(pei), :]
+            resetAxis(pay_breakdown, axis=0)
+            pay_breakdown['0'] = pay_breakdown['0'].astype(str)
 
-        dropColumns = []
-        for columnIndex in range(len(pay_breakdown.columns)):
-            if pay_breakdown[str(columnIndex)].isnull().all():
-                dropColumns += [str(columnIndex)]
-            else:
-                continue
-
-        pay_breakdown.drop(dropColumns, axis=1, inplace=True)
-        resetAxis(pay_breakdown, axis=0)
-        resetAxis(pay_breakdown, axis=1)
-        pay_breakdown = pay_breakdown[pay_breakdown['0'] != 'nan']
-
-        pay_brkdwn = pay_breakdown.copy()
-
-        if pay_breakdown.empty:
-            print("无任何付款信息")
-
-        else:
-            pay_brkdwn['0'] = pay_brkdwn['0'].apply(lambda x:x[:x.find('(')])
-
-        read_ = read.copy()
-        read_['0'] = read_['0'].apply(lambda a : unicodedata.normalize("NFKD", a))
-        read_['0'] = read_['0'].apply(lambda x : remove_spaces(x))
-
-        df_dict = {}
-        df_dict.update({
-            'read_' : read_,
-            'read' : read,
-            'pay_breakdown': pay_breakdown,
-            'pay_brkdwn' : pay_brkdwn,
-            })
-
-        today_dt_format = dt.datetime.today()
-        if sys.platform.strip().upper() == "IOS":
-            #it may not render strftime with Chinese characters correctly on ios app such as Juno
-            today_date = today_dt_format.strftime("%YNIAN%mYUE%RI")
-            today_date = today_date.replace("NIAN", "年")
-            today_date = today_date.replace("YUE", "月")
-            today_date = today_date.replace("RI", "日")
-        else:
-            today_date = today_dt_format.strftime("%Y年%m月%d日")
-
-        #raw_date_from_book
-        if isLocalBook:
-
-            try:
-                read_date = read.iloc[int(read[read["0"].str.contains('X/Shift Report')].index[0])+1,0]
-            except IndexError:
-                read_date = read.iloc[int(read[read["0"].str.contains('Z/Closing Report')].index[0])+1,0]
-
-            rdfb = read_date.split()
-
-        else:
-            rdfb = read[read['0'].str.contains('Date:')].dropna(axis=1).values[0][0]
-            rdfb = rdfb.split()
-
-        if isLocalBook:
-            dfb = '{} {} {}'.format(rdfb[1], rdfb[2], rdfb[3])
-            dfb = dt.datetime.strptime(dfb, '%d %b %Y')
-
-        else:
-            if len(rdfb) == 8:
-                if rdfb[1] == rdfb[5] and rdfb[2] == rdfb[6] and rdfb[3] == rdfb[7]:
-                    #date_from_book
-                    dfb = '{} {} {}'.format(rdfb[1],rdfb[2],rdfb[3])
-                    dfb = dt.datetime.strptime(dfb, '%d %b %Y')
+            if isLocalBook:
+                if len(pay_breakdown[pay_breakdown['0'].str.contains('nan')].index) <= 0:
+                    drop_index = min(pay_breakdown[pay_breakdown['0'] == ' '].index)
 
                 else:
-                    print('不支持跨日期。\n报表日期将以今天日期为标准。')
-                    dfb = today_dt_format
+                    drop_index = min(pay_breakdown[pay_breakdown['0'].str.contains('nan')].index)
+
+                pay_breakdown = pay_breakdown.iloc[:drop_index]
+
+            dropColumns = []
+            for columnIndex in range(len(pay_breakdown.columns)):
+                if pay_breakdown[str(columnIndex)].isnull().all():
+                    dropColumns += [str(columnIndex)]
+                else:
+                    continue
+
+            pay_breakdown.drop(dropColumns, axis=1, inplace=True)
+            resetAxis(pay_breakdown, axis=0)
+            resetAxis(pay_breakdown, axis=1)
+            pay_breakdown = pay_breakdown[pay_breakdown['0'] != 'nan']
+
+            pay_brkdwn = pay_breakdown.copy()
+
+            if pay_breakdown.empty:
+                print("无任何付款信息")
+
             else:
-                print('日期格式不符，报表将以今天的日期为标准。')
-                dfb = today_dt_format
+                pay_brkdwn['0'] = pay_brkdwn['0'].apply(lambda x:x[:x.find('(')])
 
-        if sys.platform.strip().upper() == "IOS":
-            #it may not render strftime with Chinese characters correctly on ios app such as Juno
-            take_date = dfb.strftime("%YNIAN%mYUE%dRI")
-            take_date = take_date.replace("NIAN", "年")
-            take_date = take_date.replace("YUE", "月")
-            take_date = take_date.replace("RI", "日")
-        else:
-            take_date = dfb.strftime("%Y年%m月%d日")
+            read_ = read.copy()
+            read_['0'] = read_['0'].apply(lambda a : unicodedata.normalize("NFKD", a))
+            read_['0'] = read_['0'].apply(lambda x : remove_spaces(x))
 
-        td_pd = dfb.strftime('%Y-%m-%d')
-        td_ytd = (dfb - dt.timedelta(days=1)).strftime('%Y-%m-%d')
-
-        if sys.platform.strip().upper() == "IOS":
-            yesterday_date = (dfb - dt.timedelta(days=1)).strftime('%YNIAN%mYUE%dRI')
-            yesterday_date = yesterday_date.replace("NIAN", "年")
-            yesterday_date = yesterday_date.replace("YUE", "月")
-            yesterday_date = yesterday_date.replace("RI", "日")
-        else:
-            yesterday_date = (dfb - dt.timedelta(days=1)).strftime('%Y年%m月%d日')
-
-        TBRuleDf = readCsv(githubFileName=takeawayBoxRuleCsvName,
-                       githubUserName=FPara['githubUserName'],
-                       githubRepoName=FPara['githubRepoName'],
-                       githubBranchName=FPara['githubBranchName'],
-                       githubFolderName=FPara['githubFolderName'],
-                       csvSep=',',
-                       csvEncoding='utf-8',
-                       runLocally=FPara['runLocally'])
-
-        TBRuleDf['String Locator'] = TBRuleDf['String Locator'].apply(lambda a : unicodedata.normalize("NFKD", a))
-        TBRuleDf['String Locator'] = TBRuleDf['String Locator'].apply(lambda x : remove_spaces(x))
-        TBRuleDf['active status'] = TBRuleDf['active status'].astype(int)
-
-        model_listing = {}
-        for number in range(boxCounter):
-            modelName = FPara['boxTakeOverName{}'.format(number)]
-            model_listing.update({ modelName : TBRuleDf[(TBRuleDf['Model to Use'] == 'boxTakeOverName{}'.format(number)) & (TBRuleDf['active status'] == 1)]['String Locator'].values.tolist()})
-
-        html_df = pd.read_html(FPara['takeawayBoxInventoryURL'], encoding='utf-8')
-        model_df = html_df.copy()[0]
-        model_df.drop('Unnamed: 0', axis=1, inplace=True)
-        model_df.columns = model_df.iloc[0, :]
-        model_df.drop(0, axis=0, inplace=True)
-        model_df.reset_index(inplace=True)
-        model_df.drop('index', axis=1, inplace=True)
-
-
-        noti_df = html_df.copy()[1]
-        noti_df.drop('Unnamed: 0', axis=1, inplace=True)
-        noti_df.columns = noti_df.iloc[0,:]
-        noti_df.drop(0, axis=0, inplace=True)
-        noti_df.reset_index(inplace=True)
-        noti_df.drop('index', axis=1, inplace=True)
-
-        for i in noti_df.columns:
-            noti_df[i] = noti_df[i].astype(str)
-
-        noti_df[noti_df.columns[-1]] = noti_df[noti_df.columns[-1]].apply(lambda x : str(x[x.find('(')+1:x.find(')')]) )
-
-        tabox = pd.read_excel(FPara['databaseFileName'], sheet_name=FPara['takeawayBoxRecordSheetName'])
-
-        if len(tabox.columns) == len(databaseColumns[FPara['takeawayBoxRecordSheetName']]):
-            if tabox.columns.tolist() != databaseColumns[FPara['takeawayBoxRecordSheetName']]:
-                tabox.columns = databaseColumns[FPara['takeawayBoxRecordSheetName']]
-                print("The columns of {} had been updated.".format(FPara['takeawayBoxRecordSheetName']))
-
-        tabox_tdy_record = tabox[tabox['Date'] == td_pd]
-
-        if takeawayBoxInventoryFunction:
-            box_value = {}
-            for index in range(len(model_df)):
-                box_value.update({
-                    '{}_in'.format(model_df.iloc[index, 0]) : int(model_df.iloc[index, 1])*float(eval(str(model_df.iloc[index, 5]))),
-
-                    '{}_out'.format(model_df.iloc[index, 0]) : int(model_df.iloc[index, 2])*float(eval(str(model_df.iloc[index, 5]))),
-
-                    '{}_absolute'.format(model_df.iloc[index, 0]) : float(model_df.iloc[index, 3]),
-
-                    '{}_sale'.format(model_df.iloc[index, 0]): float(normal_round(float(ModelUseSums(dataFrame=df_dict['read_'],
-                                                                                                keyName=str(model_df.iloc[index, 0]),
-                                                                                                modelListing=model_listing,
-                                                                                                TBRuleDf = TBRuleDf, FPara = FPara))*
-                                                               float(model_df.iloc[index, 4])*
-                                                               float(eval(str(model_df.iloc[index, 5]))), 4))
+            df_dict = {}
+            df_dict.update({
+                'read_' : read_,
+                'read' : read,
+                'pay_breakdown': pay_breakdown,
+                'pay_brkdwn' : pay_brkdwn,
                 })
 
-            TBExtraRuleDf = readCsv(githubFileName=extraTakeawayBoxRuleCsvName,
+            today_dt_format = dt.datetime.today()
+            if sys.platform.strip().upper() == "IOS":
+                #it may not render strftime with Chinese characters correctly on ios app such as Juno
+                today_date = today_dt_format.strftime("%YNIAN%mYUE%RI")
+                today_date = today_date.replace("NIAN", "年")
+                today_date = today_date.replace("YUE", "月")
+                today_date = today_date.replace("RI", "日")
+            else:
+                today_date = today_dt_format.strftime("%Y年%m月%d日")
+
+            #raw_date_from_book
+            if isLocalBook:
+
+                try:
+                    read_date = read.iloc[int(read[read["0"].str.contains('X/Shift Report')].index[0])+1,0]
+                except IndexError:
+                    read_date = read.iloc[int(read[read["0"].str.contains('Z/Closing Report')].index[0])+1,0]
+
+                rdfb = read_date.split()
+
+            else:
+                rdfb = read[read['0'].str.contains('Date:')].dropna(axis=1).values[0][0]
+                rdfb = rdfb.split()
+
+            if isLocalBook:
+                dfb = '{} {} {}'.format(rdfb[1], rdfb[2], rdfb[3])
+                dfb = dt.datetime.strptime(dfb, '%d %b %Y')
+
+            else:
+                if len(rdfb) == 8:
+                    if rdfb[1] == rdfb[5] and rdfb[2] == rdfb[6] and rdfb[3] == rdfb[7]:
+                        #date_from_book
+                        dfb = '{} {} {}'.format(rdfb[1],rdfb[2],rdfb[3])
+                        dfb = dt.datetime.strptime(dfb, '%d %b %Y')
+
+                    else:
+                        print('不支持跨日期。\n报表日期将以今天日期为标准。')
+                        dfb = today_dt_format
+                else:
+                    print('日期格式不符，报表将以今天的日期为标准。')
+                    dfb = today_dt_format
+
+            if sys.platform.strip().upper() == "IOS":
+                #it may not render strftime with Chinese characters correctly on ios app such as Juno
+                take_date = dfb.strftime("%YNIAN%mYUE%dRI")
+                take_date = take_date.replace("NIAN", "年")
+                take_date = take_date.replace("YUE", "月")
+                take_date = take_date.replace("RI", "日")
+            else:
+                take_date = dfb.strftime("%Y年%m月%d日")
+
+            td_pd = dfb.strftime('%Y-%m-%d')
+            td_ytd = (dfb - dt.timedelta(days=1)).strftime('%Y-%m-%d')
+
+            if sys.platform.strip().upper() == "IOS":
+                yesterday_date = (dfb - dt.timedelta(days=1)).strftime('%YNIAN%mYUE%dRI')
+                yesterday_date = yesterday_date.replace("NIAN", "年")
+                yesterday_date = yesterday_date.replace("YUE", "月")
+                yesterday_date = yesterday_date.replace("RI", "日")
+            else:
+                yesterday_date = (dfb - dt.timedelta(days=1)).strftime('%Y年%m月%d日')
+
+            TBRuleDf = readCsv(githubFileName=takeawayBoxRuleCsvName,
                            githubUserName=FPara['githubUserName'],
                            githubRepoName=FPara['githubRepoName'],
                            githubBranchName=FPara['githubBranchName'],
@@ -762,616 +705,318 @@ if len(read) > int(FPara['minBookFileLenAllowable']):
                            csvEncoding='utf-8',
                            runLocally=FPara['runLocally'])
 
-            if TBExtraRuleDf.empty:
-                pass
+            TBRuleDf['String Locator'] = TBRuleDf['String Locator'].apply(lambda a : unicodedata.normalize("NFKD", a))
+            TBRuleDf['String Locator'] = TBRuleDf['String Locator'].apply(lambda x : remove_spaces(x))
+            TBRuleDf['active status'] = TBRuleDf['active status'].astype(int)
+
+            model_listing = {}
+            for number in range(boxCounter):
+                modelName = FPara['boxTakeOverName{}'.format(number)]
+                model_listing.update({ modelName : TBRuleDf[(TBRuleDf['Model to Use'] == 'boxTakeOverName{}'.format(number)) & (TBRuleDf['active status'] == 1)]['String Locator'].values.tolist()})
+
+            html_df = pd.read_html(FPara['takeawayBoxInventoryURL'], encoding='utf-8')
+            model_df = html_df.copy()[0]
+            model_df.drop('Unnamed: 0', axis=1, inplace=True)
+            model_df.columns = model_df.iloc[0, :]
+            model_df.drop(0, axis=0, inplace=True)
+            model_df.reset_index(inplace=True)
+            model_df.drop('index', axis=1, inplace=True)
+
+
+            noti_df = html_df.copy()[1]
+            noti_df.drop('Unnamed: 0', axis=1, inplace=True)
+            noti_df.columns = noti_df.iloc[0,:]
+            noti_df.drop(0, axis=0, inplace=True)
+            noti_df.reset_index(inplace=True)
+            noti_df.drop('index', axis=1, inplace=True)
+
+            for i in noti_df.columns:
+                noti_df[i] = noti_df[i].astype(str)
+
+            noti_df[noti_df.columns[-1]] = noti_df[noti_df.columns[-1]].apply(lambda x : str(x[x.find('(')+1:x.find(')')]) )
+
+            tabox = pd.read_excel(FPara['databaseFileName'], sheet_name=FPara['takeawayBoxRecordSheetName'])
+
+            if len(tabox.columns) == len(databaseColumns[FPara['takeawayBoxRecordSheetName']]):
+                if tabox.columns.tolist() != databaseColumns[FPara['takeawayBoxRecordSheetName']]:
+                    tabox.columns = databaseColumns[FPara['takeawayBoxRecordSheetName']]
+                    print("The columns of {} had been updated.".format(FPara['takeawayBoxRecordSheetName']))
+
+            tabox_tdy_record = tabox[tabox['Date'] == td_pd]
+
+            if takeawayBoxInventoryFunction:
+                box_value = {}
+                for index in range(len(model_df)):
+                    box_value.update({
+                        '{}_in'.format(model_df.iloc[index, 0]) : int(model_df.iloc[index, 1])*float(eval(str(model_df.iloc[index, 5]))),
+
+                        '{}_out'.format(model_df.iloc[index, 0]) : int(model_df.iloc[index, 2])*float(eval(str(model_df.iloc[index, 5]))),
+
+                        '{}_absolute'.format(model_df.iloc[index, 0]) : float(model_df.iloc[index, 3]),
+
+                        '{}_sale'.format(model_df.iloc[index, 0]): float(normal_round(float(ModelUseSums(dataFrame=df_dict['read_'],
+                                                                                                    keyName=str(model_df.iloc[index, 0]),
+                                                                                                    modelListing=model_listing,
+                                                                                                    TBRuleDf = TBRuleDf, FPara = FPara))*
+                                                                   float(model_df.iloc[index, 4])*
+                                                                   float(eval(str(model_df.iloc[index, 5]))), 4))
+                    })
+
+                TBExtraRuleDf = readCsv(githubFileName=extraTakeawayBoxRuleCsvName,
+                               githubUserName=FPara['githubUserName'],
+                               githubRepoName=FPara['githubRepoName'],
+                               githubBranchName=FPara['githubBranchName'],
+                               githubFolderName=FPara['githubFolderName'],
+                               csvSep=',',
+                               csvEncoding='utf-8',
+                               runLocally=FPara['runLocally'])
+
+                if TBExtraRuleDf.empty:
+                    pass
+
+                else:
+                    TBExtraRuleDf['active status'] = TBExtraRuleDf['active status'].astype(int)
+                    for op in range(len(TBExtraRuleDf)):
+                        if int(TBExtraRuleDf['active status'][op]) != 1:
+                            continue
+                        else:
+                            if str(TBExtraRuleDf['operation'][op]) == 'plus equal':
+                                box_value[str(TBExtraRuleDf['box_value to operate on'][op])] += box_value[str(TBExtraRuleDf['value'][op])]
+                            elif str(TBExtraRuleDf['operation'][op]) == 'minus equal':
+                                box_value[str(TBExtraRuleDf['box_value to operate on'][op])] -= box_value[str(TBExtraRuleDf['value'][op])]
+                            elif str(TBExtraRuleDf['operation'][op]) == 'divide equal':
+                                box_value[str(TBExtraRuleDf['box_value to operate on'][op])] /= box_value[str(TBExtraRuleDf['value'][op])]
+                            elif str(TBExtraRuleDf['operation'][op]) == 'times equal':
+                                box_value[str(TBExtraRuleDf['box_value to operate on'][op])] *= box_value[str(TBExtraRuleDf['value'][op])]
+                            elif str(TBExtraRuleDf['operation'][op]) == 'equal':
+                                box_value[str(TBExtraRuleDf['box_value to operate on'][op])] = box_value[str(TBExtraRuleDf['value'][op])]
+                            elif str(TBExtraRuleDf['operation'][op]) == 'zero':
+                                box_value[str(TBExtraRuleDf['box_value to operate on'][op])] = 0
+                            elif str(TBExtraRuleDf['operation'][op]) == 'change value':
+                                box_value[str(TBExtraRuleDf['box_value to operate on'][op])] = float(str(TBExtraRuleDf['value'][op]))
+                            else:
+                                pass
+
+            elif not takeawayBoxInventoryFunction:
+                box_value = {}
+                for index in range(len(model_df)):
+                    box_value.update({
+                        '{}_in'.format(model_df.iloc[index, 0]) : 0,
+                        '{}_out'.format(model_df.iloc[index, 0]) : 0,
+                        '{}_absolute'.format(model_df.iloc[index, 0]) : 0,
+                        '{}_sale'.format(model_df.iloc[index, 0]): 0,
+                    })
+
+
+            if tabox_tdy_record.empty:
+                if tabox[tabox['Date'] == td_ytd].empty:
+                    tabox_write = False
+                    for index in range(len(model_df)):
+                        box_value.update({
+                            '{}_now'.format(model_df.iloc[index, 0]) : np.nan
+                        })
+                else:
+                    tabox_write = True
 
             else:
-                TBExtraRuleDf['active status'] = TBExtraRuleDf['active status'].astype(int)
-                for op in range(len(TBExtraRuleDf)):
-                    if int(TBExtraRuleDf['active status'][op]) != 1:
-                        continue
-                    else:
-                        if str(TBExtraRuleDf['operation'][op]) == 'plus equal':
-                            box_value[str(TBExtraRuleDf['box_value to operate on'][op])] += box_value[str(TBExtraRuleDf['value'][op])]
-                        elif str(TBExtraRuleDf['operation'][op]) == 'minus equal':
-                            box_value[str(TBExtraRuleDf['box_value to operate on'][op])] -= box_value[str(TBExtraRuleDf['value'][op])]
-                        elif str(TBExtraRuleDf['operation'][op]) == 'divide equal':
-                            box_value[str(TBExtraRuleDf['box_value to operate on'][op])] /= box_value[str(TBExtraRuleDf['value'][op])]
-                        elif str(TBExtraRuleDf['operation'][op]) == 'times equal':
-                            box_value[str(TBExtraRuleDf['box_value to operate on'][op])] *= box_value[str(TBExtraRuleDf['value'][op])]
-                        elif str(TBExtraRuleDf['operation'][op]) == 'equal':
-                            box_value[str(TBExtraRuleDf['box_value to operate on'][op])] = box_value[str(TBExtraRuleDf['value'][op])]
-                        elif str(TBExtraRuleDf['operation'][op]) == 'zero':
-                            box_value[str(TBExtraRuleDf['box_value to operate on'][op])] = 0
-                        elif str(TBExtraRuleDf['operation'][op]) == 'change value':
-                            box_value[str(TBExtraRuleDf['box_value to operate on'][op])] = float(str(TBExtraRuleDf['value'][op]))
-                        else:
+                tabox_write = False
+                if takeawayBoxInventoryFunction:
+                    for index in range(len(model_df)):
+                        box_value.update(
+                            {
+                                '{}_now'.format(model_df.iloc[index, 0]) : float(modelLeft(df=tabox,
+                                                                                    df_string=str(model_df.iloc[index, 0]),
+                                                                                           date=td_pd))
+                            })
+                elif not takeawayBoxInventoryFunction:
+                    for index in range(len(model_df)):
+                        box_value.update({
+                                '{}_now'.format(model_df.iloc[index, 0]) : 0
+                        }
+                        )
+
+            if tabox_write:
+                if takeawayBoxInventoryFunction:
+                    for index in range(len(model_df)):
+                        box_value.update({
+                            '{}_now'.format(model_df.iloc[index, 0]) : float(model_now(df=tabox,
+                                                                                       key_name=str(model_df.iloc[index, 0]),
+                                                                                       box_dict=box_value,
+                                                                                       td_ytd=td_ytd))
+                        })
+                elif not takeawayBoxInventoryFunction:
+                    for index in range(len(model_df)):
+                        box_value.update({
+                            '{}_now'.format(model_df.iloc[index, 0]) : 0
+                        })
+
+                update_tabox = {}
+                tabox_input = [td_pd,]
+                for x in range(len(model_df['title'])):
+                    tabox_input += [
+                                    box_value['{}_in'.format(model_df['title'][x])],
+                                    abs(box_value['{}_out'.format(model_df['title'][x])])+abs(box_value['{}_sale'.format(model_df['title'][x])]),
+                                    box_value['{}_now'.format(model_df['title'][x])]
+                                   ]
+
+                for i in range(len(tabox_input)):
+                    update_tabox.update({tabox.columns[i]:[tabox_input[i]]})
+
+                update_tabox = pd.DataFrame(update_tabox)
+                tabox_concat = pd.concat([tabox, update_tabox])
+                tabox_concat.sort_values(by='Date', ascending=True, ignore_index=True, inplace=True)
+                tabox_msg = "{}的打包盒信息已存入数据库，写入时间: {}".format(take_date, str(pd.to_datetime('today')))
+
+                if stockAlertFunction:
+                    if takeawayBoxInventoryFunction:
+                        alerts = stock_alert(box_value=box_value, model_df=model_df, noti_df=noti_df, td_pd=td_pd, alert_everyday=stockEverydayFunction)
+                        if len(alerts[0]) == 0 and len(alerts[1]) == 0:
+                            send_email = False
+                        elif len(alerts[0]) != 0 and len(alerts[1]) == 0:
+                            send_email = True
+                            text = '打包盒: \n'
+                            for key, items in alerts[0].items():
+                                text += '{}: 剩{} (条/个) \n'.format(key, round(float(items), 3))
+                                text += '\n'
+
+                        elif len(alerts[0]) == 0 and len(alerts[1]) != 0:
+                            send_email = True
+                            text = '{}提醒叫货的项目: \n'.format(td_pd)
+                            for key, items in alerts[1].items():
+                                text += '{}'.format(key)
+                                text += '\n'
+
+                        elif len(alerts[0]) != 0 and len(alerts[1]) != 0:
+                            send_email=True
+
+                            text = '打包盒: \n'
+                            for key, items in alerts[0].items():
+                                text += '{}: 剩{} (条/个) \n'.format(key, round(float(items), 3))
+                                text += '\n'
+
+                            text += '\n'
+
+                            text += '{}提醒叫货的项目: \n'.format(td_pd)
+                            for key, items in alerts[1].items():
+                                text += '{}'.format(key)
+                                text += '\n'
+
+                        if send_email:
+                            sending_email(text=text, receiver_list=FPara['emailReceiverList'], td_pd=td_pd, emailSender=FPara['emailSender'], emailSenderPassword=FPara['emailSenderPassword'])
+
+                        elif not send_email:
                             pass
 
-        elif not takeawayBoxInventoryFunction:
-            box_value = {}
-            for index in range(len(model_df)):
-                box_value.update({
-                    '{}_in'.format(model_df.iloc[index, 0]) : 0,
-                    '{}_out'.format(model_df.iloc[index, 0]) : 0,
-                    '{}_absolute'.format(model_df.iloc[index, 0]) : 0,
-                    '{}_sale'.format(model_df.iloc[index, 0]): 0,
-                })
-
-
-        if tabox_tdy_record.empty:
-            if tabox[tabox['Date'] == td_ytd].empty:
-                tabox_write = False
-                for index in range(len(model_df)):
-                    box_value.update({
-                        '{}_now'.format(model_df.iloc[index, 0]) : np.nan
-                    })
-            else:
-                tabox_write = True
-
-        else:
-            tabox_write = False
-            if takeawayBoxInventoryFunction:
-                for index in range(len(model_df)):
-                    box_value.update(
-                        {
-                            '{}_now'.format(model_df.iloc[index, 0]) : float(modelLeft(df=tabox,
-                                                                                df_string=str(model_df.iloc[index, 0]),
-                                                                                       date=td_pd))
-                        })
-            elif not takeawayBoxInventoryFunction:
-                for index in range(len(model_df)):
-                    box_value.update({
-                            '{}_now'.format(model_df.iloc[index, 0]) : 0
-                    }
-                    )
-
-        if tabox_write:
-            if takeawayBoxInventoryFunction:
-                for index in range(len(model_df)):
-                    box_value.update({
-                        '{}_now'.format(model_df.iloc[index, 0]) : float(model_now(df=tabox,
-                                                                                   key_name=str(model_df.iloc[index, 0]),
-                                                                                   box_dict=box_value,
-                                                                                   td_ytd=td_ytd))
-                    })
-            elif not takeawayBoxInventoryFunction:
-                for index in range(len(model_df)):
-                    box_value.update({
-                        '{}_now'.format(model_df.iloc[index, 0]) : 0
-                    })
-
-            update_tabox = {}
-            tabox_input = [td_pd,]
-            for x in range(len(model_df['title'])):
-                tabox_input += [
-                                box_value['{}_in'.format(model_df['title'][x])],
-                                abs(box_value['{}_out'.format(model_df['title'][x])])+abs(box_value['{}_sale'.format(model_df['title'][x])]),
-                                box_value['{}_now'.format(model_df['title'][x])]
-                               ]
-
-            for i in range(len(tabox_input)):
-                update_tabox.update({tabox.columns[i]:[tabox_input[i]]})
-
-            update_tabox = pd.DataFrame(update_tabox)
-            tabox_concat = pd.concat([tabox, update_tabox])
-            tabox_concat.sort_values(by='Date', ascending=True, ignore_index=True, inplace=True)
-            tabox_msg = "{}的打包盒信息已存入数据库，写入时间: {}".format(take_date, str(pd.to_datetime('today')))
-
-            if stockAlertFunction:
-                if takeawayBoxInventoryFunction:
-                    alerts = stock_alert(box_value=box_value, model_df=model_df, noti_df=noti_df, td_pd=td_pd, alert_everyday=stockEverydayFunction)
-                    if len(alerts[0]) == 0 and len(alerts[1]) == 0:
-                        send_email = False
-                    elif len(alerts[0]) != 0 and len(alerts[1]) == 0:
-                        send_email = True
-                        text = '打包盒: \n'
-                        for key, items in alerts[0].items():
-                            text += '{}: 剩{} (条/个) \n'.format(key, round(float(items), 3))
-                            text += '\n'
-
-                    elif len(alerts[0]) == 0 and len(alerts[1]) != 0:
-                        send_email = True
-                        text = '{}提醒叫货的项目: \n'.format(td_pd)
-                        for key, items in alerts[1].items():
-                            text += '{}'.format(key)
-                            text += '\n'
-
-                    elif len(alerts[0]) != 0 and len(alerts[1]) != 0:
-                        send_email=True
-
-                        text = '打包盒: \n'
-                        for key, items in alerts[0].items():
-                            text += '{}: 剩{} (条/个) \n'.format(key, round(float(items), 3))
-                            text += '\n'
-
-                        text += '\n'
-
-                        text += '{}提醒叫货的项目: \n'.format(td_pd)
-                        for key, items in alerts[1].items():
-                            text += '{}'.format(key)
-                            text += '\n'
-
-                    if send_email:
-                        sending_email(text=text, receiver_list=FPara['emailReceiverList'], td_pd=td_pd, emailSender=FPara['emailSender'], emailSenderPassword=FPara['emailSenderPassword'])
-
-                    elif not send_email:
+                    elif not takeawayBoxInventoryFunction:
                         pass
 
-                elif not takeawayBoxInventoryFunction:
+                elif not stockAlertFunction:
                     pass
 
-            elif not stockAlertFunction:
-                pass
-
-        else:
-            tabox_concat = tabox
-            tabox_concat.sort_values(by='Date', ascending=True, ignore_index=True, inplace=True)
-            tabox_msg = "{}的打包盒信息无法存入或无法再次存入数据库".format(take_date)
-
-        print("计算中...请耐心等待")
-        total_sales = float(resetAxis(read[read['0'] == 'Total Sales'].dropna(axis=1), axis=1)['1'].values[0])
-        no_of_cover = int(resetAxis(read[read['0'] == 'No. Of Cover'].dropna(axis=1), axis=1)['1'].values[0])
-
-        if isLocalBook:
-            lun_start_index = int(read[read['0'].str.contains('LUNCH')].index[0])
-            lun_end_index = int(read[read['0'].str.contains('TEA TIME')].index[0])
-            lunch_df = read.copy()
-            lunch_df = lunch_df.iloc[(lun_start_index+1):(lun_end_index), :]
-            lunch_df.dropna(axis=1, inplace=True)
-
-            lun_sales = float(lunch_df[lunch_df['0'].str.contains('Total Amount')]['1'].values[0])
-            lun_avg = float(lunch_df[lunch_df['0'].str.contains('Average/Pax')]['1'].values[0])
-            lun_gc = int(lunch_df[lunch_df['0'].str.contains('Total Pax')]['1'].values[0])
-
-        else:
-            lun_sales = float(lun_sales)
-
-            if lun_gc == 0:
-                lun_avg = 0
             else:
-                lun_avg = lun_sales/lun_gc
+                tabox_concat = tabox
+                tabox_concat.sort_values(by='Date', ascending=True, ignore_index=True, inplace=True)
+                tabox_msg = "{}的打包盒信息无法存入或无法再次存入数据库".format(take_date)
 
-            lun_avg = normal_round(lun_avg, 2)
+            print("计算中...请耐心等待")
+            total_sales = float(resetAxis(read[read['0'] == 'Total Sales'].dropna(axis=1), axis=1)['1'].values[0])
+            no_of_cover = int(resetAxis(read[read['0'] == 'No. Of Cover'].dropna(axis=1), axis=1)['1'].values[0])
 
-        if isLocalBook:
-            tb_start_index = lun_end_index
-            tb_end_index = int(read[read['0'].str.contains('DINNER')].index[0])
-            tb_df = read.copy()
-            tb_df = tb_df.iloc[(tb_start_index)+1:(tb_end_index), :]
-            tb_df.dropna(axis=1, inplace=True)
+            if isLocalBook:
+                lun_start_index = int(read[read['0'].str.contains('LUNCH')].index[0])
+                lun_end_index = int(read[read['0'].str.contains('TEA TIME')].index[0])
+                lunch_df = read.copy()
+                lunch_df = lunch_df.iloc[(lun_start_index+1):(lun_end_index), :]
+                lunch_df.dropna(axis=1, inplace=True)
 
-            tb_sales = float(tb_df[tb_df['0'].str.contains('Total Amount')]['1'].values[0])
-            tb_avg = float(tb_df[tb_df['0'].str.contains('Average/Pax')]['1'].values[0])
-            tb_gc = int(tb_df[tb_df['0'].str.contains('Total Pax')]['1'].values[0])
+                lun_sales = float(lunch_df[lunch_df['0'].str.contains('Total Amount')]['1'].values[0])
+                lun_avg = float(lunch_df[lunch_df['0'].str.contains('Average/Pax')]['1'].values[0])
+                lun_gc = int(lunch_df[lunch_df['0'].str.contains('Total Pax')]['1'].values[0])
 
-        else:
-            tb_sales = float(tb_sales)
-
-            if tb_gc == 0:
-                tb_avg = 0
             else:
-                tb_avg = tb_sales/tb_gc
+                lun_sales = float(lun_sales)
 
-            tb_avg = normal_round(tb_avg, 2)
-
-        if isLocalBook:
-            night_start_index = tb_end_index
-            night_end_index = night_start_index+6
-            night_df = read.copy()
-            night_df = night_df.iloc[(night_start_index+1):(night_end_index), :]
-            night_df.dropna(axis=1, inplace=True)
-
-            night_sales = float(night_df[night_df['0'].str.contains('Total Amount')]['1'].values[0])
-            night_avg = float(night_df[night_df['0'].str.contains('Average/Pax')]['1'].values[0])
-            night_gc = int(night_df[night_df['0'].str.contains('Total Pax')]['1'].values[0])
-
-        else:
-            night_sales = total_sales - lun_sales - tb_sales
-            night_gc = no_of_cover - lun_gc - tb_gc
-
-            if night_gc == 0:
-                night_avg = 0
-            else:
-                night_avg = night_sales/night_gc
-
-            night_sales = normal_round(night_sales, 2)
-            night_avg = normal_round(night_avg, 2)
-
-        lun_sales = single_zero(format(lun_sales, '.2f'))
-        lun_avg = single_zero(format(lun_avg, '.2f'))
-        tb_sales = single_zero(format(tb_sales, '.2f'))
-        tb_avg = single_zero(format(tb_avg, '.2f'))
-        night_sales = single_zero(format(night_sales, '.2f'))
-        night_avg = single_zero(format(night_avg, '.2f'))
-
-        value_dict = {
-            'take_date' : take_date,
-            'outlet_loc' : outlet_loc,
-            'lun_sales' : lun_sales,
-            'lun_gc' : lun_gc,
-            'lun_avg' : lun_avg,
-            'lun_fwc' : lun_fwc,
-            'lun_kwc' : lun_kwc,
-            'tb_sales' : tb_sales,
-            'tb_gc' : tb_gc,
-            'tb_avg' : tb_avg,
-            'tb_fwc': tb_fwc,
-            'tb_kwc' : tb_kwc,
-            'night_sales' : night_sales,
-            'night_gc' : night_gc,
-            'night_avg' : night_avg,
-            'night_fwc' : night_fwc,
-            'night_kwc' : night_kwc,
-            'no_of_cover' : no_of_cover,
-        }
-
-
-        rule = readCsv(githubFileName=valueDictRuleCsvName,
-                       githubUserName=FPara['githubUserName'],
-                       githubRepoName=FPara['githubRepoName'],
-                       githubBranchName=FPara['githubBranchName'],
-                       githubFolderName=FPara['githubFolderName'],
-                       csvSep=',',
-                       csvEncoding='utf-8',
-                       runLocally=FPara['runLocally'])
-
-        for i in range(len(rule.index)):
-            if int(rule.iloc[i, 7]) == 1:
-                value_dict.update({
-                    str(rule.iloc[i,0]): sum_rule(dfSlice=look_up_rule(dataFrame=df_dict[str(rule.iloc[i,2])],
-                                                                       a_string=str(rule.iloc[i, 1]),
-                                                                       take=int(rule.iloc[i, 3])),
-                                                  take=int(rule.iloc[i, 4]),
-                                                  is_money=int(rule.iloc[i,6]))
-                })
-
-                if int(rule.iloc[i, 5]) < 0:
-                    continue
+                if lun_gc == 0:
+                    lun_avg = 0
                 else:
-                    value_dict.update({
-                        '{}_ytd_tdy'.format(str(rule.iloc[i,0]).replace('_count', '')) : promo_add_rule(
-                                                                                     databaseFileName=FPara['databaseFileName'],
-                                                                                     promoRecordSheetName=FPara['promoRecordSheetName'],
-                                                                                     td_pd = td_pd,
-                                                                                     td_ytd = td_ytd,
-                                                                                     promo_count=int(value_dict[str(rule.iloc[i,0])]),
-                                                                                     title=str(rule.iloc[i,0]).replace('_count', ''),
-                                                                                     take=rule.iloc[i,5])
-                    })
+                    lun_avg = lun_sales/lun_gc
+
+                lun_avg = normal_round(lun_avg, 2)
+
+            if isLocalBook:
+                tb_start_index = lun_end_index
+                tb_end_index = int(read[read['0'].str.contains('DINNER')].index[0])
+                tb_df = read.copy()
+                tb_df = tb_df.iloc[(tb_start_index)+1:(tb_end_index), :]
+                tb_df.dropna(axis=1, inplace=True)
+
+                tb_sales = float(tb_df[tb_df['0'].str.contains('Total Amount')]['1'].values[0])
+                tb_avg = float(tb_df[tb_df['0'].str.contains('Average/Pax')]['1'].values[0])
+                tb_gc = int(tb_df[tb_df['0'].str.contains('Total Pax')]['1'].values[0])
 
             else:
-                continue
+                tb_sales = float(tb_sales)
 
-        value_dict.update({'net_sales_deductibles' : float(float(value_dict['TRUEBLUE_SUM'])+float(value_dict['SANRENXING_SUM'])+float(value_dict['PANDABOX_SUM'])+float(value_dict['Chinatown_5']))})
-        value_dict.update({'net_sales_aft_deduction' : float(float(value_dict['net_sales']) - float(value_dict['net_sales_deductibles']))})
-        value_dict['net_sales_aft_deduction'] = single_zero(format(normal_round(value_dict['net_sales_aft_deduction'], 2), ".2f"))
-
-        read_net_sales = pd.read_excel(FPara['databaseFileName'], thousands=',', sheet_name=FPara['salesRecordSheetName'])
-        dfb_record_exist = read_net_sales[read_net_sales['Date'] == td_pd]
-        if dfb_record_exist.empty:
-            if read_net_sales['Date'].values[-1] == td_ytd:
-                if int(dfb.day) == 1:
-                    cmns_ytd = 0.0
-                    cmns_tdy = cmns_ytd + float(value_dict['net_sales_aft_deduction'])
-                    cmns_tdy_ = format(normal_round(cmns_tdy, 2), ".2f")
-                    avg_daily_sales = cmns_tdy/int(dfb.day)
-                    ads_rd1 = str(avg_daily_sales)[str(avg_daily_sales).find('.'):][:3]
-                    ads_rd2 = str(avg_daily_sales)[:str(avg_daily_sales).find('.')]
-                    ads = float(ads_rd2+ads_rd1)
-                    ns_new_input = True
+                if tb_gc == 0:
+                    tb_avg = 0
                 else:
-                    cmns_ytd = float(read_net_sales['cum net sales today'].values[-1])
-                    cmns_tdy = cmns_ytd + float(value_dict['net_sales_aft_deduction'])
-                    cmns_tdy_ = format(normal_round(cmns_tdy, 2),".2f")
-                    avg_daily_sales = cmns_tdy/int(dfb.day)
-                    ads_rd1 = str(avg_daily_sales)[str(avg_daily_sales).find('.'):][:3]
-                    ads_rd2 = str(avg_daily_sales)[:str(avg_daily_sales).find('.')]
-                    ads = float(ads_rd2+ads_rd1)
-                    ns_new_input = True
+                    tb_avg = tb_sales/tb_gc
+
+                tb_avg = normal_round(tb_avg, 2)
+
+            if isLocalBook:
+                night_start_index = tb_end_index
+                night_end_index = night_start_index+6
+                night_df = read.copy()
+                night_df = night_df.iloc[(night_start_index+1):(night_end_index), :]
+                night_df.dropna(axis=1, inplace=True)
+
+                night_sales = float(night_df[night_df['0'].str.contains('Total Amount')]['1'].values[0])
+                night_avg = float(night_df[night_df['0'].str.contains('Average/Pax')]['1'].values[0])
+                night_gc = int(night_df[night_df['0'].str.contains('Total Pax')]['1'].values[0])
+
             else:
-                print('{}的昨日({})营业额信息不存在!'.format(td_pd, td_ytd))
-                cmns_ytd = np.nan
-                cmns_tdy_ = np.nan
-                ads = np.nan
-                ns_new_input = False
-        else:
-            print('{}的营业额信息已存在数据库'.format(td_pd))
-            cmns_ytd = float(dfb_record_exist['cum net sales ytd'].values[0])
-            cmns_tdy = float(dfb_record_exist['cum net sales today'].values[0])
-            ads = float(dfb_record_exist['Avg Net Sales/Day'].values[0])
-            cmns_tdy_ = format(cmns_tdy, '.2f')
-            ns_new_input = False
+                night_sales = total_sales - lun_sales - tb_sales
+                night_gc = no_of_cover - lun_gc - tb_gc
 
-        value_dict.update({
-            'cmns_ytd' : cmns_ytd,
-            'cmns_tdy_' : cmns_tdy_,
-            'ads' : ads,
-        })
-
-        for number in range(promotionCountConstant):
-            value_dict.update({'promo{}_ytd'.format(number+1) : value_dict['promo{}_ytd_tdy'.format(number+1)][0],
-                               'promo{}_tdy'.format(number+1) : value_dict['promo{}_ytd_tdy'.format(number+1)][1]})
-
-        promo_df = pd.read_excel(FPara['databaseFileName'], thousands=',', sheet_name=FPara['promoRecordSheetName'])
-        promo_info_exist = promo_df[promo_df['Date'] == td_pd]
-        if promo_info_exist.empty:
-            if promo_df['Date'].values[-1] == td_ytd:
-                sec_new = True
-            else:
-                print('{}的昨日({})促销信息不存在!'.format(td_pd, td_ytd))
-                sec_new = False
-        else:
-            print('{}的促销信息已存在数据库'.format(td_pd))
-            sec_new = False
-
-        read_cash_record = pd.read_excel(FPara['databaseFileName'], thousands=",", sheet_name=FPara['cashRecordSheetName'])
-        rcr_record_exist = read_cash_record[read_cash_record["Date"] == td_pd]
-        if rcr_record_exist.empty:
-            if read_cash_record["Date"].values[-1] == td_ytd:
-                cash_received_tdy = float(value_dict["CASH"])
-                cash_record_write = True
-            else:
-                print('{}的昨日({})现金记录不存在!'.format(td_pd, td_ytd))
-                cash_received_tdy = None
-                cash_record_write = False
-        else:
-            print("{}的现金记录已存在数据库".format(td_pd))
-            cash_received_tdy = float(read_cash_record[read_cash_record["Date"] == td_pd]["Amount"].values[0])
-            cash_record_write = False
-
-        generate=True
-        for num in range(promotionCountConstant):
-            if int(value_dict['promo{}_ytd_tdy'.format(num+1)][1]) < int(value_dict['promo{}_count'.format(num+1)]):
-                generate = False
-            else:
-                pass
-        print()
-        print('生成报表中...')
-        print('——————————————')
-        print()
-        if generate:
-            print_result = []
-            printRuleDf = readCsv(githubFileName=printRuleCsvName,
-                           githubUserName=FPara['githubUserName'],
-                           githubRepoName=FPara['githubRepoName'],
-                           githubBranchName=FPara['githubBranchName'],
-                           githubFolderName=FPara['githubFolderName'],
-                           csvSep=',',
-                           csvEncoding='utf-8',
-                           runLocally=FPara['runLocally'])
-
-            for column in printRuleDf.columns:
-                printRuleDf[column] = printRuleDf[column].astype(str)
-
-            for index in range(len(printRuleDf)):
-                formatList = printRuleDf['key names in value_dict'][index]
-                formatListList = formatList.split(',')
-                formatEval = []
-                for formats in formatListList:
-                    if formats == 'nan':
-                        continue
-                    else:
-                        formatEval += [value_dict[str(formats)]]
-
-                if printRuleDf['print_statement'][index] == 'nan':
-                    print_result += [' ']
-
-                elif int(printRuleDf['active_status'][index]) != 1:
-                    pass
+                if night_gc == 0:
+                    night_avg = 0
                 else:
-                    print_result += [printRuleDf['print_statement'][index].format(*formatEval)]
+                    night_avg = night_sales/night_gc
 
-            bookkeeping_particulars = ['初始额', '销售额']
+                night_sales = normal_round(night_sales, 2)
+                night_avg = normal_round(night_avg, 2)
 
-            voucher_expense_list = ['Trueblue会员', '三人行礼券', 'PandaBox', "唐人街首单减$5"]
-            voucher_expense_dict_locator = ['TRUEBLUE_SUM', 'SANRENXING_SUM', 'PANDABOX_SUM', "Chinatown_5"]
+            lun_sales = single_zero(format(lun_sales, '.2f'))
+            lun_avg = single_zero(format(lun_avg, '.2f'))
+            tb_sales = single_zero(format(tb_sales, '.2f'))
+            tb_avg = single_zero(format(tb_avg, '.2f'))
+            night_sales = single_zero(format(night_sales, '.2f'))
+            night_avg = single_zero(format(night_avg, '.2f'))
 
-            income_list = [' ',
-                           format(float(value_dict['net_sales']), '.2f'), ]
-
-            expense_list = [' ',
-                            ' ', ]
-
-            balance_list = [format(float(value_dict['cmns_ytd']), '.2f'),
-                            format(normal_round(float(value_dict['cmns_ytd'])+float(value_dict['net_sales']),2), '.2f'), ]
-
-            account_balance = float(balance_list[-1])
-            for index in range(len(voucher_expense_dict_locator)):
-                if value_dict[voucher_expense_dict_locator[index]] != 0:
-                    bookkeeping_particulars += [voucher_expense_list[index]]
-                    income_list += [' ']
-                    expense_list += [format(float(value_dict[voucher_expense_dict_locator[index]]), '.2f')]
-                    account_balance -= float(value_dict[voucher_expense_dict_locator[index]])
-                    balance_list += [format(account_balance, '.2f')]
-                else:
-                    continue
-
-            income_total = 0
-            expense_total = 0
-            for index in range(len(income_list)):
-                if income_list[index] != ' ':
-                    income_total += float(income_list[index])
-                else:
-                    continue
-
-            for index in range(len(expense_list)):
-                if expense_list[index] != ' ':
-                    expense_total += float(expense_list[index])
-                else:
-                    continue
-
-            bookkeeping_particulars += ['今日关帐合计']
-            income_list += [format(income_total, '.2f')]
-            expense_list += [format(expense_total, '.2f')]
-            balance_list += [format(float(value_dict['cmns_tdy_']), '.2f')]
-
-            bookkeeping_df = pd.DataFrame({"描述": bookkeeping_particulars,
-                                           "收入": income_list,
-                                           "支出": expense_list,
-                                           "月累计": balance_list,})
-
-            promo_df = pd.read_excel(FPara['databaseFileName'], thousands=',', sheet_name=FPara['promoRecordSheetName'])
-
-            tdy_input_promo = [td_pd, dt.datetime.strptime(td_pd,'%Y-%m-%d').strftime("%A"), ]
-
-            for number in range(promotionCountConstant):
-                tdy_input_promo += [
-                                value_dict['promo{}_ytd_tdy'.format(number+1)][0],
-                                value_dict['promo{}_ytd_tdy'.format(number+1)][1]
-                ]
-
-            if sec_new:
-                promo_updating = {}
-                for item in range(len(tdy_input_promo)):
-                    promo_updating.update({promo_df.columns[item]:[tdy_input_promo[item]]})
-
-                promo_updating = pd.DataFrame(promo_updating)
-                promo_conca = pd.concat([promo_df, promo_updating])
-                promo_msg = "{}的促销信息已存入数据库，写入时间: {}".format(take_date, str(pd.to_datetime('today')))
-
-            else:
-                promo_conca = promo_df
-                promo_msg = "{}的促销信息无法存入或无法再次存入数据库".format(take_date)
-
-            read_net_sales = pd.read_excel(FPara['databaseFileName'], thousands=',', sheet_name=FPara['salesRecordSheetName'])
-            tdy_input_sales = [td_pd,
-                               dt.datetime.strptime(td_pd,'%Y-%m-%d').strftime("%A"),
-                               float(format(float(value_dict['net_sales_aft_deduction']), '.2f')),
-                               float(format(float(value_dict['cmns_ytd']), '.2f')),
-                               float(format(float(value_dict['cmns_tdy_']), '.2f')),
-                               float(value_dict['ads']),]
-            if ns_new_input:
-                update_sales = {}
-                for i in range(len(tdy_input_sales)):
-                    update_sales.update({read_net_sales.columns[i]:[tdy_input_sales[i]]})
-
-                update_sales = pd.DataFrame(update_sales)
-                conca_sales = pd.concat([read_net_sales, update_sales])
-                sales_msg = "{}的营业额信息已存入数据库，写入时间: {}".format(take_date, str(pd.to_datetime('today')))
-            else:
-                conca_sales = read_net_sales
-                sales_msg = "{}的营业额信息无法存入或无法再次存入数据库".format(take_date)
-
-            if cash_record_write:
-                read_cash_record = pd.read_excel(FPara['databaseFileName'], thousands=",", sheet_name=FPara['cashRecordSheetName'])
-                tdy_cash_record_list = [td_pd, dt.datetime.strptime(td_pd,'%Y-%m-%d').strftime("%A"), cash_received_tdy]
-
-                update_cash_record = {}
-                for i in range(len(tdy_cash_record_list)):
-                    update_cash_record.update({read_cash_record.columns[i]:[tdy_cash_record_list[i]]})
-
-                update_cash_record = pd.DataFrame(update_cash_record)
-                conca_cash_record = pd.concat([read_cash_record, update_cash_record])
-                cash_record_msg = "{}的现金信息已存入数据库，写入时间: {}".format(take_date, str(pd.to_datetime('today')))
-
-            else:
-                conca_cash_record = read_cash_record
-                cash_record_msg = "{}的现金信息无法存入或无法再次存入数据库".format(take_date)
-
-
-            drink_dict = {
-            'drinkTakeOverName0In' : drinkTakeOverName0In,
-            'drinkTakeOverName1In' : drinkTakeOverName1In,
-            'drinkTakeOverName2In' : drinkTakeOverName2In,
-            'drinkTakeOverName3In' : drinkTakeOverName3In,
-            'drinkTakeOverName4In' : drinkTakeOverName4In,
-            'drinkTakeOverName5In' : drinkTakeOverName5In,
-            'drinkTakeOverName6In' : drinkTakeOverName6In,
-            'drinkTakeOverName7In' : drinkTakeOverName7In,
-            'drinkTakeOverName8In' : drinkTakeOverName8In,
-            'drinkTakeOverName9In' : drinkTakeOverName9In,
-            'drinkTakeOverName10In' : drinkTakeOverName10In,
-            'drinkTakeOverName11In' : drinkTakeOverName11In,
-
-            'drinkTakeOverName0Ziyong' : drinkTakeOverName0Ziyong,
-            'drinkTakeOverName1Ziyong' : drinkTakeOverName1Ziyong,
-            'drinkTakeOverName2Ziyong' : drinkTakeOverName2Ziyong,
-            'drinkTakeOverName3Ziyong' : drinkTakeOverName3Ziyong,
-            'drinkTakeOverName4Ziyong' : drinkTakeOverName4Ziyong,
-            'drinkTakeOverName5Ziyong' : drinkTakeOverName5Ziyong,
-            'drinkTakeOverName6Ziyong' : drinkTakeOverName6Ziyong,
-            'drinkTakeOverName7Ziyong' : drinkTakeOverName7Ziyong,
-            'drinkTakeOverName8Ziyong' : drinkTakeOverName8Ziyong,
-            'drinkTakeOverName9Ziyong' : drinkTakeOverName9Ziyong,
-            'drinkTakeOverName10Ziyong' : drinkTakeOverName10Ziyong,
-            'drinkTakeOverName11Ziyong' : drinkTakeOverName11Ziyong,
-
+            value_dict = {
+                'take_date' : take_date,
+                'outlet_loc' : outlet_loc,
+                'lun_sales' : lun_sales,
+                'lun_gc' : lun_gc,
+                'lun_avg' : lun_avg,
+                'lun_fwc' : lun_fwc,
+                'lun_kwc' : lun_kwc,
+                'tb_sales' : tb_sales,
+                'tb_gc' : tb_gc,
+                'tb_avg' : tb_avg,
+                'tb_fwc': tb_fwc,
+                'tb_kwc' : tb_kwc,
+                'night_sales' : night_sales,
+                'night_gc' : night_gc,
+                'night_avg' : night_avg,
+                'night_fwc' : night_fwc,
+                'night_kwc' : night_kwc,
+                'no_of_cover' : no_of_cover,
             }
 
-            for number in range(drinkCounter):
-                drink_dict.update({ 'drinkTakeOverName{}Out'.format(number) : int(int(value_dict['drinkTakeOverName{}Sale'.format(number)]) + int(drink_dict['drinkTakeOverName{}Ziyong'.format(number)])),
-                                    'drinkTakeOverName{}Beizhu'.format(number) : drink_beizhu(drink_dict['drinkTakeOverName{}Ziyong'.format(number)])
-                                  })
 
-            read_drink = pd.read_excel(FPara['databaseFileName'], thousands=',', sheet_name=FPara['drinkRecordSheetName'])
-            read_drink.sort_values(by='日期', ascending=True, ignore_index=True, inplace=True)
-
-            if len(read_drink.columns) == len(databaseColumns[FPara['drinkRecordSheetName']]):
-                if read_drink.columns.tolist() != databaseColumns[FPara['drinkRecordSheetName']]:
-                    read_drink.columns = databaseColumns[FPara['drinkRecordSheetName']]
-                    print('The columns of {} had been updated.'.format(FPara['drinkRecordSheetName']))
-
-            tdyDrinkRecord = read_drink[read_drink['日期'] == take_date]
-            if tdyDrinkRecord.empty:
-                if read_drink[read_drink['日期'] == yesterday_date].empty:
-                    writeToDrink = False
-                else:
-                    writeToDrink = True
-                    for number in range(drinkCounter):
-                        drink_dict.update({ 'drinkTakeOverName{}Previous'.format(number) : int(read_drink[read_drink['日期'] == yesterday_date]['{}实结存'.format(FPara['drinkTakeOverName{}'.format(number)])].values[0]) })
-
-                    for number in range(drinkCounter):
-                        drink_dict.update({ 'drinkTakeOverName{}SJC'.format(number) : int(drink_dict['drinkTakeOverName{}Previous'.format(number)]) + int(drink_dict['drinkTakeOverName{}In'.format(number)]) - int(drink_dict['drinkTakeOverName{}Out'.format(number)])})
-            else:
-                writeToDrink = False
-
-            if writeToDrink:
-                out_drink = [take_date]
-
-                if drinkInventoryFunction:
-                    for number in range(drinkCounter):
-                        out_drink += [
-                                        drink_dict['drinkTakeOverName{}Previous'.format(number)],
-                                        drink_dict['drinkTakeOverName{}In'.format(number)],
-                                        drink_dict['drinkTakeOverName{}Out'.format(number)],
-                                        drink_dict['drinkTakeOverName{}SJC'.format(number)],
-                                        drink_dict['drinkTakeOverName{}Beizhu'.format(number)]
-                                     ]
-                else:
-                    for number in range(drinkCounter):
-                        out_drink += [0,0,0,0,0]
-
-                out_drink_df = {}
-                for y in range(len(out_drink)):
-                    out_drink_df.update({read_drink.columns[y]:[out_drink[y]]})
-                out_drink_df = pd.DataFrame(out_drink_df)
-                drink_conca = pd.concat([read_drink, out_drink_df])
-                drink_conca.sort_values(by='日期', ascending=True, ignore_index=True, inplace=True)
-                drink_msg = "{}的酒水库存已存入数据库，写入时间: {}".format(take_date, str(pd.to_datetime('today')))
-            else:
-                drink_conca = read_drink
-                drink_msg =  "{}的酒水库存无法存入或无法再次存入数据库".format(take_date)
-
-            concaFile = [drink_conca, tabox_concat, conca_sales, conca_cash_record, promo_conca]
-            msgList = [drink_msg, tabox_msg, sales_msg, cash_record_msg, promo_msg]
-            concaFileName = [FPara['drinkRecordSheetName'],
-                             FPara['takeawayBoxRecordSheetName'],
-                             FPara['salesRecordSheetName'],
-                             FPara['cashRecordSheetName'],
-                             FPara['promoRecordSheetName']]
-
-            with pd.ExcelWriter(FPara['databaseFileName']) as writer:
-                for file in range(len(concaFile)):
-                    concaFile[file].to_excel(writer, sheet_name=concaFileName[file], index=False, header=True)
-
-            drink_conca = pd.read_excel(FPara['databaseFileName'], sheet_name=FPara['drinkRecordSheetName'])
-            tabox_concat = pd.read_excel(FPara['databaseFileName'], sheet_name=FPara['takeawayBoxRecordSheetName'])
-            conca_sales = pd.read_excel(FPara['databaseFileName'], sheet_name=FPara['salesRecordSheetName'])
-            conca_cash_record = pd.read_excel(FPara['databaseFileName'], sheet_name=FPara['cashRecordSheetName'])
-            promo_conca = pd.read_excel(FPara['databaseFileName'], sheet_name=FPara['promoRecordSheetName'])
-
-            NameConverter = readCsv(githubFileName=NameConverterForShowingDfCsvName,
+            rule = readCsv(githubFileName=valueDictRuleCsvName,
                            githubUserName=FPara['githubUserName'],
                            githubRepoName=FPara['githubRepoName'],
                            githubBranchName=FPara['githubBranchName'],
@@ -1380,177 +1025,545 @@ if len(read) > int(FPara['minBookFileLenAllowable']):
                            csvEncoding='utf-8',
                            runLocally=FPara['runLocally'])
 
-            if drinkInventoryFunction:
-                read_drink = pd.read_excel(FPara['databaseFileName'], thousands = ',', sheet_name=FPara['drinkRecordSheetName'])
-                for_drink_df = read_drink[read_drink['日期'] == take_date]
+            for i in range(len(rule.index)):
+                if int(rule.iloc[i, 7]) == 1:
+                    value_dict.update({
+                        str(rule.iloc[i,0]): sum_rule(dfSlice=look_up_rule(dataFrame=df_dict[str(rule.iloc[i,2])],
+                                                                           a_string=str(rule.iloc[i, 1]),
+                                                                           take=int(rule.iloc[i, 3])),
+                                                      take=int(rule.iloc[i, 4]),
+                                                      is_money=int(rule.iloc[i,6]))
+                    })
 
-                yinLiao = []
-                drinkRuku = []
-                drinkShouchu = []
-                drinkZiyong = []
-                drinkShengyu = []
+                    if int(rule.iloc[i, 5]) < 0:
+                        continue
+                    else:
+                        value_dict.update({
+                            '{}_ytd_tdy'.format(str(rule.iloc[i,0]).replace('_count', '')) : promo_add_rule(
+                                                                                         databaseFileName=FPara['databaseFileName'],
+                                                                                         promoRecordSheetName=FPara['promoRecordSheetName'],
+                                                                                         td_pd = td_pd,
+                                                                                         td_ytd = td_ytd,
+                                                                                         promo_count=int(value_dict[str(rule.iloc[i,0])]),
+                                                                                         title=str(rule.iloc[i,0]).replace('_count', ''),
+                                                                                         take=rule.iloc[i,5])
+                        })
+
+                else:
+                    continue
+
+            value_dict.update({'net_sales_deductibles' : float(float(value_dict['TRUEBLUE_SUM'])+float(value_dict['SANRENXING_SUM'])+float(value_dict['PANDABOX_SUM'])+float(value_dict['Chinatown_5']))})
+            value_dict.update({'net_sales_aft_deduction' : float(float(value_dict['net_sales']) - float(value_dict['net_sales_deductibles']))})
+            value_dict['net_sales_aft_deduction'] = single_zero(format(normal_round(value_dict['net_sales_aft_deduction'], 2), ".2f"))
+
+            read_net_sales = pd.read_excel(FPara['databaseFileName'], thousands=',', sheet_name=FPara['salesRecordSheetName'])
+            dfb_record_exist = read_net_sales[read_net_sales['Date'] == td_pd]
+            if dfb_record_exist.empty:
+                if read_net_sales['Date'].values[-1] == td_ytd:
+                    if int(dfb.day) == 1:
+                        cmns_ytd = 0.0
+                        cmns_tdy = cmns_ytd + float(value_dict['net_sales_aft_deduction'])
+                        cmns_tdy_ = format(normal_round(cmns_tdy, 2), ".2f")
+                        avg_daily_sales = cmns_tdy/int(dfb.day)
+                        ads_rd1 = str(avg_daily_sales)[str(avg_daily_sales).find('.'):][:3]
+                        ads_rd2 = str(avg_daily_sales)[:str(avg_daily_sales).find('.')]
+                        ads = float(ads_rd2+ads_rd1)
+                        ns_new_input = True
+                    else:
+                        cmns_ytd = float(read_net_sales['cum net sales today'].values[-1])
+                        cmns_tdy = cmns_ytd + float(value_dict['net_sales_aft_deduction'])
+                        cmns_tdy_ = format(normal_round(cmns_tdy, 2),".2f")
+                        avg_daily_sales = cmns_tdy/int(dfb.day)
+                        ads_rd1 = str(avg_daily_sales)[str(avg_daily_sales).find('.'):][:3]
+                        ads_rd2 = str(avg_daily_sales)[:str(avg_daily_sales).find('.')]
+                        ads = float(ads_rd2+ads_rd1)
+                        ns_new_input = True
+                else:
+                    print('{}的昨日({})营业额信息不存在!'.format(td_pd, td_ytd))
+                    cmns_ytd = np.nan
+                    cmns_tdy_ = np.nan
+                    ads = np.nan
+                    ns_new_input = False
+            else:
+                print('{}的营业额信息已存在数据库'.format(td_pd))
+                cmns_ytd = float(dfb_record_exist['cum net sales ytd'].values[0])
+                cmns_tdy = float(dfb_record_exist['cum net sales today'].values[0])
+                ads = float(dfb_record_exist['Avg Net Sales/Day'].values[0])
+                cmns_tdy_ = format(cmns_tdy, '.2f')
+                ns_new_input = False
+
+            value_dict.update({
+                'cmns_ytd' : cmns_ytd,
+                'cmns_tdy_' : cmns_tdy_,
+                'ads' : ads,
+            })
+
+            for number in range(promotionCountConstant):
+                value_dict.update({'promo{}_ytd'.format(number+1) : value_dict['promo{}_ytd_tdy'.format(number+1)][0],
+                                   'promo{}_tdy'.format(number+1) : value_dict['promo{}_ytd_tdy'.format(number+1)][1]})
+
+            promo_df = pd.read_excel(FPara['databaseFileName'], thousands=',', sheet_name=FPara['promoRecordSheetName'])
+            promo_info_exist = promo_df[promo_df['Date'] == td_pd]
+            if promo_info_exist.empty:
+                if promo_df['Date'].values[-1] == td_ytd:
+                    sec_new = True
+                else:
+                    print('{}的昨日({})促销信息不存在!'.format(td_pd, td_ytd))
+                    sec_new = False
+            else:
+                print('{}的促销信息已存在数据库'.format(td_pd))
+                sec_new = False
+
+            read_cash_record = pd.read_excel(FPara['databaseFileName'], thousands=",", sheet_name=FPara['cashRecordSheetName'])
+            rcr_record_exist = read_cash_record[read_cash_record["Date"] == td_pd]
+            if rcr_record_exist.empty:
+                if read_cash_record["Date"].values[-1] == td_ytd:
+                    cash_received_tdy = float(value_dict["CASH"])
+                    cash_record_write = True
+                else:
+                    print('{}的昨日({})现金记录不存在!'.format(td_pd, td_ytd))
+                    cash_received_tdy = None
+                    cash_record_write = False
+            else:
+                print("{}的现金记录已存在数据库".format(td_pd))
+                cash_received_tdy = float(read_cash_record[read_cash_record["Date"] == td_pd]["Amount"].values[0])
+                cash_record_write = False
+
+            generate=True
+            for num in range(promotionCountConstant):
+                if int(value_dict['promo{}_ytd_tdy'.format(num+1)][1]) < int(value_dict['promo{}_count'.format(num+1)]):
+                    generate = False
+                else:
+                    pass
+            print()
+            print('生成报表中...')
+            print('——————————————')
+            print()
+            if generate:
+                print_result = []
+                printRuleDf = readCsv(githubFileName=printRuleCsvName,
+                               githubUserName=FPara['githubUserName'],
+                               githubRepoName=FPara['githubRepoName'],
+                               githubBranchName=FPara['githubBranchName'],
+                               githubFolderName=FPara['githubFolderName'],
+                               csvSep=',',
+                               csvEncoding='utf-8',
+                               runLocally=FPara['runLocally'])
+
+                for column in printRuleDf.columns:
+                    printRuleDf[column] = printRuleDf[column].astype(str)
+
+                for index in range(len(printRuleDf)):
+                    formatList = printRuleDf['key names in value_dict'][index]
+                    formatListList = formatList.split(',')
+                    formatEval = []
+                    for formats in formatListList:
+                        if formats == 'nan':
+                            continue
+                        else:
+                            formatEval += [value_dict[str(formats)]]
+
+                    if printRuleDf['print_statement'][index] == 'nan':
+                        print_result += [' ']
+
+                    elif int(printRuleDf['active_status'][index]) != 1:
+                        pass
+                    else:
+                        print_result += [printRuleDf['print_statement'][index].format(*formatEval)]
+
+                bookkeeping_particulars = ['初始额', '销售额']
+
+                voucher_expense_list = ['Trueblue会员', '三人行礼券', 'PandaBox', "唐人街首单减$5"]
+                voucher_expense_dict_locator = ['TRUEBLUE_SUM', 'SANRENXING_SUM', 'PANDABOX_SUM', "Chinatown_5"]
+
+                income_list = [' ',
+                               format(float(value_dict['net_sales']), '.2f'), ]
+
+                expense_list = [' ',
+                                ' ', ]
+
+                balance_list = [format(float(value_dict['cmns_ytd']), '.2f'),
+                                format(normal_round(float(value_dict['cmns_ytd'])+float(value_dict['net_sales']),2), '.2f'), ]
+
+                account_balance = float(balance_list[-1])
+                for index in range(len(voucher_expense_dict_locator)):
+                    if value_dict[voucher_expense_dict_locator[index]] != 0:
+                        bookkeeping_particulars += [voucher_expense_list[index]]
+                        income_list += [' ']
+                        expense_list += [format(float(value_dict[voucher_expense_dict_locator[index]]), '.2f')]
+                        account_balance -= float(value_dict[voucher_expense_dict_locator[index]])
+                        balance_list += [format(account_balance, '.2f')]
+                    else:
+                        continue
+
+                income_total = 0
+                expense_total = 0
+                for index in range(len(income_list)):
+                    if income_list[index] != ' ':
+                        income_total += float(income_list[index])
+                    else:
+                        continue
+
+                for index in range(len(expense_list)):
+                    if expense_list[index] != ' ':
+                        expense_total += float(expense_list[index])
+                    else:
+                        continue
+
+                bookkeeping_particulars += ['今日关帐合计']
+                income_list += [format(income_total, '.2f')]
+                expense_list += [format(expense_total, '.2f')]
+                balance_list += [format(float(value_dict['cmns_tdy_']), '.2f')]
+
+                bookkeeping_df = pd.DataFrame({"描述": bookkeeping_particulars,
+                                               "收入": income_list,
+                                               "支出": expense_list,
+                                               "月累计": balance_list,})
+
+                promo_df = pd.read_excel(FPara['databaseFileName'], thousands=',', sheet_name=FPara['promoRecordSheetName'])
+
+                tdy_input_promo = [td_pd, dt.datetime.strptime(td_pd,'%Y-%m-%d').strftime("%A"), ]
+
+                for number in range(promotionCountConstant):
+                    tdy_input_promo += [
+                                    value_dict['promo{}_ytd_tdy'.format(number+1)][0],
+                                    value_dict['promo{}_ytd_tdy'.format(number+1)][1]
+                    ]
+
+                if sec_new:
+                    promo_updating = {}
+                    for item in range(len(tdy_input_promo)):
+                        promo_updating.update({promo_df.columns[item]:[tdy_input_promo[item]]})
+
+                    promo_updating = pd.DataFrame(promo_updating)
+                    promo_conca = pd.concat([promo_df, promo_updating])
+                    promo_msg = "{}的促销信息已存入数据库，写入时间: {}".format(take_date, str(pd.to_datetime('today')))
+
+                else:
+                    promo_conca = promo_df
+                    promo_msg = "{}的促销信息无法存入或无法再次存入数据库".format(take_date)
+
+                read_net_sales = pd.read_excel(FPara['databaseFileName'], thousands=',', sheet_name=FPara['salesRecordSheetName'])
+                tdy_input_sales = [td_pd,
+                                   dt.datetime.strptime(td_pd,'%Y-%m-%d').strftime("%A"),
+                                   float(format(float(value_dict['net_sales_aft_deduction']), '.2f')),
+                                   float(format(float(value_dict['cmns_ytd']), '.2f')),
+                                   float(format(float(value_dict['cmns_tdy_']), '.2f')),
+                                   float(value_dict['ads']),]
+                if ns_new_input:
+                    update_sales = {}
+                    for i in range(len(tdy_input_sales)):
+                        update_sales.update({read_net_sales.columns[i]:[tdy_input_sales[i]]})
+
+                    update_sales = pd.DataFrame(update_sales)
+                    conca_sales = pd.concat([read_net_sales, update_sales])
+                    sales_msg = "{}的营业额信息已存入数据库，写入时间: {}".format(take_date, str(pd.to_datetime('today')))
+                else:
+                    conca_sales = read_net_sales
+                    sales_msg = "{}的营业额信息无法存入或无法再次存入数据库".format(take_date)
+
+                if cash_record_write:
+                    read_cash_record = pd.read_excel(FPara['databaseFileName'], thousands=",", sheet_name=FPara['cashRecordSheetName'])
+                    tdy_cash_record_list = [td_pd, dt.datetime.strptime(td_pd,'%Y-%m-%d').strftime("%A"), cash_received_tdy]
+
+                    update_cash_record = {}
+                    for i in range(len(tdy_cash_record_list)):
+                        update_cash_record.update({read_cash_record.columns[i]:[tdy_cash_record_list[i]]})
+
+                    update_cash_record = pd.DataFrame(update_cash_record)
+                    conca_cash_record = pd.concat([read_cash_record, update_cash_record])
+                    cash_record_msg = "{}的现金信息已存入数据库，写入时间: {}".format(take_date, str(pd.to_datetime('today')))
+
+                else:
+                    conca_cash_record = read_cash_record
+                    cash_record_msg = "{}的现金信息无法存入或无法再次存入数据库".format(take_date)
+
+
+                drink_dict = {
+                'drinkTakeOverName0In' : drinkTakeOverName0In,
+                'drinkTakeOverName1In' : drinkTakeOverName1In,
+                'drinkTakeOverName2In' : drinkTakeOverName2In,
+                'drinkTakeOverName3In' : drinkTakeOverName3In,
+                'drinkTakeOverName4In' : drinkTakeOverName4In,
+                'drinkTakeOverName5In' : drinkTakeOverName5In,
+                'drinkTakeOverName6In' : drinkTakeOverName6In,
+                'drinkTakeOverName7In' : drinkTakeOverName7In,
+                'drinkTakeOverName8In' : drinkTakeOverName8In,
+                'drinkTakeOverName9In' : drinkTakeOverName9In,
+                'drinkTakeOverName10In' : drinkTakeOverName10In,
+                'drinkTakeOverName11In' : drinkTakeOverName11In,
+
+                'drinkTakeOverName0Ziyong' : drinkTakeOverName0Ziyong,
+                'drinkTakeOverName1Ziyong' : drinkTakeOverName1Ziyong,
+                'drinkTakeOverName2Ziyong' : drinkTakeOverName2Ziyong,
+                'drinkTakeOverName3Ziyong' : drinkTakeOverName3Ziyong,
+                'drinkTakeOverName4Ziyong' : drinkTakeOverName4Ziyong,
+                'drinkTakeOverName5Ziyong' : drinkTakeOverName5Ziyong,
+                'drinkTakeOverName6Ziyong' : drinkTakeOverName6Ziyong,
+                'drinkTakeOverName7Ziyong' : drinkTakeOverName7Ziyong,
+                'drinkTakeOverName8Ziyong' : drinkTakeOverName8Ziyong,
+                'drinkTakeOverName9Ziyong' : drinkTakeOverName9Ziyong,
+                'drinkTakeOverName10Ziyong' : drinkTakeOverName10Ziyong,
+                'drinkTakeOverName11Ziyong' : drinkTakeOverName11Ziyong,
+
+                }
 
                 for number in range(drinkCounter):
-                    yinLiao += [NameConverter[NameConverter['name in rule'] == 'drinkTakeOverName{}'.format(number)]['name to show'].values[0]]
+                    drink_dict.update({ 'drinkTakeOverName{}Out'.format(number) : int(int(value_dict['drinkTakeOverName{}Sale'.format(number)]) + int(drink_dict['drinkTakeOverName{}Ziyong'.format(number)])),
+                                        'drinkTakeOverName{}Beizhu'.format(number) : drink_beizhu(drink_dict['drinkTakeOverName{}Ziyong'.format(number)])
+                                      })
 
-                    drinkRuku += [for_drink_df['{}进'.format(FPara['drinkTakeOverName{}'.format(number)])].values[0]]
+                read_drink = pd.read_excel(FPara['databaseFileName'], thousands=',', sheet_name=FPara['drinkRecordSheetName'])
+                read_drink.sort_values(by='日期', ascending=True, ignore_index=True, inplace=True)
 
-                    drinkShouchu += [int(value_dict['drinkTakeOverName{}Sale'.format(number)])]
+                if len(read_drink.columns) == len(databaseColumns[FPara['drinkRecordSheetName']]):
+                    if read_drink.columns.tolist() != databaseColumns[FPara['drinkRecordSheetName']]:
+                        read_drink.columns = databaseColumns[FPara['drinkRecordSheetName']]
+                        print('The columns of {} had been updated.'.format(FPara['drinkRecordSheetName']))
 
-                    drinkZiyong += [int(for_drink_df['{}出'.format(FPara['drinkTakeOverName{}'.format(number)])].values[0]) - int(value_dict['drinkTakeOverName{}Sale'.format(number)])]
+                tdyDrinkRecord = read_drink[read_drink['日期'] == take_date]
+                if tdyDrinkRecord.empty:
+                    if read_drink[read_drink['日期'] == yesterday_date].empty:
+                        writeToDrink = False
+                    else:
+                        writeToDrink = True
+                        for number in range(drinkCounter):
+                            drink_dict.update({ 'drinkTakeOverName{}Previous'.format(number) : int(read_drink[read_drink['日期'] == yesterday_date]['{}实结存'.format(FPara['drinkTakeOverName{}'.format(number)])].values[0]) })
 
-                    drinkShengyu += [int(for_drink_df['{}实结存'.format(FPara['drinkTakeOverName{}'.format(number)])].values[0])]
+                        for number in range(drinkCounter):
+                            drink_dict.update({ 'drinkTakeOverName{}SJC'.format(number) : int(drink_dict['drinkTakeOverName{}Previous'.format(number)]) + int(drink_dict['drinkTakeOverName{}In'.format(number)]) - int(drink_dict['drinkTakeOverName{}Out'.format(number)])})
+                else:
+                    writeToDrink = False
+
+                if writeToDrink:
+                    out_drink = [take_date]
+
+                    if drinkInventoryFunction:
+                        for number in range(drinkCounter):
+                            out_drink += [
+                                            drink_dict['drinkTakeOverName{}Previous'.format(number)],
+                                            drink_dict['drinkTakeOverName{}In'.format(number)],
+                                            drink_dict['drinkTakeOverName{}Out'.format(number)],
+                                            drink_dict['drinkTakeOverName{}SJC'.format(number)],
+                                            drink_dict['drinkTakeOverName{}Beizhu'.format(number)]
+                                         ]
+                    else:
+                        for number in range(drinkCounter):
+                            out_drink += [0,0,0,0,0]
+
+                    out_drink_df = {}
+                    for y in range(len(out_drink)):
+                        out_drink_df.update({read_drink.columns[y]:[out_drink[y]]})
+                    out_drink_df = pd.DataFrame(out_drink_df)
+                    drink_conca = pd.concat([read_drink, out_drink_df])
+                    drink_conca.sort_values(by='日期', ascending=True, ignore_index=True, inplace=True)
+                    drink_msg = "{}的酒水库存已存入数据库，写入时间: {}".format(take_date, str(pd.to_datetime('today')))
+                else:
+                    drink_conca = read_drink
+                    drink_msg =  "{}的酒水库存无法存入或无法再次存入数据库".format(take_date)
+
+                concaFile = [drink_conca, tabox_concat, conca_sales, conca_cash_record, promo_conca]
+                msgList = [drink_msg, tabox_msg, sales_msg, cash_record_msg, promo_msg]
+                concaFileName = [FPara['drinkRecordSheetName'],
+                                 FPara['takeawayBoxRecordSheetName'],
+                                 FPara['salesRecordSheetName'],
+                                 FPara['cashRecordSheetName'],
+                                 FPara['promoRecordSheetName']]
+
+                with pd.ExcelWriter(FPara['databaseFileName']) as writer:
+                    for file in range(len(concaFile)):
+                        concaFile[file].to_excel(writer, sheet_name=concaFileName[file], index=False, header=True)
+
+                drink_conca = pd.read_excel(FPara['databaseFileName'], sheet_name=FPara['drinkRecordSheetName'])
+                tabox_concat = pd.read_excel(FPara['databaseFileName'], sheet_name=FPara['takeawayBoxRecordSheetName'])
+                conca_sales = pd.read_excel(FPara['databaseFileName'], sheet_name=FPara['salesRecordSheetName'])
+                conca_cash_record = pd.read_excel(FPara['databaseFileName'], sheet_name=FPara['cashRecordSheetName'])
+                promo_conca = pd.read_excel(FPara['databaseFileName'], sheet_name=FPara['promoRecordSheetName'])
+
+                NameConverter = readCsv(githubFileName=NameConverterForShowingDfCsvName,
+                               githubUserName=FPara['githubUserName'],
+                               githubRepoName=FPara['githubRepoName'],
+                               githubBranchName=FPara['githubBranchName'],
+                               githubFolderName=FPara['githubFolderName'],
+                               csvSep=',',
+                               csvEncoding='utf-8',
+                               runLocally=FPara['runLocally'])
+
+                if drinkInventoryFunction:
+                    read_drink = pd.read_excel(FPara['databaseFileName'], thousands = ',', sheet_name=FPara['drinkRecordSheetName'])
+                    for_drink_df = read_drink[read_drink['日期'] == take_date]
+
+                    yinLiao = []
+                    drinkRuku = []
+                    drinkShouchu = []
+                    drinkZiyong = []
+                    drinkShengyu = []
+
+                    for number in range(drinkCounter):
+                        yinLiao += [NameConverter[NameConverter['name in rule'] == 'drinkTakeOverName{}'.format(number)]['name to show'].values[0]]
+
+                        drinkRuku += [for_drink_df['{}进'.format(FPara['drinkTakeOverName{}'.format(number)])].values[0]]
+
+                        drinkShouchu += [int(value_dict['drinkTakeOverName{}Sale'.format(number)])]
+
+                        drinkZiyong += [int(for_drink_df['{}出'.format(FPara['drinkTakeOverName{}'.format(number)])].values[0]) - int(value_dict['drinkTakeOverName{}Sale'.format(number)])]
+
+                        drinkShengyu += [int(for_drink_df['{}实结存'.format(FPara['drinkTakeOverName{}'.format(number)])].values[0])]
 
 
-                drink_df = pd.DataFrame({'饮料(单位)' : yinLiao, '入库' : drinkRuku, '售出' : drinkShouchu, '自用' : drinkZiyong, '剩余': drinkShengyu})
-                drink_df['售出'] = drink_df['售出'].apply(lambda x : -1*x)
-                drink_df['自用'] = drink_df['自用'].apply(lambda x : -1*x)
+                    drink_df = pd.DataFrame({'饮料(单位)' : yinLiao, '入库' : drinkRuku, '售出' : drinkShouchu, '自用' : drinkZiyong, '剩余': drinkShengyu})
+                    drink_df['售出'] = drink_df['售出'].apply(lambda x : -1*x)
+                    drink_df['自用'] = drink_df['自用'].apply(lambda x : -1*x)
 
-                dropIndex = []
-                for index in range(len(drink_df)):
-                    if str(drink_df.iloc[index, 0]).startswith("饮料"):
-                        dropIndex += [index]
+                    dropIndex = []
+                    for index in range(len(drink_df)):
+                        if str(drink_df.iloc[index, 0]).startswith("饮料"):
+                            dropIndex += [index]
 
-                drink_df.drop(dropIndex, axis=0, inplace=True)
+                    drink_df.drop(dropIndex, axis=0, inplace=True)
 
-            else:
-                drink_df = None
+                else:
+                    drink_df = None
 
-            if takeawayBoxInventoryFunction:
-                tabox = pd.read_excel(FPara['databaseFileName'], sheet_name=FPara['takeawayBoxRecordSheetName'])
-                for_takeaway_df = tabox[tabox['Date'] == td_pd]
-                wuPin = []
-                ruKu = []
-                yongChu = []
-                shengYu = []
+                if takeawayBoxInventoryFunction:
+                    tabox = pd.read_excel(FPara['databaseFileName'], sheet_name=FPara['takeawayBoxRecordSheetName'])
+                    for_takeaway_df = tabox[tabox['Date'] == td_pd]
+                    wuPin = []
+                    ruKu = []
+                    yongChu = []
+                    shengYu = []
 
-                for number in range(boxCounter):
-                    wuPin += [NameConverter[NameConverter['name in rule'] == 'boxTakeOverName{}'.format(number)]['name to show'].values[0]]
+                    for number in range(boxCounter):
+                        wuPin += [NameConverter[NameConverter['name in rule'] == 'boxTakeOverName{}'.format(number)]['name to show'].values[0]]
 
-                    ruKu += [for_takeaway_df['{}入库'.format(FPara['boxTakeOverName{}'.format(number)])].values[0]]
+                        ruKu += [for_takeaway_df['{}入库'.format(FPara['boxTakeOverName{}'.format(number)])].values[0]]
 
-                    yongChu += [for_takeaway_df['{}出库'.format(FPara['boxTakeOverName{}'.format(number)])].values[0]]
+                        yongChu += [for_takeaway_df['{}出库'.format(FPara['boxTakeOverName{}'.format(number)])].values[0]]
 
-                    shengYu += [for_takeaway_df['{}现有数量'.format(FPara['boxTakeOverName{}'.format(number)])].values[0]]
+                        shengYu += [for_takeaway_df['{}现有数量'.format(FPara['boxTakeOverName{}'.format(number)])].values[0]]
 
-                takeaway_df = pd.DataFrame({'物品(单位)': wuPin, '入库': ruKu, '用出': yongChu, '剩余' : shengYu})
-                takeaway_df['用出'] = takeaway_df['用出'].apply(lambda x:-1*round(x,2))
-                takeaway_df['剩余'] = takeaway_df['剩余'].apply(lambda x:round(x,2))
+                    takeaway_df = pd.DataFrame({'物品(单位)': wuPin, '入库': ruKu, '用出': yongChu, '剩余' : shengYu})
+                    takeaway_df['用出'] = takeaway_df['用出'].apply(lambda x:-1*round(x,2))
+                    takeaway_df['剩余'] = takeaway_df['剩余'].apply(lambda x:round(x,2))
 
-                dropIndex = []
-                for index in range(len(takeaway_df)):
-                    if str(takeaway_df.iloc[index, 0]).startswith("box"):
-                        dropIndex += [index]
+                    dropIndex = []
+                    for index in range(len(takeaway_df)):
+                        if str(takeaway_df.iloc[index, 0]).startswith("box"):
+                            dropIndex += [index]
 
-                takeaway_df.drop(dropIndex, axis=0, inplace=True)
+                    takeaway_df.drop(dropIndex, axis=0, inplace=True)
 
 
-            else:
-                takeaway_df = None
+                else:
+                    takeaway_df = None
 
-            if cashRecordShowFunction:
+                if cashRecordShowFunction:
 
-                cash_df = pd.read_excel(FPara['databaseFileName'], thousands=",", sheet_name=FPara['cashRecordSheetName'])
-                cash_df['Date'] = cash_df['Date'].astype(str)
-                if cash_received_tdy != None:
-                    start_date_continue = True
-                    try:
-                        start_date_index = int(cash_df[cash_df['Date'] == cash_start_date].index.values[0])
-                    except:
+                    cash_df = pd.read_excel(FPara['databaseFileName'], thousands=",", sheet_name=FPara['cashRecordSheetName'])
+                    cash_df['Date'] = cash_df['Date'].astype(str)
+                    if cash_received_tdy != None:
+                        start_date_continue = True
+                        try:
+                            start_date_index = int(cash_df[cash_df['Date'] == cash_start_date].index.values[0])
+                        except:
+                            cash_df = None
+                            cash_summary = None
+                            cash_df_msg = "未存放现金的起始日期错误,原因可能是标点符号使用错误或是数据库里不存在该日期的记录. "
+                            start_date_continue = False
+
+                        if start_date_continue:
+                            if cash_end_date == 'default':
+                                if start_date_index != 0:
+                                    drop_indexes = np.arange(start_date_index)
+                                    cash_df.drop(drop_indexes, axis=0, inplace=True)
+                                    cash_df.reset_index(inplace=True)
+                                    if "index" in cash_df.columns:
+                                        cash_df.drop("index", axis=1, inplace=True)
+                                else:
+                                    pass
+
+                                cash_summary = cash_df['Amount'].sum()
+                                cash_df_msg = "{}至{}的现金收入共计${}".format(cash_start_date, td_pd, format(cash_summary, '.2f'))
+
+                            else:
+                                end_date_continue = True
+                                try:
+                                    end_date_index = int(cash_df[cash_df['Date'] == cash_end_date].index.values[0])
+                                except:
+                                    cash_df = None
+                                    cash_summary = None
+                                    cash_df_msg = "未存放现金的结束日期错误,原因可能是标点符号使用错误或是数据库里不存在该日期的记录. "
+                                    end_date_continue = False
+
+                                if end_date_continue:
+                                    cash_df = cash_df.iloc[np.arange(start_date_index, end_date_index+1),:]
+                                    cash_summary = cash_df["Amount"].sum()
+                                    cash_df_msg = "{}至{}的现金收入共计${}".format(cash_start_date, cash_end_date, format(cash_summary, '.2f'))
+                                else:
+                                    pass
+                        else:
+                            pass
+                    else:
                         cash_df = None
                         cash_summary = None
-                        cash_df_msg = "未存放现金的起始日期错误,原因可能是标点符号使用错误或是数据库里不存在该日期的记录. "
-                        start_date_continue = False
-
-                    if start_date_continue:
-                        if cash_end_date == 'default':
-                            if start_date_index != 0:
-                                drop_indexes = np.arange(start_date_index)
-                                cash_df.drop(drop_indexes, axis=0, inplace=True)
-                                cash_df.reset_index(inplace=True)
-                                if "index" in cash_df.columns:
-                                    cash_df.drop("index", axis=1, inplace=True)
-                            else:
-                                pass
-
-                            cash_summary = cash_df['Amount'].sum()
-                            cash_df_msg = "{}至{}的现金收入共计${}".format(cash_start_date, td_pd, format(cash_summary, '.2f'))
-
-                        else:
-                            end_date_continue = True
-                            try:
-                                end_date_index = int(cash_df[cash_df['Date'] == cash_end_date].index.values[0])
-                            except:
-                                cash_df = None
-                                cash_summary = None
-                                cash_df_msg = "未存放现金的结束日期错误,原因可能是标点符号使用错误或是数据库里不存在该日期的记录. "
-                                end_date_continue = False
-
-                            if end_date_continue:
-                                cash_df = cash_df.iloc[np.arange(start_date_index, end_date_index+1),:]
-                                cash_summary = cash_df["Amount"].sum()
-                                cash_df_msg = "{}至{}的现金收入共计${}".format(cash_start_date, cash_end_date, format(cash_summary, '.2f'))
-                            else:
-                                pass
-                    else:
-                        pass
+                        cash_df_msg = "现金收入存放信息生成错误! "
                 else:
-                    cash_df = None
-                    cash_summary = None
-                    cash_df_msg = "现金收入存放信息生成错误! "
-            else:
-                pass
+                    pass
 
 
-            for items in print_result:
-                print(items)
+                for items in print_result:
+                    print(items)
 
-            print()
-            print('——————————————')
-            print()
-            print('服务费: ${}'.format(value_dict['svc']))
-            print('GST: ${}'.format(value_dict['gst']))
-            print('日均营业额: ${}'.format(value_dict['ads']))
-            print()
-            print("帐务簿记")
-            print(take_date)
-            print()
-            prtdf(bookkeeping_df)
-            print()
-            print('——————————————')
-            print('正在写入...')
-            for msg in msgList:
-                print(msg)
-            print()
-            print('——————————————')
-            if drinkInventoryFunction:
-                if isinstance(drink_df, pd.DataFrame):
-                    print('酒水信息: ')
-                    print(take_date)
-                    prtdf(drink_df)
-                    print()
-
-            if takeawayBoxInventoryFunction:
-                if isinstance(takeaway_df, pd.DataFrame):
-                    print('打包盒信息: ')
-                    print(take_date)
-                    prtdf(takeaway_df)
-                    print()
-
-            if cashRecordShowFunction:
-                print("现金收入存放信息: ")
+                print()
+                print('——————————————')
+                print()
+                print('服务费: ${}'.format(value_dict['svc']))
+                print('GST: ${}'.format(value_dict['gst']))
+                print('日均营业额: ${}'.format(value_dict['ads']))
+                print()
+                print("帐务簿记")
                 print(take_date)
-                if isinstance(cash_df, pd.DataFrame) and cash_summary != None:
-                    prtdf(cash_df)
-                    print(cash_df_msg)
-                else:
-                    print(cash_df_msg)
+                print()
+                prtdf(bookkeeping_df)
+                print()
+                print('——————————————')
+                print('正在写入...')
+                for msg in msgList:
+                    print(msg)
+                print()
+                print('——————————————')
+                if drinkInventoryFunction:
+                    if isinstance(drink_df, pd.DataFrame):
+                        print('酒水信息: ')
+                        print(take_date)
+                        prtdf(drink_df)
+                        print()
 
+                if takeawayBoxInventoryFunction:
+                    if isinstance(takeaway_df, pd.DataFrame):
+                        print('打包盒信息: ')
+                        print(take_date)
+                        prtdf(takeaway_df)
+                        print()
+
+                if cashRecordShowFunction:
+                    print("现金收入存放信息: ")
+                    print(take_date)
+                    if isinstance(cash_df, pd.DataFrame) and cash_summary != None:
+                        prtdf(cash_df)
+                        print(cash_df_msg)
+                    else:
+                        print(cash_df_msg)
+
+            else:
+                 print("逻辑错误")
         else:
-             print("逻辑错误")
+            print("导出的报表无法识别来自哪家门店")
+            print("请选择门店导出报表后再运行一遍吧")
+            print("如果用机器上的报表关帐的,请定义theOutlet后再运行一遍")
     else:
-        print("导出的报表无法识别来自哪家门店")
-        print("请选择门店导出报表后再运行一遍吧")
-        print("如果用机器上的报表关帐的,请定义theOutlet后再运行一遍")
+        print("你应该没有复制所有的后台数据,复制完所有的数据再运行一遍吧")
 else:
-    print("你应该没有复制所有的后台数据,复制完所有的数据再运行一遍吧")
+    print("始于2021年9月27日，终于2023年7月31日。此程序已为三人行服务了672天！")
+    print("关帐程序已全面升级，请使用新程序继续关帐！")
+    print("谢谢，再见！")
