@@ -1092,7 +1092,7 @@ def parse_alert(stock_alert_bool, date_dict, unparsed_alert, understock_alert_bo
 
             else:
                 if len(understock_alert) > 0:
-                    message_string = "{}({}) \n".format(outlet, dfb.strftime("%Y-%m-%d")
+                    message_string = "{}({}) \n".format(outlet, dfb.strftime("%Y-%m-%d"))
                     message_string += "{} \n".format(title_dict["understock_alert"])
                     for t in range(len(understock_alert)):
                         message_string += "{} \n".format(understock_alert[t])
@@ -1113,7 +1113,7 @@ def parse_alert(stock_alert_bool, date_dict, unparsed_alert, understock_alert_bo
             try:
                 message_string+"" == message_string
             except:
-                message_string = "{}({}) \n".format(outlet, dfb.strftime("%Y-%m-%d")
+                message_string = "{}({}) \n".format(outlet, dfb.strftime("%Y-%m-%d"))
 
             if len(overstock_alert) > 0:
                 message_string += "------------------------ \n"
