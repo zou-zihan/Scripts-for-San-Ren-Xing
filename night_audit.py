@@ -1042,12 +1042,13 @@ def parse_tabox(k_dict, google_auth, fernet_key, box_num, rule_df_dict, take_dat
 
     return tabox_write_db, box_value, unparsed_alert
 
-def parse_alert(stock_alert_bool, date_dict, unparsed_alert, understock_alert_bool, overstock_alert_bool, alert_freq, alert_type):
+def parse_alert(stock_alert_bool, date_dict, unparsed_alert, understock_alert_bool, overstock_alert_bool, alert_freq, alert_type, outlet):
     dfb = date_dict["dfb"]
     understock_alert = unparsed_alert["understock_alert"]
     understock_other = unparsed_alert["understock_other"]
     stock_all = unparsed_alert["stock_all"]
     overstock_alert = unparsed_alert["overstock_alert"]
+    outlet = outlet.strip().capitalize()
 
     #box_stock_alert = eval(str(k_dict["box_stock_alert"]).strip().capitalize())
     #drink_stock_alert = eval(str(k_dict["drink_stock_alert"]).strip().capitalize())
@@ -1084,13 +1085,15 @@ def parse_alert(stock_alert_bool, date_dict, unparsed_alert, understock_alert_bo
 
         if understock_alert_bool:
             if dayname == alert_freq:
-                message_string = "{} \n".format(title_dict["stock_all"])
+                message_string = "{}({}) \n".format(outlet, dfb.strftime("%Y-%d-%m")
+                message_string += "{} \n".format(title_dict["stock_all"])
                 for t in range(len(stock_all)):
                     message_string += "{} \n".format(stock_all[t])
 
             else:
                 if len(understock_alert) > 0:
-                    message_string = "{} \n".format(title_dict["understock_alert"])
+                    message_string = "{}({}) \n".format(outlet, dfb.strftime("%Y-%m-%d")
+                    message_string += "{} \n".format(title_dict["understock_alert"])
                     for t in range(len(understock_alert)):
                         message_string += "{} \n".format(understock_alert[t])
 
@@ -1110,7 +1113,7 @@ def parse_alert(stock_alert_bool, date_dict, unparsed_alert, understock_alert_bo
             try:
                 message_string+"" == message_string
             except:
-                message_string = ""
+                message_string = "{}({}) \n".format(outlet, dfb.strftime("%Y-%m-%d")
 
             if len(overstock_alert) > 0:
                 message_string += "------------------------ \n"
@@ -2772,7 +2775,8 @@ def night_audit_main(database_url, db_setting_url, serialized_rule_filename, ser
                                                  understock_alert_bool=box_understock_alert,
                                                  overstock_alert_bool=box_overstock_alert,
                                                  alert_freq=box_alert_freq,
-                                                 alert_type="box")
+                                                 alert_type="box",
+                                                 outlet=outlet)
 
                 pbar.update(10)
                 value_dict, write_finance_db, write_promo_db = parse_value_dict(promo_num, lun_sales, lun_gc, tb_sales, tb_gc, lun_fwc, lun_kwc, tb_fwc, tb_kwc, night_fwc, night_kwc, rule_df_dict, take_databases, date_dict, book_dict, k_dict)
@@ -2799,7 +2803,8 @@ def night_audit_main(database_url, db_setting_url, serialized_rule_filename, ser
                                                    understock_alert_bool=drink_understock_alert,
                                                    overstock_alert_bool=drink_overstock_alert,
                                                    alert_freq=drink_alert_freq,
-                                                   alert_type="drink")
+                                                   alert_type="drink",
+                                                   outlet=outlet)
 
                 pbar.update(12)
 
