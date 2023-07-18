@@ -1469,6 +1469,8 @@ def parse_value_dict(promo_num, lun_sales, lun_gc, tb_sales, tb_gc, lun_fwc, lun
         ads_rd2 = str(avg_daily_sales)[:str(avg_daily_sales).find('.')]
         ads = float(ads_rd2+ads_rd1)
 
+        cmns_tdy = format(cmns_tdy, ".2f")
+
         value_dict.update({
             "cmns_ytd" : cmns_ytd,
             "cmns_tdy" : cmns_tdy,
@@ -1885,7 +1887,7 @@ def pending_upload_db(take_databases, k_dict, box_value, drink_dict, value_dict,
             day = dfb.strftime("%A")
             net_sales = value_dict["net_sales_after_deduction"]
             cum_net_sales_ytd = value_dict["cmns_ytd"]
-            cum_net_sales_tdy = value_dict["cmns_tdy"]
+            cum_net_sales_tdy = float(value_dict["cmns_tdy"])
             avg_sales_per_day = value_dict["ads"]
             cash_amt = value_dict["CASH"]
             dine_in_total = value_dict["SALES_DI"]
@@ -2855,13 +2857,13 @@ def night_audit_main(database_url, db_setting_url, serialized_rule_filename, ser
                     prtdf(bk_df)
                     print()
 
-                if not show_box_df.empty:
+                if not show_drink_df.empty:
                     print("酒水信息: ")
                     print(drink_db_max_date.strftime("%Y-%m-%d"))
                     prtdf(show_drink_df)
                     print()
 
-                if not show_drink_df.empty:
+                if not show_box_df.empty:
                     print("打包盒信息: ")
                     print(tabox_max_date.strftime("%Y-%m-%d"))
                     prtdf(show_box_df)
