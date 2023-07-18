@@ -376,7 +376,7 @@ def get_book_dfs(k_dict):
 
         if is_local_book:
             try:
-                outlet_loc = outlet
+                outlet_loc = outlet.strip().capitalize()
             except NameError:
                 outlet_loc = "门店【待编辑】"
 
