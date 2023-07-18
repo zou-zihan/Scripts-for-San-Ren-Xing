@@ -2460,7 +2460,7 @@ def parse_sending(drink_on_duty, box_on_duty, cashier_on_duty, google_auth, outl
                                                  receiver=receivers,
                                                  wifi=wifi)
 
-                            elif night_send_channel.strip().capitalize() == "Email":
+                            elif night_audit_send_channel.strip().capitalize() == "Email":
                                 print_result += ["——————————————", "服务费: ${}".format(svc),
                                                  "GST: ${}".format(gst), "日均营业额: ${}".format(ads)]
                                 receivers = ast.literal_eval(str(rcv_dict["night_audit_mail_receivers"]))[cashier_on_duty]
