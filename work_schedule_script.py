@@ -696,6 +696,12 @@ else:
             shift_df["AL PLUS"] = ALPlusArr
             shift_df["CCL PLUS"] = CCLPlusArr
 
+            dropExistingDateCriteria = shift_database["DATE"].isin(shift_df["DATE"].values)
+            dropIndex = shift_database[dropExistingDateCriteria].index
+            shift_database.drop(dropIndex, axis=0, inplace=True)
+            shift_database.reset_index(inplace=True)
+            shift_database.drop("index", axis=1, inplace=True)
+
             for index in range(len(shift_df)):
                 if index > 0:
                     shift_database = pd.concat([shift_database, DataFrame])
