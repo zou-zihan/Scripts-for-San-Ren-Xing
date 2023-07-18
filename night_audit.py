@@ -1085,7 +1085,7 @@ def parse_alert(stock_alert_bool, date_dict, unparsed_alert, understock_alert_bo
 
         if understock_alert_bool:
             if dayname == alert_freq:
-                message_string = "{}({}) \n".format(outlet, dfb.strftime("%Y-%d-%m"))
+                message_string = "{}({}) \n".format(outlet, dfb.strftime("%Y-%m-%d"))
                 message_string += "{} \n".format(title_dict["stock_all"])
                 for t in range(len(stock_all)):
                     message_string += "{} \n".format(stock_all[t])
