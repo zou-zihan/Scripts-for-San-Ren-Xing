@@ -1154,7 +1154,7 @@ def sending_email(is_pr, mail_server, mail_sender, mail_sender_password, mail_re
                     print("正在发送电邮给{}".format(ppl))
 
                     msg["To"] = ppl
-                    smtp_obj.sendmail(mail_sender, pp, msg.as_string())
+                    smtp_obj.sendmail(mail_sender, ppl, msg.as_string())
 
                     print("{} 电邮发送成功".format(ppl))
 
