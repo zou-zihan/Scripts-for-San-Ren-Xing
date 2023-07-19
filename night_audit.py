@@ -2820,7 +2820,7 @@ def night_audit_main(database_url, db_setting_url, serialized_rule_filename, ser
                 parse_sending(drink_on_duty, box_on_duty, cashier_on_duty, google_auth, outlet, send_dict, drink_message_string, tabox_message_string, print_result, k_dict, fernet_key, wifi, date_dict, value_dict, db_writables, backup_foldername)
                 pbar.update(5)
 
-                bk_df, show_box_df, show_drink_df, tabox_max_date, drink_db_max_date = parse_display_df(value_dict, rule_df_dict, k_dict, google_auth, db_writables, fernet_key, take_databases, database_url, backup_foldername)
+                bk_df, show_box_df, show_drink_df, tabox_max_date, drink_db_max_date = parse_display_df(value_dict, rule_df_dict, k_dict, google_auth, db_writables, fernet_key, database_url, backup_foldername)
                 pbar.update(5)
 
                 print()
