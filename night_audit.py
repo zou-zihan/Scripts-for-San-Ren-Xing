@@ -593,7 +593,7 @@ def get_db_columns(k_dict, drink_num, box_num, promo_num):
                      "DATE",
                      "DAY",
                      "NET SALES",
-                     "NET SALES YESTERDAY",
+                     "CUM NET SALES YESTERDAY",
                      "CUM NET SALES TODAY",
                      "AVG NET SALES PER DAY",
                      "CASH AMOUNT",
@@ -844,7 +844,7 @@ def parse_tabox(k_dict, google_auth, fernet_key, box_num, rule_df_dict, take_dat
                 print("已采用本地备份的打包盒出入库数据。")
                 print("注意确保本地备份的打包盒名字和数据库里的是一模一样的，当天所有出入库的数据是正确的。")
                 print("如果需要更改本地备份数据，请先强制停止此程序，改好后重新运行。")
-                print("如果无需更改任何数据, 按任意键继续运行程序")
+                print("如果无需更改任何数据, 按回车键继续运行程序")
                 input(":")
     else:
         local_db_filename = str(k_dict["local_database_filename"])
@@ -856,7 +856,7 @@ def parse_tabox(k_dict, google_auth, fernet_key, box_num, rule_df_dict, take_dat
         print("无网络连接，已采用本地备份的打包盒出入库数据")
         print("注意确保本地备份的打包盒名字和数据库里是一模一样的，当天所有出入库的数据是正确的。")
         print("如果需要更改本地备份数据，请先强制停止此程序，改好后重新运行。")
-        print("如果无需更改任何数据, 按任意键继续运行程序")
+        print("如果无需更改任何数据, 按回车键继续运行程序")
         input(":")
 
     if tabox_inv_function:
@@ -1622,7 +1622,7 @@ def parse_drink_stock(k_dict, fernet_key, google_auth, drink_num, value_dict, ta
                 print("已采用本地备份的酒水出入库数据。")
                 print("注意确保本地备份的酒水名字和数据库里的是一模一样的，当天所有出入库的数据是正确的。")
                 print("如果需要更改本地备份数据，请先强制停止此程序，改好后重新运行。")
-                print("如果无需更改任何数据, 按任意键继续运行程序")
+                print("如果无需更改任何数据, 按回车键继续运行程序")
                 input(":")
     else:
         local_db_filename = str(k_dict["local_database_filename"])
@@ -1633,7 +1633,7 @@ def parse_drink_stock(k_dict, fernet_key, google_auth, drink_num, value_dict, ta
         print("无网络连接，已采用本地备份的酒水出入库数据")
         print("注意确保本地备份的酒水名字和数据库里的是一模一样的，当天所有出入库的数据是正确的。")
         print("如果需要更改本地备份数据，请先强制停止此程序，改好后重新运行。")
-        print("如果无需更改任何数据, 按任意键继续运行程序")
+        print("如果无需更改任何数据, 按回车键继续运行程序")
         input(":")
 
     if drink_inv_function:
