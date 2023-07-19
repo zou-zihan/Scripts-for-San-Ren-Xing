@@ -237,7 +237,7 @@ def option_limit(options_list, user_input):
                 while user_input in range(len(options_list)):
                     return user_input
 
-def get_dfs(google_auth, db_setting_url, service_filename, constants_sheetname, serialized_rule_filename, outlet, fernet_key, wifi, backup_foldername):
+def get_dfs(google_auth, db_setting_url, constants_sheetname, serialized_rule_filename, outlet, fernet_key, wifi, backup_foldername):
 
     if wifi:
         try:
@@ -353,7 +353,7 @@ def get_dfs(google_auth, db_setting_url, service_filename, constants_sheetname, 
 
     return k_dict, rule_df_dict
 
-def get_book_dfs(k_dict):
+def get_book_dfs(k_dict, outlet):
 
     book_filename = str(k_dict["book_filename"])
     min_book_len_allowable = int(k_dict["min_book_len_allowable"])
@@ -1287,9 +1287,6 @@ def promo_add_rule(take_databases, k_dict, dfb, yesterday, promo_suffix, promo_c
 def parse_value_dict(promo_num, lun_sales, lun_gc, tb_sales, tb_gc, lun_fwc, lun_kwc, tb_fwc, tb_kwc, night_fwc, night_kwc, rule_df_dict, take_databases, date_dict, book_dict, k_dict):
 
     read = book_dict["read"]
-    pay_breakdown = book_dict["pay_breakdown"]
-    pay_brkdwn = book_dict["pay_brkdwn"]
-    read_ = book_dict["read_"]
     is_local_book = book_dict["is_local_book"]
     outlet_loc = book_dict["outlet_loc"]
 
@@ -1773,7 +1770,6 @@ def pending_upload_db(take_databases, k_dict, box_value, drink_dict, value_dict,
     yesterday = date_dict["dfb"]
     date_chinese_string = date_dict["date_chinese_string"]
 
-    local_db_filename = str(k_dict["local_database_filename"])
     dfb = pd.to_datetime(dfb)
     yesterday = pd.to_datetime(yesterday)
 
@@ -1964,7 +1960,7 @@ def upload_db(database_url, take_databases, k_dict, fernet_key, google_auth, box
     #print("正在上传数据...")
 
     auto_hour = 20
-    auto_min = 45
+    auto_min = 55
 
     NOW = dt.datetime.now()
     AUTO_TIME = dt.datetime(NOW.year, NOW.month, NOW.day, auto_hour, auto_min)
@@ -2196,7 +2192,7 @@ def upload_db(database_url, take_databases, k_dict, fernet_key, google_auth, box
 
     if wifi:
         try:
-            drink_sheet = google_auth.open_by_url(tabox_url)
+            tabox_drink_sheet = google_auth.open_by_url(tabox_url)
             rcv_sheetname_index = tabox_drink_sheet.worksheet(property="title", value=receivers_sheetname).index
             rcv_df = tabox_drink_sheet[rcv_sheetname_index].get_as_df()
         except:
@@ -2288,7 +2284,7 @@ def sending_telegram(is_pr, message, api, receiver, wifi):
     else:
         pass
 
-def parse_sending(drink_on_duty, box_on_duty, cashier_on_duty, google_auth, outlet, send_dict, drink_message_string, tabox_message_string, print_result, k_dict, fernet_key, wifi, date_dict, value_dict, db_writables):
+def parse_sending(drink_on_duty, box_on_duty, cashier_on_duty, google_auth, outlet, send_dict, drink_message_string, tabox_message_string, print_result, k_dict, fernet_key, wifi, date_dict, value_dict, db_writables, backup_foldername):
     date = date_dict["dfb"].strftime("%Y-%m-%d")
 
     drink_stock_alert = eval(k_dict["drink_stock_alert"].strip().capitalize())
@@ -2482,7 +2478,7 @@ def parse_sending(drink_on_duty, box_on_duty, cashier_on_duty, google_auth, outl
     else:
         pass
 
-def parse_display_df(value_dict, rule_df_dict, k_dict, google_auth, db_writables, fernet_key, take_databases, database_url, backup_foldername):
+def parse_display_df(value_dict, rule_df_dict, k_dict, google_auth, db_writables, fernet_key, database_url, backup_foldername):
     tabox_inv_function = eval(k_dict["takeaway_box_inventory"].strip().capitalize())
     drink_inv_function = eval(k_dict["drink_inventory"].strip().capitalize())
 
@@ -2493,7 +2489,6 @@ def parse_display_df(value_dict, rule_df_dict, k_dict, google_auth, db_writables
     write_finance_db = db_writables["write_finance_db"]
     tabox_write_db = db_writables["tabox_write_db"]
     write_drink_db = db_writables["write_drink_db"]
-    write_promo_db = db_writables["write_promo_db"]
 
     box_drink_in_out_url = fernet_decrypt(k_dict["box_drink_in_out_url"], fernet_key)
     tabox_sheetname = k_dict["takeaway_box_sheetname"]
@@ -2745,8 +2740,8 @@ def night_audit_main(database_url, db_setting_url, serialized_rule_filename, ser
             print("离线模式, 程序运行中, 请耐心等待...")
         with tqdm(total=100) as pbar:
             outlet = get_outlet()
-            k_dict, rule_df_dict = get_dfs(google_auth, db_setting_url, service_filename, constants_sheetname, serialized_rule_filename, outlet, fernet_key, wifi, backup_foldername)
-            book_dict = get_book_dfs(k_dict)
+            k_dict, rule_df_dict = get_dfs(google_auth, db_setting_url, constants_sheetname, serialized_rule_filename, outlet, fernet_key, wifi, backup_foldername)
+            book_dict = get_book_dfs(k_dict, outlet)
 
             if len(book_dict) == 0:
                 pass
@@ -2822,7 +2817,7 @@ def night_audit_main(database_url, db_setting_url, serialized_rule_filename, ser
                 upload_db(database_url, take_databases, k_dict, fernet_key, google_auth, box_num, drink_num, wifi, outlet, backup_foldername)
                 pbar.update(5)
 
-                parse_sending(drink_on_duty, box_on_duty, cashier_on_duty, google_auth, outlet, send_dict, drink_message_string, tabox_message_string, print_result, k_dict, fernet_key, wifi, date_dict, value_dict, db_writables)
+                parse_sending(drink_on_duty, box_on_duty, cashier_on_duty, google_auth, outlet, send_dict, drink_message_string, tabox_message_string, print_result, k_dict, fernet_key, wifi, date_dict, value_dict, db_writables, backup_foldername)
                 pbar.update(5)
 
                 bk_df, show_box_df, show_drink_df, tabox_max_date, drink_db_max_date = parse_display_df(value_dict, rule_df_dict, k_dict, google_auth, db_writables, fernet_key, take_databases, database_url, backup_foldername)
