@@ -38,7 +38,7 @@ def on_internet():
 githubUserName = "zou-zihan"
 githubRepoName = "Scripts-for-San-Ren-Xing"
 githubBranchName = "main"
-script_backup_filename = "Encryted Script.txt"
+script_backup_filename = "Encrypted Script.txt"
 backup_foldername = "NABK"
 
 #打包盒管理负责人(加引号)
