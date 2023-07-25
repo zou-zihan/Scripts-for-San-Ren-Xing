@@ -3447,7 +3447,7 @@ def inventory_main(google_auth, db_setting_url, constants_sheetname, serialized_
     songti_filename = "SongTi.ttf"
     stock_count_pdf_foldername = "PDF"
 
-    res = pyfiglet.figlet_format("Inventory Stock Count")
+    res = pyfiglet.figlet_format("Inventory")
     print(res)
 
     on_net = on_internet()
@@ -5020,7 +5020,7 @@ def work_schedule_main(google_auth, db_setting_url, constants_sheetname, seriali
     database_url = database_url
     payslip_on_duty = payslip_on_duty
 
-    res = pyfiglet.figlet_format("Work Schedule")
+    res = pyfiglet.figlet_format("Schedule")
     print(res)
 
     on_net = on_internet()
