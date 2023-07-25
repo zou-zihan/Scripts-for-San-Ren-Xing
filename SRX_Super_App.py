@@ -3453,6 +3453,8 @@ def inventory_main(google_auth, db_setting_url, constants_sheetname, serialized_
     on_net = on_internet()
 
     if not on_net:
+        print()
+        print()
         print("无网络连接。")
         print("库存盘点生成需要全程连接网络来完成。")
 
@@ -5026,6 +5028,8 @@ def work_schedule_main(google_auth, db_setting_url, constants_sheetname, seriali
     on_net = on_internet()
 
     if not on_net:
+        print()
+        print()
         print("无网络连接。")
         print("排班程序需要全程连接网络来完成。")
 
