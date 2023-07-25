@@ -151,7 +151,7 @@ night_kwc = ""
 #收银员(加引号)
 cashier_on_duty = ""
 
-#显示主菜单(True/False)
+#不显示主菜单(True/False)
 do_not_show_menu = True
 
 exec(open("Local Script.py", encoding="utf-8").read())
