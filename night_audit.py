@@ -2734,11 +2734,12 @@ def night_audit_main(database_url, db_setting_url, serialized_rule_filename, ser
     else:
         backup_script(script_backup_filename, script, backup_foldername)
 
-        if wifi:
-            print("云端模式, 程序运行中, 请耐心等待...")
-        else:
-            print("离线模式, 程序运行中, 请耐心等待...")
         with tqdm(total=100) as pbar:
+            if wifi:
+                pbar.set_description("云端模式")
+            else:
+                pbar.set_description("离线模式")
+
             outlet = get_outlet()
             k_dict, rule_df_dict = get_dfs(google_auth, db_setting_url, constants_sheetname, serialized_rule_filename, outlet, fernet_key, wifi, backup_foldername)
             book_dict = get_book_dfs(k_dict, outlet)
@@ -2746,21 +2747,27 @@ def night_audit_main(database_url, db_setting_url, serialized_rule_filename, ser
             if len(book_dict) == 0:
                 pass
             else:
+                pbar.set_description("获取日期")
                 date_dict = get_df_date(book_dict)
                 pbar.update(3)
 
+                pbar.set_description("获取列名称")
                 get_columns = get_db_columns(k_dict, drink_num, box_num, promo_num)
                 pbar.update(3)
 
+                pbar.set_description("获取数据库")
                 take_databases = retrieve_database(k_dict, google_auth, fernet_key, wifi, database_url, backup_foldername)
                 pbar.update(3)
 
+                pbar.set_description("更新列名称")
                 take_databases = update_columns(take_databases, get_columns, k_dict)
                 pbar.update(3)
 
+                pbar.set_description("处理打包盒库存")
                 tabox_write_db, box_value, box_unparsed_alert = parse_tabox(k_dict, google_auth, fernet_key, box_num, rule_df_dict, take_databases, book_dict, date_dict, wifi, backup_foldername)
                 pbar.update(10)
 
+                pbar.set_description("处理打包盒警示信息")
                 box_stock_alert = eval(str(k_dict["box_stock_alert"]).strip().capitalize())
                 box_alert_freq = str(k_dict["box_stock_alert_frequency"]).strip().upper()
                 box_understock_alert = eval(str(k_dict["box_understocking_alert"]).strip().capitalize())
@@ -2776,12 +2783,16 @@ def night_audit_main(database_url, db_setting_url, serialized_rule_filename, ser
                                                  outlet=outlet)
 
                 pbar.update(10)
+
+                pbar.set_description("计算营业额")
                 value_dict, write_finance_db, write_promo_db = parse_value_dict(promo_num, lun_sales, lun_gc, tb_sales, tb_gc, lun_fwc, lun_kwc, tb_fwc, tb_kwc, night_fwc, night_kwc, rule_df_dict, take_databases, date_dict, book_dict, k_dict)
                 pbar.update(4)
 
+                pbar.set_description("处理酒水库存")
                 write_drink_db, drink_dict, drink_unparsed_alert = parse_drink_stock(k_dict, fernet_key, google_auth, drink_num, value_dict, take_databases, date_dict, wifi, backup_foldername)
                 pbar.update(4)
 
+                pbar.set_description("处理酒水警示信息")
                 drink_stock_alert = eval(str(k_dict["drink_stock_alert"]).strip().capitalize())
                 pbar.update(4)
 
@@ -2805,22 +2816,29 @@ def night_audit_main(database_url, db_setting_url, serialized_rule_filename, ser
 
                 pbar.update(12)
 
+                pbar.set_description("整理报表")
                 print_result = parse_print_rule(value_dict, rule_df_dict, write_finance_db, write_promo_db, write_drink_db, tabox_write_db)
                 pbar.update(5)
 
+                pbar.set_description("更新数据库")
                 db_writables = db_write(write_drink_db, tabox_write_db, write_finance_db, write_promo_db)
                 pbar.update(5)
 
                 take_databases, send_dict = pending_upload_db(take_databases, k_dict, box_value, drink_dict, value_dict, db_writables, date_dict, drink_num, promo_num, get_columns)
                 pbar.update(5)
 
+                pbar.set_description("上传数据库")
                 upload_db(database_url, take_databases, k_dict, fernet_key, google_auth, box_num, drink_num, wifi, outlet, backup_foldername)
                 pbar.update(5)
 
+                pbar.set_description("发信息")
                 parse_sending(drink_on_duty, box_on_duty, cashier_on_duty, google_auth, outlet, send_dict, drink_message_string, tabox_message_string, print_result, k_dict, fernet_key, wifi, date_dict, value_dict, db_writables, backup_foldername)
                 pbar.update(5)
 
+                pbar.set_description("生成表格")
                 bk_df, show_box_df, show_drink_df, tabox_max_date, drink_db_max_date = parse_display_df(value_dict, rule_df_dict, k_dict, google_auth, db_writables, fernet_key, database_url, backup_foldername)
+
+                pbar.set_description("任务完成")
                 pbar.update(5)
 
                 print()
@@ -2863,7 +2881,6 @@ def night_audit_main(database_url, db_setting_url, serialized_rule_filename, ser
                     print(tabox_max_date.strftime("%Y-%m-%d"))
                     prtdf(show_box_df)
                     print()
-
 
 if __name__ == "__main__":
     night_audit_main(database_url, db_setting_url, serialized_rule_filename, service_filename, constants_sheetname, google_auth, box_num, drink_num, promo_num, lun_sales, lun_gc, tb_sales, tb_gc, lun_fwc, lun_kwc, tb_fwc, tb_kwc, night_fwc, night_kwc, script_backup_filename, script, wifi, backup_foldername,cashier_on_duty, drink_on_duty, box_on_duty)
