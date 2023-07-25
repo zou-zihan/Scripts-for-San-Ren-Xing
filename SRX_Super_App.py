@@ -83,8 +83,8 @@ if not on_net:
 
     print("警告! 没有网络连接! ")
     print("离线模式下，程序将会全程采用本地备份数据来运行")
-    print("可能有一些没有及时更新的资料而导致生成的报表不准确")
-    print("非常不推荐你使用离线模式关帐！")
+    print("可能有一些没有及时更新的资料而导致生成的文件不准确")
+    print("非常不推荐你使用离线模式！")
     print()
     for i, name in enumerate(["离线模式继续运行","终止运行"]):
         print("{}扣{}".format(name, i))
@@ -5641,6 +5641,92 @@ def fernet_tool():
         else:
             pass
 
+def email_validate(email_address):
+    regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
+
+    if (re.fullmatch(regex, email_address)):
+        return True
+    else:
+        return False
+
+def telegram_test_tool(google_auth, db_setting_url, constants_sheetname, serialized_rule_filename, backup_foldername):
+    google_auth = google_auth
+    db_setting_url = db_setting_url
+    constants_sheetname = constants_sheetname
+    serialized_rule_filename = serialized_rule_filename
+    backup_foldername = backup_foldername
+
+    fernet_key = get_key()
+
+    if fernet_key == 0:
+        print("安全密钥错误! ")
+    else:
+        outlet = get_outlet()
+        k_dict = get_k_dictionary(google_auth, db_setting_url, constants_sheetname, serialized_rule_filename, outlet, fernet_key, backup_foldername)
+        
+        TIME_NOW = dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        telegram_api = fernet_decrypt(k_dict["night_audit_telegram_bot_api"], fernet_key)
+
+        print()
+        print("输入你的测试信息，如果选择默认信息，直接按回车键")
+        test_message = input(": ")
+
+        if len(test_message.strip()) == 0:
+            test_message = "这是机器人测试Telegram信息, 发送时间: {} \n This is Telegram Robot test message, sent at time: {}".format(TIME_NOW, TIME_NOW)
+        else:
+            pass
+        
+        print()
+        print("输入你的Telegram Chat ID, 按回车键执行")
+        chat_id_input = input(": ")
+
+        sending_telegram(is_pr=False, message=test_message, api=telegram_api, receiver=chat_id_input, wifi=True)
+
+def email_test_tool(google_auth, db_setting_url, constants_sheetname, serialized_rule_filename, backup_foldername):
+    google_auth = google_auth
+    db_setting_url = db_setting_url
+    constants_sheetname = constants_sheetname
+    serialized_rule_filename = serialized_rule_filename
+    backup_foldername = backup_foldername
+
+    fernet_key = get_key()
+
+    if fernet_key == 0:
+        print("安全密钥错误! ")
+    else:
+        outlet = get_outlet()
+        k_dict = get_k_dictionary(google_auth, db_setting_url, constants_sheetname, serialized_rule_filename, outlet, fernet_key, backup_foldername)
+
+        email_server = fernet_decrypt(k_dict["night_audit_email_server"], fernet_key)
+        email_sender = fernet_decrypt(k_dict["night_audit_email_sender"], fernet_key)
+        email_sender_password = fernet_decrypt(k_dict["night_audit_sender_password"], fernet_key)
+
+        TIME_NOW = dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+        print("请输入电邮主题，如果选择默认主题，直接按回车键")
+        email_subject = input(": ")
+
+        if len(email_subject.strip()) == 0:
+            email_subject = "电邮测试 {}".format(TIME_NOW)
+
+        print("输入电邮内容, 如果选择默认内容, 直接按回车键")
+        email_text = input(": ")
+
+        if len(email_text.strip()) == 0:
+            email_text = "电邮测试 {}".format(TIME_NOW)
+
+        valid_email = False
+        while not valid_email:
+            email_receiver = input("输入收件人电子邮箱: ")
+
+            if not email_validate(email_address=email_receiver):
+                print("输入的'{}'不是电子邮箱，请重新输入。".format(email_receiver))
+            
+            else:
+                valid_email = True
+        
+        sending_email(is_pr=False, mail_server=email_server, mail_sender=email_sender, mail_sender_password=email_sender_password, mail_receivers=email_receiver, mail_subject=email_subject, message_string=email_text, wifi=True)
+        
 def main(database_url, db_setting_url, serialized_rule_filename, service_filename, constants_sheetname, google_auth, box_num, drink_num, promo_num, lun_sales, lun_gc, tb_sales, tb_gc, lun_fwc, lun_kwc, tb_fwc, tb_kwc, night_fwc, night_kwc, script_backup_filename, script, wifi, backup_foldername,cashier_on_duty, drink_on_duty, box_on_duty, payslip_on_duty, do_not_show_menu):
     database_url = database_url
     db_setting_url = db_setting_url
@@ -5700,16 +5786,35 @@ def main(database_url, db_setting_url, serialized_rule_filename, service_filenam
                 res = pyfiglet.figlet_format("Tool Box")
                 print(res)
 
-                toolbox_input = 0
-                while toolbox_input != 2:
-                    toolboxes = option_num(["硬币Sheet清理工具", "Fernet加密解密工具", "关闭工具箱"])
-                    toolbox_input = option_limit(toolboxes, input(": "))
+                on_net = on_internet()
 
-                    if toolbox_input == 0:
-                        coin_reset(google_auth, db_setting_url, constants_sheetname, serialized_rule_filename, backup_foldername)
+                if not on_net:
+                    print("没有网络连接")
+                    print("工具箱需全程连接网络来使用")
+                
+                else:
+                    toolbox_input = 0
+                    while toolbox_input != 3:
+                        toolboxes = option_num(["硬币Sheet清理工具", "Fernet加密解密工具", "测试发送信息", "关闭工具箱"])
+                        toolbox_input = option_limit(toolboxes, input(": "))
 
-                    elif toolbox_input == 1:
-                        fernet_tool()
+                        if toolbox_input == 0:
+                            coin_reset(google_auth, db_setting_url, constants_sheetname, serialized_rule_filename, backup_foldername)
+
+                        elif toolbox_input == 1:
+                            fernet_tool()
+                        
+                        elif toolbox_input == 2:
+                            send_test_input = 0
+                            while send_test_input != 2:
+                                options = option_num(["发送Telegram测试", "发送电邮测试", "退出发送测试"])
+                                send_test_input = option_limit(options, input(": "))
+
+                                if send_test_input == 0:
+                                    telegram_test_tool(google_auth, db_setting_url, constants_sheetname, serialized_rule_filename, backup_foldername)
+                                
+                                elif send_test_input == 1:
+                                    email_test_tool(google_auth, db_setting_url, constants_sheetname, serialized_rule_filename, backup_foldername)
                     
         else:
             res = pyfiglet.figlet_format("Thank You")
