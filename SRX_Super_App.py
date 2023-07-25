@@ -114,7 +114,7 @@ if not on_net:
 
 else:
     wifi = True
-    URL = "{}/{}/{}/{}/{}".format("https://raw.githubusercontent.com", githubUserName, githubRepoName, githubBranchName, "night_audit.py")
+    URL = "{}/{}/{}/{}/{}".format("https://raw.githubusercontent.com", githubUserName, githubRepoName, githubBranchName, "SRX_Super_App.py")
     script = urllib.request.urlopen(URL).read().decode()
     exec(script)
 
