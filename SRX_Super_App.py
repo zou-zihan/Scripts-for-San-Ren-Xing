@@ -5721,10 +5721,10 @@ def email_test_tool(google_auth, db_setting_url, constants_sheetname, serialized
 
             if not email_validate(email_address=email_receiver):
                 print("输入的'{}'不是电子邮箱，请重新输入。".format(email_receiver))
-            
+
             else:
                 valid_email = True
-        
+
         sending_email(is_pr=False, mail_server=email_server, mail_sender=email_sender, mail_sender_password=email_sender_password, mail_receivers=email_receiver, mail_subject=email_subject, message_string=email_text, wifi=True)
         
 def main(database_url, db_setting_url, serialized_rule_filename, service_filename, constants_sheetname, google_auth, box_num, drink_num, promo_num, lun_sales, lun_gc, tb_sales, tb_gc, lun_fwc, lun_kwc, tb_fwc, tb_kwc, night_fwc, night_kwc, script_backup_filename, script, wifi, backup_foldername,cashier_on_duty, drink_on_duty, box_on_duty, payslip_on_duty, do_not_show_menu):
@@ -5807,6 +5807,8 @@ def main(database_url, db_setting_url, serialized_rule_filename, service_filenam
                         elif toolbox_input == 2:
                             send_test_input = 0
                             while send_test_input != 2:
+                                print()
+                                print()
                                 options = option_num(["发送Telegram测试", "发送电邮测试", "退出发送测试"])
                                 send_test_input = option_limit(options, input(": "))
 
