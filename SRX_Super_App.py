@@ -2073,6 +2073,7 @@ def upload_db(database_url, take_databases, k_dict, fernet_key, google_auth, box
                     print("是否重置打包盒出入库归零?")
                     print()
                     action_req = option_num(["是", "否"])
+                    time.sleep(0.25)
                     user_input = option_limit(action_req, input("在这里输入>>>: "))
 
                     if user_input == 0:
@@ -2152,6 +2153,7 @@ def upload_db(database_url, take_databases, k_dict, fernet_key, google_auth, box
                     print("是否重置酒水出入库归零?")
                     print()
                     action_req = option_num(["是", "否"])
+                    time.sleep(0.25)
                     user_input = option_limit(action_req, input("在这里输入>>>: "))
 
                     if user_input == 0:
@@ -2511,6 +2513,7 @@ def parse_sending(payslip_on_duty, drink_on_duty, box_on_duty, cashier_on_duty, 
                     if len(print_result) > 0:
                         print("是否重新发送关帐报表? ")
                         action_req = option_num(["重新发送", "不发送"])
+                        time.sleep(0.25)
                         user_input = option_limit(action_req, input("在这里输入>>>: "))
 
                         if user_input == 0:
@@ -2630,6 +2633,7 @@ def parse_sending(payslip_on_duty, drink_on_duty, box_on_duty, cashier_on_duty, 
                         if write_finance_db:
                             print("是否重新发送工时工资分析单? ")
                             action_req = option_num(["重新发送", "不发送"])
+                            time.sleep(0.25)
                             user_input = option_limit(action_req, input("在这里输入>>>: "))
 
                             if user_input == 0:
@@ -2932,6 +2936,7 @@ def night_audit_main(database_url, db_setting_url, serialized_rule_filename, ser
     else:
         res = pyfiglet.figlet_format("Night Audit")
         print(res)
+        time.sleep(0.15)
 
         backup_script(script_backup_filename, script, backup_foldername)
 
@@ -3031,16 +3036,19 @@ def night_audit_main(database_url, db_setting_url, serialized_rule_filename, ser
                 pbar.set_description("上传数据库")
                 upload_db(database_url, take_databases, k_dict, fernet_key, google_auth, box_num, drink_num, wifi, backup_foldername)
                 pbar.update(5)
+                time.sleep(0.25)
 
                 pbar.set_description("发信息")
                 parse_sending(payslip_on_duty, drink_on_duty, box_on_duty, cashier_on_duty, google_auth, outlet, send_dict, drink_message_string, tabox_message_string, print_result, k_dict, fernet_key, wifi, date_dict, value_dict, db_writables, backup_foldername, database_url)
                 pbar.update(5)
+                time.sleep(0.25)
 
                 pbar.set_description("生成表格")
                 bk_df, show_box_df, show_drink_df, tabox_max_date, drink_db_max_date = parse_display_df(value_dict, rule_df_dict, k_dict, google_auth, db_writables, fernet_key, database_url, backup_foldername)
 
                 pbar.set_description("任务完成")
                 pbar.update(5)
+                time.sleep(0.25)
 
                 print()
                 print("——————————————")
@@ -3628,6 +3636,7 @@ def inventory_main(google_auth, db_setting_url, constants_sheetname, serialized_
 
     res = pyfiglet.figlet_format("Inventory")
     print(res)
+    time.sleep(0.15)
 
     on_net = on_internet()
 
@@ -3799,18 +3808,21 @@ def inventory_main(google_auth, db_setting_url, constants_sheetname, serialized_
 
                     print("盘点主菜单")
                     startAction = option_num(["查看文档", "盘点类操作", "生成PDF", "退出盘点"])
+                    time.sleep(0.25)
                     userInputOne = option_limit(startAction, input("在这里输入>>>: "))
 
                     if userInputOne == 0:
                         userInputTwo = 0
                         while userInputTwo != 3:
                             docActions = option_num(["查看物品破损记录表", "查看物品进货表", "查看封存区库存", "返回上一菜单"])
+                            time.sleep(0.25)
                             userInputTwo = option_limit(docActions, input("在这里输入>>>: "))
 
                             if userInputTwo == 0:
                                 userInputThree = 0
                                 while userInputThree != 3:
                                     breakagesDocActions = option_num(['整月查看','自定义日期范围', '查看全部破损记录', '返回上一菜单'])
+                                    time.sleep(0.25)
                                     userInputThree = option_limit(breakagesDocActions, input("在这里输入>>>: "))
 
                                     if userInputThree == 0:
@@ -3834,6 +3846,7 @@ def inventory_main(google_auth, db_setting_url, constants_sheetname, serialized_
                                 userInputFour = 0
                                 while userInputFour != 3:
                                     buyInStockActions = option_num(['整月查看','自定义日期范围', '查看全部入库记录', '返回上一菜单'])
+                                    time.sleep(0.25)
                                     userInputFour = option_limit(buyInStockActions, input("在这里输入>>>: "))
 
                                     if userInputFour == 0:
@@ -3859,6 +3872,7 @@ def inventory_main(google_auth, db_setting_url, constants_sheetname, serialized_
                         userInputFive = 0
                         while userInputFive != 2:
                             stockRelatedAction = option_num(["开始盘点", "查看往月盘点详情", "返回上一菜单"])
+                            time.sleep(0.25)
                             userInputFive = option_limit(stockRelatedAction, input("在这里输入>>>: "))
 
                             if userInputFive == 0:
@@ -4567,6 +4581,7 @@ def inventory_main(google_auth, db_setting_url, constants_sheetname, serialized_
                                                     print("你如果已经对该文件做了修改，你覆盖之后将会丢失所有你修改过的数据")
 
                                                     saveActions = option_num(['保存', '丢弃'])
+                                                    time.sleep(0.25)
                                                     userInputSix = option_limit(saveActions, input("在这里输入>>>: "))
                                                     if userInputSix == 0:
                                                         with pd.ExcelWriter("{}/{}/{}/{}".format(os.getcwd(), stock_count_foldername, stock_count_excel_foldername, current_stock_filename)) as writer:
@@ -4606,6 +4621,7 @@ def inventory_main(google_auth, db_setting_url, constants_sheetname, serialized_
                                 fileToShow += ["返回上一菜单"]
 
                                 selectFileToViewOptions = option_num(fileToShow)
+                                time.sleep(0.25)
                                 userInputSeven = option_limit(selectFileToViewOptions, input("在这里输入>>>: "))
 
                                 if userInputSeven == len(fileToShow)-1 :
@@ -4635,6 +4651,7 @@ def inventory_main(google_auth, db_setting_url, constants_sheetname, serialized_
                         fileToShow += ["返回上一菜单"]
 
                         selectFileToViewOptions = option_num(fileToShow)
+                        time.sleep(0.25)
                         userInputEight = option_limit(selectFileToViewOptions, input("在这里输入>>>: "))
 
                         if userInputEight == len(fileToShow)-1:
@@ -5203,6 +5220,7 @@ def work_schedule_main(google_auth, db_setting_url, constants_sheetname, seriali
 
     res = pyfiglet.figlet_format("Schedule")
     print(res)
+    time.sleep(0.15)
 
     on_net = on_internet()
 
@@ -5296,6 +5314,7 @@ def work_schedule_main(google_auth, db_setting_url, constants_sheetname, seriali
 
                     print("排班主菜单")
                     startAction = option_num(["录入排班表数据库", "工资单时间分析", "移除或添加排班", "移除手动录入的假期记录", "退出排班"])
+                    time.sleep(0.25)
                     userInputOne = option_limit(startAction, input("在这里输入>>>: "))
 
                     if userInputOne == 0:
@@ -5483,6 +5502,7 @@ def work_schedule_main(google_auth, db_setting_url, constants_sheetname, seriali
                             userInputTwo = 0
                             while userInputTwo != 3:
                                 payslip_action = option_num(["整月分析", "自定义日期范围分析", "全部记录分析", "返回上一菜单"])
+                                time.sleep(0.25)
                                 userInputTwo = option_limit(payslip_action, input("在这里输入>>>: "))
 
                                 if userInputTwo == 0:
@@ -5526,6 +5546,7 @@ def work_schedule_main(google_auth, db_setting_url, constants_sheetname, seriali
                                     print()
                                     print("是否发送工时分析信息？")
                                     action_req = option_num(["是", "否"])
+                                    time.sleep(0.25)
                                     userInputFive = option_limit(action_req, input("在这里输入>>>: "))
                                     if userInputFive == 0:
                                         send_string = "{}年{}月{}日至{}年{}月{}日{}员工工资工时分析单 \n ".format(start_date.year, start_date.month, start_date.day, end_date.year, end_date.month, end_date.day, shiftOutlet.strip().capitalize())
@@ -5580,10 +5601,12 @@ def work_schedule_main(google_auth, db_setting_url, constants_sheetname, seriali
                         shift_dr = pygsheets.datarange.DataRange(start=shift_start_coordinate, end=shift_end_coordinate, worksheet=shift_sh)
 
                         action_req = option_num(["移除", "添加"])
+                        time.sleep(0.25)
                         userInputThree = option_limit(action_req, input("在这里输入>>>: "))
 
                         if userInputThree == 0:
                             action_req = option_num(["自定义日期范围移除", "全部移除"])
+                            time.sleep(0.25)
                             userInputFour = option_limit(action_req, input("在这里输入>>>: "))
 
                             if userInputFour == 0:
@@ -5757,6 +5780,7 @@ def coin_reset(google_auth, db_setting_url, constants_sheetname, serialized_rule
         clear_dr = pygsheets.datarange.DataRange(start="A2", end="C502", worksheet=ws[0])
 
         actions = option_num(["清理(保留各币种剩余数值)", "清除(清除所有记录)", "终止"])
+        time.sleep(0.25)
         userInput = option_limit(actions, input("在这里输入>>>: "))
 
         if userInput == 0:
@@ -5787,6 +5811,7 @@ def fernet_tool():
         f_handler = Fernet(fernet_key)
 
         actions = option_num(["加密", "解密", "终止"])
+        time.sleep(0.25)
         userInput = option_limit(actions, input("在这里输入>>>: "))
 
         if userInput == 0:
@@ -5935,13 +5960,14 @@ def main(database_url, db_setting_url, serialized_rule_filename, service_filenam
 
         res = pyfiglet.figlet_format("San Ren Xing Super App")
         print(res)
-        time.sleep(0.25)
+        time.sleep(0.15)
 
         SRX_take_input = 0
         while SRX_take_input != 4:
             print()
             print("Main Menu")
             options = option_num(["关帐", "盘点", "排班", "工具箱", "终止Super App"])
+            time.sleep(0.25)
             SRX_take_input = option_limit(options, input("在这里输入>>>: "))
 
             if SRX_take_input == 0:
@@ -5957,8 +5983,8 @@ def main(database_url, db_setting_url, serialized_rule_filename, service_filenam
 
                 res = pyfiglet.figlet_format("Tool Box")
                 print(res)
-                time.sleep(0.25)
-                
+                time.sleep(0.15)
+
                 on_net = on_internet()
 
                 if not on_net:
@@ -5969,6 +5995,7 @@ def main(database_url, db_setting_url, serialized_rule_filename, service_filenam
                     toolbox_input = 0
                     while toolbox_input != 3:
                         toolboxes = option_num(["硬币Sheet清理工具", "Fernet加密解密工具", "测试发送信息", "关闭工具箱"])
+                        time.sleep(0.25)
                         toolbox_input = option_limit(toolboxes, input("在这里输入>>>: "))
 
                         if toolbox_input == 0:
@@ -5983,6 +6010,7 @@ def main(database_url, db_setting_url, serialized_rule_filename, service_filenam
                                 print()
                                 print()
                                 options = option_num(["发送Telegram测试", "发送电邮测试", "退出发送测试"])
+                                time.sleep(0.25)
                                 send_test_input = option_limit(options, input("在这里输入>>>: "))
 
                                 if send_test_input == 0:
