@@ -1190,7 +1190,7 @@ def sending_email(is_pr, mail_server, mail_sender, mail_sender_password, mail_re
                 print("{} 电邮发送成功".format(mail_receivers))
 
             except smtplib.SMTPException:
-                print("电邮发送失败")
+                print("{} 电邮发送失败".format(mail_receivers))
     else:
         print("无网络连接，无法发送电邮")
 
@@ -3024,19 +3024,19 @@ def night_audit_main(database_url, db_setting_url, serialized_rule_filename, ser
                 pbar.set_description("上传数据库")
                 upload_db(database_url, take_databases, k_dict, fernet_key, google_auth, box_num, drink_num, wifi, backup_foldername)
                 pbar.update(5)
-                time.sleep(0.25)
+                time.sleep(2)
 
                 pbar.set_description("发信息")
                 parse_sending(payslip_on_duty, drink_on_duty, box_on_duty, cashier_on_duty, google_auth, outlet, send_dict, drink_message_string, tabox_message_string, print_result, k_dict, fernet_key, wifi, date_dict, value_dict, db_writables, backup_foldername, database_url)
                 pbar.update(5)
-                time.sleep(0.25)
+                time.sleep(2)
 
                 pbar.set_description("生成表格")
                 bk_df, show_box_df, show_drink_df, tabox_max_date, drink_db_max_date = parse_display_df(value_dict, rule_df_dict, k_dict, google_auth, db_writables, fernet_key, database_url, backup_foldername)
 
                 pbar.set_description("任务完成")
                 pbar.update(5)
-                time.sleep(0.25)
+                time.sleep(2)
 
                 print()
                 print("——————————————")
