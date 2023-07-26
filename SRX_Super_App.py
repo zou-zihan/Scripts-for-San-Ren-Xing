@@ -90,7 +90,7 @@ if not on_net:
         print("{}扣{}".format(name, i))
 
     try:
-        userInputOne = int(input(": "))
+        userInputOne = int(input("在这里输入>>>: "))
     except:
         userInputOne = 1
         print("无效命令")
@@ -410,7 +410,7 @@ def get_book_dfs(k_dict, outlet):
             except NameError:
                 outlet_loc = "门店【待编辑】"
 
-            print("The programme had detected that you are using a book from local machine to do closing")
+            print("The program had detected that you are using a book from local machine to do night audit")
             print()
             print("Important messages to take note:")
             print("In order to copy all contents from HTML correctly you have to use a computer for copy-and-paste action")
@@ -875,7 +875,7 @@ def parse_tabox(k_dict, google_auth, fernet_key, box_num, rule_df_dict, take_dat
                 print("注意确保本地备份的打包盒名字和数据库里的是一模一样的，当天所有出入库的数据是正确的。")
                 print("如果需要更改本地备份数据，请先强制停止此程序，改好后重新运行。")
                 print("如果无需更改任何数据, 按回车键继续运行程序")
-                input(":")
+                input("在这里输入>>>:")
     else:
         local_db_filename = str(k_dict["local_database_filename"])
         tabox_sheet_name = str(k_dict["takeaway_box_sheetname"])
@@ -887,7 +887,7 @@ def parse_tabox(k_dict, google_auth, fernet_key, box_num, rule_df_dict, take_dat
         print("注意确保本地备份的打包盒名字和数据库里是一模一样的，当天所有出入库的数据是正确的。")
         print("如果需要更改本地备份数据，请先强制停止此程序，改好后重新运行。")
         print("如果无需更改任何数据, 按回车键继续运行程序")
-        input(":")
+        input("在这里输入>>>:")
 
     if tabox_inv_function:
         tb_df = rule_df_dict["tb_df"]
@@ -1183,13 +1183,10 @@ def sending_email(is_pr, mail_server, mail_sender, mail_sender_password, mail_re
                 smtp_obj.connect(mail_server, 25)
                 smtp_obj.login(mail_sender, mail_sender_password)
 
-                for ppl in mail_receivers:
-                    print("正在发送电邮给{}".format(ppl))
+                msg["To"] = mail_receivers
+                smtp_obj.sendmail(mail_sender, mail_receivers, msg.as_string())
 
-                    msg["To"] = ppl
-                    smtp_obj.sendmail(mail_sender, ppl, msg.as_string())
-
-                    print("{} 电邮发送成功".format(ppl))
+                print("{} 电邮发送成功".format(mail_receivers))
 
             except smtplib.SMTPException:
                 print("电邮发送失败")
@@ -1650,7 +1647,7 @@ def parse_drink_stock(k_dict, fernet_key, google_auth, drink_num, value_dict, ta
                 print("注意确保本地备份的酒水名字和数据库里的是一模一样的，当天所有出入库的数据是正确的。")
                 print("如果需要更改本地备份数据，请先强制停止此程序，改好后重新运行。")
                 print("如果无需更改任何数据, 按回车键继续运行程序")
-                input(":")
+                input("在这里输入>>>:")
     else:
         local_db_filename = str(k_dict["local_database_filename"])
         drink_stock_sheetname = str(k_dict["drink_stock_sheetname"])
@@ -1661,7 +1658,7 @@ def parse_drink_stock(k_dict, fernet_key, google_auth, drink_num, value_dict, ta
         print("注意确保本地备份的酒水名字和数据库里的是一模一样的，当天所有出入库的数据是正确的。")
         print("如果需要更改本地备份数据，请先强制停止此程序，改好后重新运行。")
         print("如果无需更改任何数据, 按回车键继续运行程序")
-        input(":")
+        input("在这里输入>>>:")
 
     if drink_inv_function:
 
@@ -1986,7 +1983,7 @@ def pending_upload_db(take_databases, k_dict, box_value, drink_dict, value_dict,
 
     return take_databases, send_dict
 
-def upload_db(database_url, take_databases, k_dict, fernet_key, google_auth, box_num, drink_num, wifi, outlet, backup_foldername):
+def upload_db(database_url, take_databases, k_dict, fernet_key, google_auth, box_num, drink_num, wifi, backup_foldername):
     #print("正在上传数据...")
 
     auto_hour = 20
@@ -2075,7 +2072,7 @@ def upload_db(database_url, take_databases, k_dict, fernet_key, google_auth, box
                     print("是否重置打包盒出入库归零?")
                     print()
                     action_req = option_num(["是", "否"])
-                    user_input = option_limit(action_req, input(": "))
+                    user_input = option_limit(action_req, input("在这里输入>>>: "))
 
                     if user_input == 0:
                         if len(in_update_matrix) > 0:
@@ -2154,7 +2151,7 @@ def upload_db(database_url, take_databases, k_dict, fernet_key, google_auth, box
                     print("是否重置酒水出入库归零?")
                     print()
                     action_req = option_num(["是", "否"])
-                    user_input = option_limit(action_req, input(": "))
+                    user_input = option_limit(action_req, input("在这里输入>>>: "))
 
                     if user_input == 0:
                         if len(drink_in_matrix) > 0:
@@ -2253,17 +2250,28 @@ def upload_db(database_url, take_databases, k_dict, fernet_key, google_auth, box
 
             #print("网络上传数据库成功！")
         except Exception as e:
+            print("网络上传失败，错误描述如下：")
             print(e)
-            print("网络上传数据库可能失败！")
+            print()
     else:
+        print()
         print("无网络连接，数据将会暂时本地保存")
         print("待网络连接后，本地暂时保存的数据将会自动上传到云端")
 
     if wifi:
         shift_db = retrieve_shift_db(online_database_url, shift_db_sheetname, local_db_filename, backup_foldername)
+        shift_db["DATE"] = pd.to_datetime(shift_db["DATE"])
+        shift_db["TIME LOG"] = pd.to_datetime(shift_db["TIME LOG"])
+        shift_db["DATE"] = shift_db["DATE"].apply(lambda y : y.strftime("%Y-%m-%d"))
+        shift_db["TIME LOG"] = shift_db["TIME LOG"].apply(lambda x : x.strftime("%Y-%m-%d %H:%M:%S"))
     else:
         shift_db = pd.read_excel("{}/{}/{}".format(os.getcwd(), backup_foldername, local_db_filename), sheet_name=shift_db_sheetname)
+        shift_db["DATE"] = pd.to_datetime(shift_db["DATE"])
+        shift_db["TIME LOG"] = pd.to_datetime(shift_db["TIME LOG"])
+        shift_db["DATE"] = shift_db["DATE"].apply(lambda y : y.strftime("%Y-%m-%d"))
+        shift_db["TIME LOG"] = shift_db["TIME LOG"].apply(lambda x : x.strftime("%Y-%m-%d %H:%M:%S"))
 
+    rcv_df = get_rcv(fernet_key, k_dict, google_auth, backup_foldername, local_db_filename, return_df=True)
 
     with pd.ExcelWriter("{}/{}/{}".format(os.getcwd(), backup_foldername, local_db_filename)) as writer:
         for name in sheet_names:
@@ -2303,6 +2311,55 @@ def sending_telegram(is_pr, message, api, receiver, wifi):
     else:
         pass
 
+def get_rcv(fernet_key, k_dict, google_auth, backup_foldername, local_database_filename, return_df):
+    rcv_sheetname = k_dict["receivers_sheetname"]
+    rcv_url = fernet_decrypt(k_dict["receivers_url"], fernet_key)
+
+    try:
+        rcv_sheet = google_auth.open_by_url(rcv_url)
+        rcv_sheetname_index = rcv_sheet.worksheet(property="title", value=rcv_sheetname).index
+        rcv_df = rcv_sheet[rcv_sheetname_index].get_as_df()
+        is_encrypted = True
+    
+    except Exception as e:
+        print()
+        print("通过机器人读取收件人信息失败，错误描述如下：")
+        print(e)
+        print()
+        rcv_df = pd.read_excel("{}/{}/{}".format(os.getcwd(), backup_foldername, local_database_filename), sheet_name=rcv_sheetname)
+        is_encrypted = False
+        print("已获取本地备份收件人信息")
+    
+    if return_df:
+        if is_encrypted:
+            rcv_df["ACCOUNT"] = rcv_df["ACCOUNT"].astype(str)
+            rcv_df["ACCOUNT"] = rcv_df["ACCOUNT"].apply(lambda x : fernet_decrypt(x, fernet_key))
+        else:
+            pass
+        
+        return rcv_df
+    
+    else:
+        rcv_email = {}
+        rcv_telegram = {}
+        for index in range(len(rcv_df)):
+            if str(rcv_df.iloc[index, 1]).strip().upper() == "EMAIL":
+                if is_encrypted:
+                    rcv_email.update({ str(rcv_df.iloc[index, 0]).strip().upper() : fernet_decrypt(str(rcv_df.iloc[index, 2]), fernet_key) })
+                else:
+                    rcv_email.update({ str(rcv_df.iloc[index, 0]).strip().upper() : str(rcv_df.iloc[index, 2]) })
+            
+            elif str(rcv_df.iloc[index, 1]).strip().upper() == "TELEGRAM":
+                if is_encrypted:
+                    rcv_telegram.update({ str(rcv_df.iloc[index, 0]).strip().upper() : fernet_decrypt(str(rcv_df.iloc[index, 2]), fernet_key) })
+                else:
+                    rcv_telegram.update({ str(rcv_df.iloc[index, 0]).strip().upper() : str(rcv_df.iloc[index, 2]) })
+            
+            else:
+                pass
+    
+        return rcv_telegram, rcv_email
+
 def parse_sending(payslip_on_duty, drink_on_duty, box_on_duty, cashier_on_duty, google_auth, outlet, send_dict, drink_message_string, tabox_message_string, print_result, k_dict, fernet_key, wifi, date_dict, value_dict, db_writables, backup_foldername, database_url):
     database_url = fernet_decrypt(database_url, fernet_key)
 
@@ -2322,9 +2379,6 @@ def parse_sending(payslip_on_duty, drink_on_duty, box_on_duty, cashier_on_duty, 
     tabox_send_channel = k_dict["tabox_send_channel"]
     payslip_send_channel = k_dict["payslip_time_send_channel"]
 
-    rcv_sheetname = k_dict["receivers_sheetname"]
-    box_drink_in_out_url = fernet_decrypt(k_dict["box_drink_in_out_url"], fernet_key)
-
     shift_db_sheetname = k_dict["shift_database_sheetname"]
     local_database_filename = k_dict["local_database_filename"]
 
@@ -2337,23 +2391,7 @@ def parse_sending(payslip_on_duty, drink_on_duty, box_on_duty, cashier_on_duty, 
 
     outlet = str(outlet).strip().capitalize()
 
-    try:
-        box_drink_sheet = google_auth.open_by_url(box_drink_in_out_url)
-        rcv_sheetname_index = box_drink_sheet.worksheet(property="title", value=rcv_sheetname).index
-        rcv_df = box_drink_sheet[rcv_sheetname_index].get_as_df()
-    except:
-        try:
-            rcv_url = box_drink_in_out_url + "htmlview"
-            rcv_df = pd.read_html(rcv_url, encoding="utf-8")[2]
-            parseGoogleHTMLSheet(rcv_df)
-        except:
-            local_db_filename = k_dict["local_database_filename"]
-            rcv_df = pd.read_excel("{}/{}/{}".format(os.getcwd(), backup_foldername, local_db_filename), sheet_name=rcv_sheetname)
-
-
-    rcv_dict = {}
-    for index in range(len(rcv_df)):
-        rcv_dict.update({ str(rcv_df.iloc[index, 0]) : str(rcv_df.iloc[index, 1]) })
+    rcv_telegram, rcv_email = get_rcv(fernet_key, k_dict, google_auth, backup_foldername, local_database_filename, return_df=False)
 
     if drink_stock_alert:
 
@@ -2365,14 +2403,14 @@ def parse_sending(payslip_on_duty, drink_on_duty, box_on_duty, cashier_on_duty, 
         if send_drink_msg:
             if len(drink_message_string) > 0:
                 if drink_send_channel.strip().capitalize() == "Telegram":
-                    receivers = ast.literal_eval(rcv_dict["drink_telegram_receivers"])[drink_on_duty]
+                    receivers = rcv_telegram[drink_on_duty]
                     sending_telegram(is_pr=False,
                                       message=drink_message_string,
                                       api = drink_stock_telegram_bot_api,
                                       receiver=receivers,
                                       wifi=wifi)
                 elif drink_send_channel.strip().capitalize() == "Email":
-                    receivers = fernet_decrypt(rcv_dict["drink_mail_receivers"], fernet_key).strip().split(",")
+                    receivers = rcv_email[drink_on_duty]
                     sending_email(is_pr=False,
                                   mail_server=drink_stock_email_server,
                                   mail_sender=drink_stock_email_sender,
@@ -2399,14 +2437,14 @@ def parse_sending(payslip_on_duty, drink_on_duty, box_on_duty, cashier_on_duty, 
         if send_tabox_msg:
             if len(tabox_message_string) > 0:
                 if tabox_send_channel.strip().capitalize() == "Telegram":
-                    receivers = ast.literal_eval(rcv_dict["box_telegram_receivers"])[box_on_duty]
+                    receivers = rcv_telegram[box_on_duty]
                     sending_telegram(is_pr=False,
                                       message=tabox_message_string,
                                       api = box_stock_telegram_bot_api,
                                       receiver=receivers,
                                       wifi=wifi)
                 elif tabox_send_channel.strip().capitalize() == "Email":
-                    receivers = fernet_decrypt(rcv_dict["box_mail_receivers"], fernet_key).strip().split(",")
+                    receivers = rcv_email[box_on_duty]
                     sending_email(is_pr=False,
                                   mail_server=box_stock_email_server,
                                   mail_sender=box_stock_email_sender,
@@ -2438,7 +2476,7 @@ def parse_sending(payslip_on_duty, drink_on_duty, box_on_duty, cashier_on_duty, 
         if send_print_result:
             if len(print_result) > 0:
                 if night_audit_send_channel.strip().capitalize() == "Telegram":
-                    receivers = ast.literal_eval(str(rcv_dict["night_audit_telegram_receivers"]))[cashier_on_duty]
+                    receivers = rcv_telegram[cashier_on_duty]
                     sending_telegram(is_pr=True,
                                       message=print_result,
                                       api = night_audit_telegram_bot_api,
@@ -2452,10 +2490,10 @@ def parse_sending(payslip_on_duty, drink_on_duty, box_on_duty, cashier_on_duty, 
                                      receiver=receivers,
                                      wifi=wifi)
 
-                elif night_send_channel.strip().capitalize() == "Email":
+                elif night_audit_send_channel.strip().capitalize() == "Email":
                     print_result += ["——————————————", "服务费: ${}".format(svc),
                                      "GST: ${}".format(gst), "日均营业额: ${}".format(ads)]
-                    receivers = ast.literal_eval(str(rcv_dict["night_audit_mail_receivers"]))[cashier_on_duty].split(",")
+                    receivers = rcv_email[cashier_on_duty]
                     sending_email(is_pr=True,
                                   mail_server=night_audit_email_server,
                                   mail_sender=night_audit_email_sender,
@@ -2472,11 +2510,11 @@ def parse_sending(payslip_on_duty, drink_on_duty, box_on_duty, cashier_on_duty, 
                     if len(print_result) > 0:
                         print("是否重新发送关帐报表? ")
                         action_req = option_num(["重新发送", "不发送"])
-                        user_input = option_limit(action_req, input(": "))
+                        user_input = option_limit(action_req, input("在这里输入>>>: "))
 
                         if user_input == 0:
                             if night_audit_send_channel.strip().capitalize() == "Telegram":
-                                receivers = ast.literal_eval(str(rcv_dict["night_audit_telegram_receivers"]))[cashier_on_duty]
+                                receivers = rcv_telegram[cashier_on_duty]
                                 sending_telegram(is_pr=True,
                                                   message=print_result,
                                                   api = night_audit_telegram_bot_api,
@@ -2493,7 +2531,9 @@ def parse_sending(payslip_on_duty, drink_on_duty, box_on_duty, cashier_on_duty, 
                             elif night_audit_send_channel.strip().capitalize() == "Email":
                                 print_result += ["——————————————", "服务费: ${}".format(svc),
                                                  "GST: ${}".format(gst), "日均营业额: ${}".format(ads)]
-                                receivers = ast.literal_eval(str(rcv_dict["night_audit_mail_receivers"]))[cashier_on_duty].split(",")
+                                
+                                receivers = rcv_email[cashier_on_duty]
+
                                 sending_email(is_pr=True,
                                               mail_server=night_audit_email_server,
                                               mail_sender=night_audit_email_sender,
@@ -2519,26 +2559,8 @@ def parse_sending(payslip_on_duty, drink_on_duty, box_on_duty, cashier_on_duty, 
                 shift_db["DATE"] = pd.to_datetime(shift_db["DATE"])
                 shift_db["ID"] = shift_db["ID"].astype(int)
                 shift_db["ID"] = shift_db["ID"].astype(str)
-
-                payslip_rcv_sheetname = k_dict["payslip_time_rcv_sheetname"]
+                
                 shiftURL = fernet_decrypt(k_dict["shift_url"], fernet_key)
-
-                try:
-                    ws = google_auth.open_by_url(shiftURL)
-                    payslip_rcv_sheetname_index = ws.worksheet(property="title", value=payslip_rcv_sheetname).index
-                    sh = ws[payslip_rcv_sheetname_index].get_as_df()
-
-                except Exception as e:
-                    print()
-                    print("机器人获取排班RCV失败，错误描述如下：")
-                    print(e)
-                    sh = pd.read_html(shiftURL + "htmlview", encoding="utf-8")[5]
-                    parseGoogleHTMLSheet(sh)
-                    print("已通过仅读模式获取排班RCV")
-
-                payslip_rcv_dict = {}
-                for index in range(len(sh)):
-                    payslip_rcv_dict.update({str(sh.iloc[index, 0]) : str(sh.iloc[index, 1])})
 
                 #loading employee_info
                 df = pd.read_html(shiftURL+"htmlview", encoding="utf-8")[2]
@@ -2567,14 +2589,14 @@ def parse_sending(payslip_on_duty, drink_on_duty, box_on_duty, cashier_on_duty, 
 
 
                 send_string = "{}年{}月{}日至{}年{}月{}日{}员工工资工时分析单 \n ".format(start_date.year, start_date.month, start_date.day, end_date.year, end_date.month, end_date.day, outlet)
-                send_string += "\n "
+                send_string += " \n "
 
                 for k, i in statement_dict.items():
                     send_string += "{} : {} \n ".format(k, i)
 
                 if send_print_result:
                     if payslip_send_channel.strip().capitalize() == "Telegram":
-                        payslip_rcv = ast.literal_eval(payslip_rcv_dict["payslip_telegram_receivers"])[payslip_on_duty]
+                        payslip_rcv = rcv_telegram[payslip_on_duty]
                         telegram_api = fernet_decrypt(k_dict["payslip_time_telegram_bot_api"], fernet_key)
 
                         sending_telegram(is_pr=False,
@@ -2587,7 +2609,7 @@ def parse_sending(payslip_on_duty, drink_on_duty, box_on_duty, cashier_on_duty, 
                         email_server = fernet_decrypt(k_dict["payslip_time_email_server"], fernet_key)
                         email_sender = fernet_decrypt(k_dict["payslip_time_email_sender"], fernet_key)
                         email_sender_password = fernet_decrypt(k_dict["payslip_time_sender_password"], fernet_key)
-                        email_receiver = ast.literal_eval(payslip_rcv_dict["payslip_mail_receivers"])[payslip_on_duty].split(",")
+                        email_receiver = rcv_email[payslip_on_duty]
 
                         sending_email(is_pr=False,
                                       mail_server=email_server,
@@ -2607,11 +2629,11 @@ def parse_sending(payslip_on_duty, drink_on_duty, box_on_duty, cashier_on_duty, 
                         if write_finance_db:
                             print("是否重新发送工时工资分析单? ")
                             action_req = option_num(["重新发送", "不发送"])
-                            user_input = option_limit(action_req, input(": "))
+                            user_input = option_limit(action_req, input("在这里输入>>>: "))
 
                             if user_input == 0:
                                 if payslip_send_channel.strip().capitalize() == "Telegram":
-                                    payslip_rcv = ast.literal_eval(payslip_rcv_dict["payslip_telegram_receivers"])[payslip_on_duty]
+                                    payslip_rcv = rcv_telegram[payslip_on_duty]
                                     telegram_api = fernet_decrypt(k_dict["payslip_time_telegram_bot_api"], fernet_key)
 
                                     sending_telegram(is_pr=False,
@@ -2624,7 +2646,7 @@ def parse_sending(payslip_on_duty, drink_on_duty, box_on_duty, cashier_on_duty, 
                                     email_server = fernet_decrypt(k_dict["payslip_time_email_server"], fernet_key)
                                     email_sender = fernet_decrypt(k_dict["payslip_time_email_sender"], fernet_key)
                                     email_sender_password = fernet_decrypt(k_dict["payslip_time_sender_password"], fernet_key)
-                                    email_receiver = ast.literal_eval(payslip_rcv_dict["payslip_mail_receivers"])[payslip_on_duty].split(",")
+                                    email_receiver = rcv_email[payslip_on_duty]
 
                                     sending_email(is_pr=False,
                                                   mail_server=email_server,
@@ -2651,7 +2673,6 @@ def parse_sending(payslip_on_duty, drink_on_duty, box_on_duty, cashier_on_duty, 
             pass
     else:
         pass
-
 
 def parse_display_df(value_dict, rule_df_dict, k_dict, google_auth, db_writables, fernet_key, database_url, backup_foldername):
     tabox_inv_function = eval(k_dict["takeaway_box_inventory"].strip().capitalize())
@@ -3007,7 +3028,7 @@ def night_audit_main(database_url, db_setting_url, serialized_rule_filename, ser
                 pbar.update(5)
 
                 pbar.set_description("上传数据库")
-                upload_db(database_url, take_databases, k_dict, fernet_key, google_auth, box_num, drink_num, wifi, outlet, backup_foldername)
+                upload_db(database_url, take_databases, k_dict, fernet_key, google_auth, box_num, drink_num, wifi, backup_foldername)
                 pbar.update(5)
 
                 pbar.set_description("发信息")
@@ -3777,19 +3798,19 @@ def inventory_main(google_auth, db_setting_url, constants_sheetname, serialized_
 
                     print("盘点主菜单")
                     startAction = option_num(["查看文档", "盘点类操作", "生成PDF", "退出盘点"])
-                    userInputOne = option_limit(startAction, input(": "))
+                    userInputOne = option_limit(startAction, input("在这里输入>>>: "))
 
                     if userInputOne == 0:
                         userInputTwo = 0
                         while userInputTwo != 3:
                             docActions = option_num(["查看物品破损记录表", "查看物品进货表", "查看封存区库存", "返回上一菜单"])
-                            userInputTwo = option_limit(docActions, input(": "))
+                            userInputTwo = option_limit(docActions, input("在这里输入>>>: "))
 
                             if userInputTwo == 0:
                                 userInputThree = 0
                                 while userInputThree != 3:
                                     breakagesDocActions = option_num(['整月查看','自定义日期范围', '查看全部破损记录', '返回上一菜单'])
-                                    userInputThree = option_limit(breakagesDocActions, input(": "))
+                                    userInputThree = option_limit(breakagesDocActions, input("在这里输入>>>: "))
 
                                     if userInputThree == 0:
 
@@ -3812,7 +3833,7 @@ def inventory_main(google_auth, db_setting_url, constants_sheetname, serialized_
                                 userInputFour = 0
                                 while userInputFour != 3:
                                     buyInStockActions = option_num(['整月查看','自定义日期范围', '查看全部入库记录', '返回上一菜单'])
-                                    userInputFour = option_limit(buyInStockActions, input(": "))
+                                    userInputFour = option_limit(buyInStockActions, input("在这里输入>>>: "))
 
                                     if userInputFour == 0:
                                         startDate, endDate = get_range_date(whole_month=True)
@@ -3837,7 +3858,7 @@ def inventory_main(google_auth, db_setting_url, constants_sheetname, serialized_
                         userInputFive = 0
                         while userInputFive != 2:
                             stockRelatedAction = option_num(["开始盘点", "查看往月盘点详情", "返回上一菜单"])
-                            userInputFive = option_limit(stockRelatedAction, input(": "))
+                            userInputFive = option_limit(stockRelatedAction, input("在这里输入>>>: "))
 
                             if userInputFive == 0:
 
@@ -4545,7 +4566,7 @@ def inventory_main(google_auth, db_setting_url, constants_sheetname, serialized_
                                                     print("你如果已经对该文件做了修改，你覆盖之后将会丢失所有你修改过的数据")
 
                                                     saveActions = option_num(['保存', '丢弃'])
-                                                    userInputSix = option_limit(saveActions, input(": "))
+                                                    userInputSix = option_limit(saveActions, input("在这里输入>>>: "))
                                                     if userInputSix == 0:
                                                         with pd.ExcelWriter("{}/{}/{}/{}".format(os.getcwd(), stock_count_foldername, stock_count_excel_foldername, current_stock_filename)) as writer:
                                                             pageOneDf.to_excel(writer, sheet_name='Sheet1', index=False, header=True)
@@ -4584,7 +4605,7 @@ def inventory_main(google_auth, db_setting_url, constants_sheetname, serialized_
                                 fileToShow += ["返回上一菜单"]
 
                                 selectFileToViewOptions = option_num(fileToShow)
-                                userInputSeven = option_limit(selectFileToViewOptions, input(": "))
+                                userInputSeven = option_limit(selectFileToViewOptions, input("在这里输入>>>: "))
 
                                 if userInputSeven == len(fileToShow)-1 :
                                     pass
@@ -4613,7 +4634,7 @@ def inventory_main(google_auth, db_setting_url, constants_sheetname, serialized_
                         fileToShow += ["返回上一菜单"]
 
                         selectFileToViewOptions = option_num(fileToShow)
-                        userInputEight = option_limit(selectFileToViewOptions, input(": "))
+                        userInputEight = option_limit(selectFileToViewOptions, input("在这里输入>>>: "))
 
                         if userInputEight == len(fileToShow)-1:
                             pass
@@ -5274,7 +5295,7 @@ def work_schedule_main(google_auth, db_setting_url, constants_sheetname, seriali
 
                     print("排班主菜单")
                     startAction = option_num(["录入排班表数据库", "工资单时间分析", "移除或添加排班", "移除手动录入的假期记录", "退出排班"])
-                    userInputOne = option_limit(startAction, input(": "))
+                    userInputOne = option_limit(startAction, input("在这里输入>>>: "))
 
                     if userInputOne == 0:
                         with tqdm(total=100) as pbar2:
@@ -5477,7 +5498,7 @@ def work_schedule_main(google_auth, db_setting_url, constants_sheetname, seriali
                             userInputTwo = 0
                             while userInputTwo != 3:
                                 payslip_action = option_num(["整月分析", "自定义日期范围分析", "全部记录分析", "返回上一菜单"])
-                                userInputTwo = option_limit(payslip_action, input(": "))
+                                userInputTwo = option_limit(payslip_action, input("在这里输入>>>: "))
 
                                 if userInputTwo == 0:
                                     start_date, end_date = get_range_date(whole_month=True)
@@ -5520,7 +5541,7 @@ def work_schedule_main(google_auth, db_setting_url, constants_sheetname, seriali
                                     print()
                                     print("是否发送工时分析信息？")
                                     action_req = option_num(["是", "否"])
-                                    userInputFive = option_limit(action_req, input(": "))
+                                    userInputFive = option_limit(action_req, input("在这里输入>>>: "))
                                     if userInputFive == 0:
                                         send_string = "{}年{}月{}日至{}年{}月{}日{}员工工资工时分析单 \n ".format(start_date.year, start_date.month, start_date.day, end_date.year, end_date.month, end_date.day, shiftOutlet.strip().capitalize())
                                         send_string += "\n "
@@ -5574,11 +5595,11 @@ def work_schedule_main(google_auth, db_setting_url, constants_sheetname, seriali
                         shift_dr = pygsheets.datarange.DataRange(start=shift_start_coordinate, end=shift_end_coordinate, worksheet=shift_sh)
 
                         action_req = option_num(["移除", "添加"])
-                        userInputThree = option_limit(action_req, input(": "))
+                        userInputThree = option_limit(action_req, input("在这里输入>>>: "))
 
                         if userInputThree == 0:
                             action_req = option_num(["自定义日期范围移除", "全部移除"])
-                            userInputFour = option_limit(action_req, input(": "))
+                            userInputFour = option_limit(action_req, input("在这里输入>>>: "))
 
                             if userInputFour == 0:
                                 current_shift_sh_values = shift_sh.get_values(start=shift_start_coordinate, end=shift_end_coordinate)
@@ -5634,7 +5655,7 @@ def work_schedule_main(google_auth, db_setting_url, constants_sheetname, seriali
                             print()
                             prtdf(employee_info.iloc[:, :2])
                             print()
-                            take_input = input(": ")
+                            take_input = input("在这里输入>>>: ")
 
                             em_ids = take_input.split(",")
 
@@ -5751,7 +5772,7 @@ def coin_reset(google_auth, db_setting_url, constants_sheetname, serialized_rule
         clear_dr = pygsheets.datarange.DataRange(start="A2", end="C502", worksheet=ws[0])
 
         actions = option_num(["清理(保留各币种剩余数值)", "清除(清除所有记录)", "终止"])
-        userInput = option_limit(actions, input(": "))
+        userInput = option_limit(actions, input("在这里输入>>>: "))
 
         if userInput == 0:
             TODAY = dt.datetime.today().strftime("%Y-%m-%d")
@@ -5781,11 +5802,11 @@ def fernet_tool():
         f_handler = Fernet(fernet_key)
 
         actions = option_num(["加密", "解密", "终止"])
-        userInput = option_limit(actions, input(": "))
+        userInput = option_limit(actions, input("在这里输入>>>: "))
 
         if userInput == 0:
             print("请粘贴要加密的文字, 按回车键执行")
-            encrypt_string = input(": ")
+            encrypt_string = input("在这里输入>>>: ")
             encrypt = f_handler.encrypt(encrypt_string.encode())
 
             print("加密文字如下: ")
@@ -5794,8 +5815,8 @@ def fernet_tool():
 
         elif userInput == 1:
             print("请粘贴要解密的文字，按回车键执行")
-            decrypt_string = input(": ")
-            decrypt = fernet_decrypt(decrypt_string)
+            decrypt_string = input("在这里输入>>>: ")
+            decrypt = fernet_decrypt(decrypt_string, fernet_key)
 
             print("解密文字如下: ")
             print(decrypt)
@@ -5832,7 +5853,7 @@ def telegram_test_tool(google_auth, db_setting_url, constants_sheetname, seriali
 
         print()
         print("输入你的测试信息，如果选择默认信息，直接按回车键")
-        test_message = input(": ")
+        test_message = input("在这里输入>>>: ")
 
         if len(test_message.strip()) == 0:
             test_message = "这是机器人测试Telegram信息, 发送时间: {} \n This is Telegram Robot test message, sent at time: {}".format(TIME_NOW, TIME_NOW)
@@ -5841,7 +5862,7 @@ def telegram_test_tool(google_auth, db_setting_url, constants_sheetname, seriali
         
         print()
         print("输入你的Telegram Chat ID, 按回车键执行")
-        chat_id_input = input(": ")
+        chat_id_input = input("在这里输入>>>: ")
 
         sending_telegram(is_pr=False, message=test_message, api=telegram_api, receiver=chat_id_input, wifi=True)
 
@@ -5867,13 +5888,13 @@ def email_test_tool(google_auth, db_setting_url, constants_sheetname, serialized
         TIME_NOW = dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         print("请输入电邮主题，如果选择默认主题，直接按回车键")
-        email_subject = input(": ")
+        email_subject = input("在这里输入>>>: ")
 
         if len(email_subject.strip()) == 0:
             email_subject = "电邮测试 {}".format(TIME_NOW)
 
         print("输入电邮内容, 如果选择默认内容, 直接按回车键")
-        email_text = input(": ")
+        email_text = input("在这里输入>>>: ")
 
         if len(email_text.strip()) == 0:
             email_text = "电邮测试 {}".format(TIME_NOW)
@@ -5934,7 +5955,7 @@ def main(database_url, db_setting_url, serialized_rule_filename, service_filenam
         while SRX_take_input != 4:
             print("Main Menu")
             options = option_num(["关帐", "盘点", "排班", "工具箱", "终止Super App"])
-            SRX_take_input = option_limit(options, input(": "))
+            SRX_take_input = option_limit(options, input("在这里输入>>>: "))
 
             if SRX_take_input == 0:
                 night_audit_main(database_url, db_setting_url, serialized_rule_filename, service_filename, constants_sheetname, google_auth, box_num, drink_num, promo_num, lun_sales, lun_gc, tb_sales, tb_gc, lun_fwc, lun_kwc, tb_fwc, tb_kwc, night_fwc, night_kwc, script_backup_filename, script, wifi, backup_foldername,cashier_on_duty, drink_on_duty, box_on_duty, payslip_on_duty)
@@ -5960,7 +5981,7 @@ def main(database_url, db_setting_url, serialized_rule_filename, service_filenam
                     toolbox_input = 0
                     while toolbox_input != 3:
                         toolboxes = option_num(["硬币Sheet清理工具", "Fernet加密解密工具", "测试发送信息", "关闭工具箱"])
-                        toolbox_input = option_limit(toolboxes, input(": "))
+                        toolbox_input = option_limit(toolboxes, input("在这里输入>>>: "))
 
                         if toolbox_input == 0:
                             coin_reset(google_auth, db_setting_url, constants_sheetname, serialized_rule_filename, backup_foldername)
@@ -5974,7 +5995,7 @@ def main(database_url, db_setting_url, serialized_rule_filename, service_filenam
                                 print()
                                 print()
                                 options = option_num(["发送Telegram测试", "发送电邮测试", "退出发送测试"])
-                                send_test_input = option_limit(options, input(": "))
+                                send_test_input = option_limit(options, input("在这里输入>>>: "))
 
                                 if send_test_input == 0:
                                     telegram_test_tool(google_auth, db_setting_url, constants_sheetname, serialized_rule_filename, backup_foldername)
