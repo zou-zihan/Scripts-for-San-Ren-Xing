@@ -13,12 +13,12 @@ import pygsheets
 import string
 import pickle
 from cryptography.fernet import Fernet
-import ast
 import smtplib
 from email.mime.text import MIMEText
 from email.header import Header
 from tqdm import tqdm
 import pyfiglet
+import time
 
 '''
 generate pdf works well with borb version 2.1.5.2
@@ -1183,6 +1183,7 @@ def sending_email(is_pr, mail_server, mail_sender, mail_sender_password, mail_re
                 smtp_obj.connect(mail_server, 25)
                 smtp_obj.login(mail_sender, mail_sender_password)
 
+                print("正在发送电邮给{}".format(mail_receivers))
                 msg["To"] = mail_receivers
                 smtp_obj.sendmail(mail_sender, mail_receivers, msg.as_string())
 
@@ -2271,7 +2272,7 @@ def upload_db(database_url, take_databases, k_dict, fernet_key, google_auth, box
         shift_db["DATE"] = shift_db["DATE"].apply(lambda y : y.strftime("%Y-%m-%d"))
         shift_db["TIME LOG"] = shift_db["TIME LOG"].apply(lambda x : x.strftime("%Y-%m-%d %H:%M:%S"))
 
-    rcv_df = get_rcv(fernet_key, k_dict, google_auth, backup_foldername, local_db_filename, return_df=True)
+    rcv_df = get_rcv(fernet_key, k_dict, google_auth, backup_foldername, local_db_filename, True)
 
     with pd.ExcelWriter("{}/{}/{}".format(os.getcwd(), backup_foldername, local_db_filename)) as writer:
         for name in sheet_names:
@@ -2391,7 +2392,7 @@ def parse_sending(payslip_on_duty, drink_on_duty, box_on_duty, cashier_on_duty, 
 
     outlet = str(outlet).strip().capitalize()
 
-    rcv_telegram, rcv_email = get_rcv(fernet_key, k_dict, google_auth, backup_foldername, local_database_filename, return_df=False)
+    rcv_telegram, rcv_email = get_rcv(fernet_key, k_dict, google_auth, backup_foldername, local_database_filename, False)
 
     if drink_stock_alert:
 
@@ -5473,27 +5474,11 @@ def work_schedule_main(google_auth, db_setting_url, constants_sheetname, seriali
                             shift_database["ID"] = shift_database["ID"].astype(int)
                             shift_database["ID"] = shift_database["ID"].astype(str)
 
-                            payslip_rcv_sheetname = k_dict["payslip_time_rcv_sheetname"]
                             payslip_send_channel = k_dict["payslip_time_send_channel"]
 
                             payslip_on_duty = str(payslip_on_duty).strip().upper()
 
-                            try:
-                                ws = google_auth.open_by_url(shiftURL)
-                                payslip_rcv_sheetname_index = ws.worksheet(property="title", value=payslip_rcv_sheetname).index
-                                sh = ws[payslip_rcv_sheetname_index].get_as_df()
-
-                            except Exception as e:
-                                print()
-                                print("机器人获取排班RCV失败，错误描述如下：")
-                                print(e)
-                                sh = pd.read_html(shiftURL + "htmlview", encoding="utf-8")[5]
-                                parseGoogleHTMLSheet(sh)
-                                print("已通过仅读模式获取排班RCV")
-
-                            rcv_dict = {}
-                            for index in range(len(sh)):
-                                rcv_dict.update({str(sh.iloc[index, 0]) : str(sh.iloc[index, 1])})
+                            rcv_telegram, rcv_email = get_rcv(fernet_key, k_dict, google_auth, backup_foldername, local_database_filename, False)
 
                             userInputTwo = 0
                             while userInputTwo != 3:
@@ -5548,10 +5533,10 @@ def work_schedule_main(google_auth, db_setting_url, constants_sheetname, seriali
                                         for k, i in statement_dict.items():
                                             send_string += "{} : {} \n ".format(k, i)
 
-                                        payslip_rcv = ast.literal_eval(rcv_dict["payslip_telegram_receivers"])[payslip_on_duty]
                                         wifi = True
 
                                         if payslip_send_channel.strip().capitalize() == "Telegram":
+                                            payslip_rcv = rcv_telegram[payslip_on_duty]
                                             telegram_api = fernet_decrypt(k_dict["payslip_time_telegram_bot_api"], fernet_key)
                                             sending_telegram(is_pr=False,
                                                              message=send_string,
@@ -5563,7 +5548,7 @@ def work_schedule_main(google_auth, db_setting_url, constants_sheetname, seriali
                                             email_server = fernet_decrypt(k_dict["payslip_time_email_server"], fernet_key)
                                             email_sender = fernet_decrypt(k_dict["payslip_time_email_sender"], fernet_key)
                                             email_sender_password = fernet_decrypt(k_dict["payslip_time_sender_password"], fernet_key)
-                                            email_receiver = ast.literal_eval(rcv_dict["payslip_mail_receivers"])[payslip_on_duty].split(",")
+                                            email_receiver = rcv_email[payslip_on_duty]
 
                                             sending_email(is_pr=False,
                                                           mail_server=email_server,
@@ -5950,9 +5935,11 @@ def main(database_url, db_setting_url, serialized_rule_filename, service_filenam
 
         res = pyfiglet.figlet_format("San Ren Xing Super App")
         print(res)
+        time.sleep(0.25)
 
         SRX_take_input = 0
         while SRX_take_input != 4:
+            print()
             print("Main Menu")
             options = option_num(["关帐", "盘点", "排班", "工具箱", "终止Super App"])
             SRX_take_input = option_limit(options, input("在这里输入>>>: "))
@@ -5970,7 +5957,8 @@ def main(database_url, db_setting_url, serialized_rule_filename, service_filenam
 
                 res = pyfiglet.figlet_format("Tool Box")
                 print(res)
-
+                time.sleep(0.25)
+                
                 on_net = on_internet()
 
                 if not on_net:
