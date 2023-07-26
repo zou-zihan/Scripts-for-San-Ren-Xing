@@ -2221,17 +2221,7 @@ def upload_db(database_url, take_databases, k_dict, fernet_key, google_auth, box
         drink_df["OUT (BY PIECE)"] = 0
 
     if wifi:
-        try:
-            tabox_drink_sheet = google_auth.open_by_url(tabox_url)
-            rcv_sheetname_index = tabox_drink_sheet.worksheet(property="title", value=receivers_sheetname).index
-            rcv_df = tabox_drink_sheet[rcv_sheetname_index].get_as_df()
-        except:
-            try:
-                rcv_url = tabox_url + "htmlview"
-                rcv_df = pd.read_html(rcv_url, encoding="utf-8")[2]
-                parseGoogleHTMLSheet(rcv_df)
-            except:
-                rcv_df = pd.read_excel("{}/{}/{}".format(os.getcwd(), backup_foldername, local_db_filename), sheet_name=receivers_sheetname)
+        rcv_df = get_rcv(fernet_key, k_dict, google_auth, backup_foldername, local_db_filename, True)
     else:
         rcv_df = pd.read_excel("{}/{}/{}".format(os.getcwd(), backup_foldername, local_db_filename), sheet_name=receivers_sheetname)
 
@@ -2273,8 +2263,6 @@ def upload_db(database_url, take_databases, k_dict, fernet_key, google_auth, box
         shift_db["TIME LOG"] = pd.to_datetime(shift_db["TIME LOG"])
         shift_db["DATE"] = shift_db["DATE"].apply(lambda y : y.strftime("%Y-%m-%d"))
         shift_db["TIME LOG"] = shift_db["TIME LOG"].apply(lambda x : x.strftime("%Y-%m-%d %H:%M:%S"))
-
-    rcv_df = get_rcv(fernet_key, k_dict, google_auth, backup_foldername, local_db_filename, True)
 
     with pd.ExcelWriter("{}/{}/{}".format(os.getcwd(), backup_foldername, local_db_filename)) as writer:
         for name in sheet_names:
