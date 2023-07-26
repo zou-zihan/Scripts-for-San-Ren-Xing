@@ -2594,7 +2594,7 @@ def parse_sending(payslip_on_duty, drink_on_duty, box_on_duty, cashier_on_duty, 
                                       mail_sender=email_sender,
                                       mail_sender_password=email_sender_password,
                                       mail_receivers=email_receiver,
-                                      mail_subject="{}的工时分析".format(shiftOutlet),
+                                      mail_subject="{}的工时分析".format(outlet),
                                       message_string=send_string,
                                       wifi=wifi)
 
@@ -2631,7 +2631,7 @@ def parse_sending(payslip_on_duty, drink_on_duty, box_on_duty, cashier_on_duty, 
                                                   mail_sender=email_sender,
                                                   mail_sender_password=email_sender_password,
                                                   mail_receivers=email_receiver,
-                                                  mail_subject="{}的工时分析".format(shiftOutlet),
+                                                  mail_subject="{}的工时分析".format(outlet),
                                                   message_string=send_string,
                                                   wifi=wifi)
 
@@ -2645,6 +2645,12 @@ def parse_sending(payslip_on_duty, drink_on_duty, box_on_duty, cashier_on_duty, 
                     else:
                         pass
 
+            else:
+                print("无法获取排班数据库")
+        else:
+            pass
+    else:
+        pass
 
 
 def parse_display_df(value_dict, rule_df_dict, k_dict, google_auth, db_writables, fernet_key, database_url, backup_foldername):
