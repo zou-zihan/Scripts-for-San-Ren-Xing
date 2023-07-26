@@ -2260,7 +2260,7 @@ def upload_db(database_url, take_databases, k_dict, fernet_key, google_auth, box
         print("待网络连接后，本地暂时保存的数据将会自动上传到云端")
 
     if wifi:
-        shift_db = retrieve_shift_db(online_database_url, shift_db_sheetname, local_db_filename)
+        shift_db = retrieve_shift_db(online_database_url, shift_db_sheetname, local_db_filename, backup_foldername)
     else:
         shift_db = pd.read_excel("{}/{}/{}".format(os.getcwd(), backup_foldername, local_db_filename), sheet_name=shift_db_sheetname)
 
@@ -2303,12 +2303,15 @@ def sending_telegram(is_pr, message, api, receiver, wifi):
     else:
         pass
 
-def parse_sending(drink_on_duty, box_on_duty, cashier_on_duty, google_auth, outlet, send_dict, drink_message_string, tabox_message_string, print_result, k_dict, fernet_key, wifi, date_dict, value_dict, db_writables, backup_foldername):
+def parse_sending(payslip_on_duty, drink_on_duty, box_on_duty, cashier_on_duty, google_auth, outlet, send_dict, drink_message_string, tabox_message_string, print_result, k_dict, fernet_key, wifi, date_dict, value_dict, db_writables, backup_foldername, database_url):
+    database_url = fernet_decrypt(database_url, fernet_key)
+
     date = date_dict["dfb"].strftime("%Y-%m-%d")
 
     drink_stock_alert = eval(k_dict["drink_stock_alert"].strip().capitalize())
     box_stock_alert = eval(k_dict["box_stock_alert"].strip().capitalize())
     night_audit_alert = eval(k_dict["night_audit_alert"].strip().capitalize())
+    payslip_end_month_alert = eval(k_dict["payslip_end_month_alert"].strip().capitalize())
 
     send_drink_msg = send_dict["send_drink_msg"]
     send_tabox_msg = send_dict["send_tabox_msg"]
@@ -2317,15 +2320,22 @@ def parse_sending(drink_on_duty, box_on_duty, cashier_on_duty, google_auth, outl
     night_audit_send_channel = k_dict["night_audit_send_channel"]
     drink_send_channel = k_dict["drink_send_channel"]
     tabox_send_channel = k_dict["tabox_send_channel"]
+    payslip_send_channel = k_dict["payslip_time_send_channel"]
 
     rcv_sheetname = k_dict["receivers_sheetname"]
     box_drink_in_out_url = fernet_decrypt(k_dict["box_drink_in_out_url"], fernet_key)
 
+    shift_db_sheetname = k_dict["shift_database_sheetname"]
+    local_database_filename = k_dict["local_database_filename"]
+
     cashier_on_duty = str(cashier_on_duty).strip().upper()
     drink_on_duty = str(drink_on_duty).strip().upper()
     box_on_duty = str(box_on_duty).strip().upper()
+    payslip_on_duty = str(payslip_on_duty).strip().upper()
 
     write_finance_db = db_writables["write_finance_db"]
+
+    outlet = str(outlet).strip().capitalize()
 
     try:
         box_drink_sheet = google_auth.open_by_url(box_drink_in_out_url)
@@ -2496,6 +2506,146 @@ def parse_sending(drink_on_duty, box_on_duty, cashier_on_duty, google_auth, outl
                                 print("Night audit alert sending channel is not defined correctly")
     else:
         pass
+
+    if payslip_end_month_alert:
+        date_from_book = pd.to_datetime(date_dict["dfb"])
+        LAST_DAY = month_last_day(year=date_from_book.year, month=date_from_book.month)
+        LAST_DAY_OF_MONTH = pd.to_datetime(dt.datetime(year=date_from_book.year, month=date_from_book.month, day=LAST_DAY))
+
+        if date_from_book == LAST_DAY_OF_MONTH:
+            shift_db = retrieve_shift_db(database_url, shift_db_sheetname, local_database_filename, backup_foldername)
+            
+            if isinstance(shift_db, pd.DataFrame):
+                shift_db["DATE"] = pd.to_datetime(shift_db["DATE"])
+                shift_db["ID"] = shift_db["ID"].astype(int)
+                shift_db["ID"] = shift_db["ID"].astype(str)
+
+                payslip_rcv_sheetname = k_dict["payslip_time_rcv_sheetname"]
+                shiftURL = fernet_decrypt(k_dict["shift_url"], fernet_key)
+
+                try:
+                    ws = google_auth.open_by_url(shiftURL)
+                    payslip_rcv_sheetname_index = ws.worksheet(property="title", value=payslip_rcv_sheetname).index
+                    sh = ws[payslip_rcv_sheetname_index].get_as_df()
+
+                except Exception as e:
+                    print()
+                    print("机器人获取排班RCV失败，错误描述如下：")
+                    print(e)
+                    sh = pd.read_html(shiftURL + "htmlview", encoding="utf-8")[5]
+                    parseGoogleHTMLSheet(sh)
+                    print("已通过仅读模式获取排班RCV")
+
+                payslip_rcv_dict = {}
+                for index in range(len(sh)):
+                    payslip_rcv_dict.update({str(sh.iloc[index, 0]) : str(sh.iloc[index, 1])})
+
+                #loading employee_info
+                df = pd.read_html(shiftURL+"htmlview", encoding="utf-8")[2]
+                parseGoogleHTMLSheet(df)
+                df["ID"] = df["ID"].astype(int)
+                df["ID"] = df["ID"].astype(str)
+                df["FIRST DAY DATE"] = pd.to_datetime(df["FIRST DAY DATE"])
+                df["AL START DATE"] = pd.to_datetime(df["AL START DATE"])
+                df["AL END DATE"] = pd.to_datetime(df["AL END DATE"])
+
+                start_date = dt.datetime(date_from_book.year, date_from_book.month, 1)
+                end_date = LAST_DAY_OF_MONTH
+
+                payslip_time_df = payslip_time(shift_database = shift_db,
+                                               start_date = pd.to_datetime(start_date),
+                                               end_date = pd.to_datetime(end_date),
+                                               employee_info_df=df)
+
+                payslip_time_df.reset_index(inplace=True)
+                payslip_time_df.drop("index", axis=1, inplace=True)
+
+                statement_dict = payslip_time_statement(concat_df = payslip_time_df,
+                                                        employee_info_df = df,
+                                                        start_date = pd.to_datetime(start_date),
+                                                        end_date = pd.to_datetime(end_date) )
+
+
+                send_string = "{}年{}月{}日至{}年{}月{}日{}员工工资工时分析单 \n ".format(start_date.year, start_date.month, start_date.day, end_date.year, end_date.month, end_date.day, outlet)
+                send_string += "\n "
+
+                for k, i in statement_dict.items():
+                    send_string += "{} : {} \n ".format(k, i)
+
+                if send_print_result:
+                    if payslip_send_channel.strip().capitalize() == "Telegram":
+                        payslip_rcv = ast.literal_eval(payslip_rcv_dict["payslip_telegram_receivers"])[payslip_on_duty]
+                        telegram_api = fernet_decrypt(k_dict["payslip_time_telegram_bot_api"], fernet_key)
+
+                        sending_telegram(is_pr=False,
+                                         message=send_string,
+                                         api = telegram_api,
+                                         receiver=payslip_rcv,
+                                         wifi=wifi)
+
+                    elif payslip_send_channel.strip().capitalize() == "Email":
+                        email_server = fernet_decrypt(k_dict["payslip_time_email_server"], fernet_key)
+                        email_sender = fernet_decrypt(k_dict["payslip_time_email_sender"], fernet_key)
+                        email_sender_password = fernet_decrypt(k_dict["payslip_time_sender_password"], fernet_key)
+                        email_receiver = ast.literal_eval(payslip_rcv_dict["payslip_mail_receivers"])[payslip_on_duty].split(",")
+
+                        sending_email(is_pr=False,
+                                      mail_server=email_server,
+                                      mail_sender=email_sender,
+                                      mail_sender_password=email_sender_password,
+                                      mail_receivers=email_receiver,
+                                      mail_subject="{}的工时分析".format(shiftOutlet),
+                                      message_string=send_string,
+                                      wifi=wifi)
+
+                    else:
+                        print("Payslip time send channel is not defined correctly")
+
+                
+                else:
+                    if wifi:
+                        if write_finance_db:
+                            print("是否重新发送工时工资分析单? ")
+                            action_req = option_num(["重新发送", "不发送"])
+                            user_input = option_limit(action_req, input(": "))
+
+                            if user_input == 0:
+                                if payslip_send_channel.strip().capitalize() == "Telegram":
+                                    payslip_rcv = ast.literal_eval(payslip_rcv_dict["payslip_telegram_receivers"])[payslip_on_duty]
+                                    telegram_api = fernet_decrypt(k_dict["payslip_time_telegram_bot_api"], fernet_key)
+
+                                    sending_telegram(is_pr=False,
+                                                     message=send_string,
+                                                     api = telegram_api,
+                                                     receiver=payslip_rcv,
+                                                     wifi=wifi)
+
+                                elif payslip_send_channel.strip().capitalize() == "Email":
+                                    email_server = fernet_decrypt(k_dict["payslip_time_email_server"], fernet_key)
+                                    email_sender = fernet_decrypt(k_dict["payslip_time_email_sender"], fernet_key)
+                                    email_sender_password = fernet_decrypt(k_dict["payslip_time_sender_password"], fernet_key)
+                                    email_receiver = ast.literal_eval(payslip_rcv_dict["payslip_mail_receivers"])[payslip_on_duty].split(",")
+
+                                    sending_email(is_pr=False,
+                                                  mail_server=email_server,
+                                                  mail_sender=email_sender,
+                                                  mail_sender_password=email_sender_password,
+                                                  mail_receivers=email_receiver,
+                                                  mail_subject="{}的工时分析".format(shiftOutlet),
+                                                  message_string=send_string,
+                                                  wifi=wifi)
+
+                                else:
+                                    print("Payslip time send channel is not defined correctly")
+
+                            else:
+                                pass
+                        else:
+                            pass
+                    else:
+                        pass
+
+
 
 def parse_display_df(value_dict, rule_df_dict, k_dict, google_auth, db_writables, fernet_key, database_url, backup_foldername):
     tabox_inv_function = eval(k_dict["takeaway_box_inventory"].strip().capitalize())
@@ -2718,7 +2868,7 @@ def backup_script(script_backup_filename, script, backup_foldername):
     with open("{}/{}/{}".format(os.getcwd(), backup_foldername, script_backup_filename), "wb") as sfile:
         sfile.write(encrypted_script)
 
-def night_audit_main(database_url, db_setting_url, serialized_rule_filename, service_filename, constants_sheetname, google_auth, box_num, drink_num, promo_num, lun_sales, lun_gc, tb_sales, tb_gc, lun_fwc, lun_kwc, tb_fwc, tb_kwc, night_fwc, night_kwc, script_backup_filename, script, wifi, backup_foldername,cashier_on_duty, drink_on_duty, box_on_duty):
+def night_audit_main(database_url, db_setting_url, serialized_rule_filename, service_filename, constants_sheetname, google_auth, box_num, drink_num, promo_num, lun_sales, lun_gc, tb_sales, tb_gc, lun_fwc, lun_kwc, tb_fwc, tb_kwc, night_fwc, night_kwc, script_backup_filename, script, wifi, backup_foldername,cashier_on_duty, drink_on_duty, box_on_duty, payslip_on_duty):
     database_url = database_url
     db_setting_url = db_setting_url
     serialized_rule_filename = serialized_rule_filename
@@ -2745,6 +2895,7 @@ def night_audit_main(database_url, db_setting_url, serialized_rule_filename, ser
     cashier_on_duty = cashier_on_duty
     drink_on_duty = drink_on_duty
     box_on_duty = box_on_duty
+    payslip_on_duty = payslip_on_duty
 
     fernet_key = get_key()
 
@@ -2854,7 +3005,7 @@ def night_audit_main(database_url, db_setting_url, serialized_rule_filename, ser
                 pbar.update(5)
 
                 pbar.set_description("发信息")
-                parse_sending(drink_on_duty, box_on_duty, cashier_on_duty, google_auth, outlet, send_dict, drink_message_string, tabox_message_string, print_result, k_dict, fernet_key, wifi, date_dict, value_dict, db_writables, backup_foldername)
+                parse_sending(payslip_on_duty, drink_on_duty, box_on_duty, cashier_on_duty, google_auth, outlet, send_dict, drink_message_string, tabox_message_string, print_result, k_dict, fernet_key, wifi, date_dict, value_dict, db_writables, backup_foldername, database_url)
                 pbar.update(5)
 
                 pbar.set_description("生成表格")
@@ -4943,7 +5094,7 @@ def payslip_time_statement(concat_df, employee_info_df, start_date, end_date):
 
     return statement_dict
 
-def retrieve_shift_db(database_url, shift_db_sheetname, local_db_filename):
+def retrieve_shift_db(database_url, shift_db_sheetname, local_db_filename, backup_foldername):
     #load shift database
     shift_db_columns = ["FOR VLOOKUP", "DATE", "DAY NAME", "ID", "NAME", "SHIFT", "OIL", "PH", "AL", "CCL", "IS PH", "REMARKS", "TIME LOG"]
 
@@ -5062,7 +5213,7 @@ def work_schedule_main(google_auth, db_setting_url, constants_sheetname, seriali
             drink_stock_sheetname = str(k_dict["drink_stock_sheetname"])
             rcv_sheetname = str(k_dict["receivers_sheetname"])
 
-            shift_database = retrieve_shift_db(database_url, shift_db_sheetname, local_database_filename)
+            shift_database = retrieve_shift_db(database_url, shift_db_sheetname, local_database_filename, backup_foldername)
 
             if isinstance(shift_database, pd.DataFrame):
                 userInputOne = 0
@@ -5288,7 +5439,7 @@ def work_schedule_main(google_auth, db_setting_url, constants_sheetname, seriali
 
                     elif userInputOne == 1:
 
-                        shift_database = retrieve_shift_db(database_url, shift_db_sheetname, local_database_filename)
+                        shift_database = retrieve_shift_db(database_url, shift_db_sheetname, local_database_filename, backup_foldername)
 
                         if isinstance(shift_database, pd.DataFrame):
                             shift_database["DATE"] = pd.to_datetime(shift_database["DATE"])
@@ -5298,6 +5449,8 @@ def work_schedule_main(google_auth, db_setting_url, constants_sheetname, seriali
                             payslip_rcv_sheetname = k_dict["payslip_time_rcv_sheetname"]
                             payslip_send_channel = k_dict["payslip_time_send_channel"]
 
+                            payslip_on_duty = str(payslip_on_duty).strip().upper()
+
                             try:
                                 ws = google_auth.open_by_url(shiftURL)
                                 payslip_rcv_sheetname_index = ws.worksheet(property="title", value=payslip_rcv_sheetname).index
@@ -5305,11 +5458,11 @@ def work_schedule_main(google_auth, db_setting_url, constants_sheetname, seriali
 
                             except Exception as e:
                                 print()
-                                print("机器人获取RCV失败，错误描述如下：")
+                                print("机器人获取排班RCV失败，错误描述如下：")
                                 print(e)
                                 sh = pd.read_html(shiftURL + "htmlview", encoding="utf-8")[5]
                                 parseGoogleHTMLSheet(sh)
-                                print("已通过仅读模式获取RCV")
+                                print("已通过仅读模式获取排班RCV")
 
                             rcv_dict = {}
                             for index in range(len(sh)):
@@ -5350,7 +5503,7 @@ def work_schedule_main(google_auth, db_setting_url, constants_sheetname, seriali
                                     print()
                                     print("{}年{}月{}日至{}年{}月{}日{}员工工资工时分析单".format(start_date.year, start_date.month, start_date.day,
                                                                                             end_date.year, end_date.month, end_date.day,
-                                                                                            shiftOutlet))
+                                                                                            shiftOutlet.strip().capitalize()))
 
 
                                     print()
@@ -5363,7 +5516,7 @@ def work_schedule_main(google_auth, db_setting_url, constants_sheetname, seriali
                                     action_req = option_num(["是", "否"])
                                     userInputFive = option_limit(action_req, input(": "))
                                     if userInputFive == 0:
-                                        send_string = "{}年{}月{}日至{}年{}月{}日{}员工工资工时分析单 \n ".format(start_date.year, start_date.month, start_date.day, end_date.year, end_date.month, end_date.day, shiftOutlet)
+                                        send_string = "{}年{}月{}日至{}年{}月{}日{}员工工资工时分析单 \n ".format(start_date.year, start_date.month, start_date.day, end_date.year, end_date.month, end_date.day, shiftOutlet.strip().capitalize())
                                         send_string += "\n "
                                         for k, i in statement_dict.items():
                                             send_string += "{} : {} \n ".format(k, i)
@@ -5763,7 +5916,7 @@ def main(database_url, db_setting_url, serialized_rule_filename, service_filenam
     do_not_show_menu = do_not_show_menu
 
     if do_not_show_menu:
-        night_audit_main(database_url, db_setting_url, serialized_rule_filename, service_filename, constants_sheetname, google_auth, box_num, drink_num, promo_num, lun_sales, lun_gc, tb_sales, tb_gc, lun_fwc, lun_kwc, tb_fwc, tb_kwc, night_fwc, night_kwc, script_backup_filename, script, wifi, backup_foldername,cashier_on_duty, drink_on_duty, box_on_duty)
+        night_audit_main(database_url, db_setting_url, serialized_rule_filename, service_filename, constants_sheetname, google_auth, box_num, drink_num, promo_num, lun_sales, lun_gc, tb_sales, tb_gc, lun_fwc, lun_kwc, tb_fwc, tb_kwc, night_fwc, night_kwc, script_backup_filename, script, wifi, backup_foldername,cashier_on_duty, drink_on_duty, box_on_duty, payslip_on_duty)
 
     else:
         backup_script(script_backup_filename, script, backup_foldername)
@@ -5778,7 +5931,7 @@ def main(database_url, db_setting_url, serialized_rule_filename, service_filenam
             SRX_take_input = option_limit(options, input(": "))
 
             if SRX_take_input == 0:
-                night_audit_main(database_url, db_setting_url, serialized_rule_filename, service_filename, constants_sheetname, google_auth, box_num, drink_num, promo_num, lun_sales, lun_gc, tb_sales, tb_gc, lun_fwc, lun_kwc, tb_fwc, tb_kwc, night_fwc, night_kwc, script_backup_filename, script, wifi, backup_foldername,cashier_on_duty, drink_on_duty, box_on_duty)
+                night_audit_main(database_url, db_setting_url, serialized_rule_filename, service_filename, constants_sheetname, google_auth, box_num, drink_num, promo_num, lun_sales, lun_gc, tb_sales, tb_gc, lun_fwc, lun_kwc, tb_fwc, tb_kwc, night_fwc, night_kwc, script_backup_filename, script, wifi, backup_foldername,cashier_on_duty, drink_on_duty, box_on_duty, payslip_on_duty)
 
             elif SRX_take_input == 1:
                 inventory_main(google_auth, db_setting_url, constants_sheetname, serialized_rule_filename, backup_foldername, database_url, box_num, drink_num)
