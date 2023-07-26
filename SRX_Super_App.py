@@ -5905,7 +5905,6 @@ def email_test_tool(google_auth, db_setting_url, constants_sheetname, serialized
                 print("输入的'{}'不是电子邮箱，请重新输入。".format(email_receiver))
 
             else:
-                email_receiver = "{}".format(email_receiver).split()
                 valid_email = True
 
         sending_email(is_pr=False, mail_server=email_server, mail_sender=email_sender, mail_sender_password=email_sender_password, mail_receivers=email_receiver, mail_subject=email_subject, message_string=email_text, wifi=True)
