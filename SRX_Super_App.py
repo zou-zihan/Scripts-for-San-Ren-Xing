@@ -3032,6 +3032,29 @@ def night_audit_main(database_url, db_setting_url, serialized_rule_filename, ser
                 pbar.set_description("生成表格")
                 bk_df, show_box_df, show_drink_df, tabox_max_date, drink_db_max_date = parse_display_df(value_dict, rule_df_dict, k_dict, google_auth, db_writables, fernet_key, database_url, backup_foldername)
 
+                pbar.set_description("酒水明细")
+                trigger_drink_generate = trigger_gen_drink_pdf(k_dict, date_dict)
+                if trigger_drink_generate:
+                    stock_count_foldername = "{}盘点文件".format(outlet.strip().capitalize())
+                    songti_filename = "SongTi.ttf"
+
+                    if not os.path.exists("{}/{}/{}".format(os.getcwd(), stock_count_foldername, songti_filename)):
+                        print("宋体TTF文件'{}'不存在, 酒水明细表的生成无法继续".format(songti_filename))
+                        print("请把宋体TTF文件'{}'保存至盘点文件名的目录下, 具体路径需在:'{}/{}/{}'".format(songti_filename, os.getcwd(), stock_count_foldername, songti_filename))
+                        print()
+                        print("生成酒水明细表PDF步骤已跳过! ")
+                    
+                    else:
+                        print("月底了，已自动进入生成酒水明细表生成步骤! ")
+                        print("生成PDF过程比较漫长, 请耐心等待...")
+                        time.sleep(0.25)
+                        custom_font_path = pathlib.Path("{}/{}/{}".format(os.getcwd(), stock_count_foldername, songti_filename))
+                        time.sleep(0.25)
+                        borb_custom_font = borb_TrueTypeFont.true_type_font_from_file(custom_font_path)
+                        gen_drink_pdf(google_auth, db_setting_url, constants_sheetname, serialized_rule_filename, backup_foldername, database_url, borb_custom_font, drink_num)
+                else:
+                    pass
+
                 pbar.set_description("任务完成")
                 pbar.update(5)
                 time.sleep(0.5)
@@ -6164,7 +6187,23 @@ def gen_drink_pdf(google_auth, db_setting_url, constants_sheetname, serialized_r
 
         else:
             print("无法获取任何酒水数据库, 酒水明细表PDF生成无法继续")
-        
+
+def trigger_gen_drink_pdf(k_dict, date_dict):
+    dfb = date_dict["dfb"]
+    
+    LAST_DAY = month_last_day(dfb.year, dfb.month)
+    MONTH_LAST_DAY = pd.to_datetime(dt.datetime(dfb.year, dfb.month, LAST_DAY))
+
+    is_auto = eval(str(k_dict["auto_gen_drink_pdf"]).strip().capitalize())
+
+    if is_auto:
+        if dfb == MONTH_LAST_DAY:
+            return True
+        else:
+            return False
+    else:
+        return False
+
 def main(database_url, db_setting_url, serialized_rule_filename, service_filename, constants_sheetname, google_auth, box_num, drink_num, promo_num, lun_sales, lun_gc, tb_sales, tb_gc, lun_fwc, lun_kwc, tb_fwc, tb_kwc, night_fwc, night_kwc, script_backup_filename, script, wifi, backup_foldername,cashier_on_duty, drink_on_duty, box_on_duty, payslip_on_duty, do_not_show_menu):
     database_url = database_url
     db_setting_url = db_setting_url
