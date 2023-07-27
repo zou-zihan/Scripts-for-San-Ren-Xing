@@ -5906,6 +5906,264 @@ def email_test_tool(google_auth, db_setting_url, constants_sheetname, serialized
                 valid_email = True
 
         sending_email(is_pr=False, mail_server=email_server, mail_sender=email_sender, mail_sender_password=email_sender_password, mail_receivers=email_receiver, mail_subject=email_subject, message_string=email_text, wifi=True)
+
+def gen_drink_pdf(google_auth, db_setting_url, constants_sheetname, serialized_rule_filename, backup_foldername, database_url, custom_font, drink_num):
+    google_auth = google_auth
+    db_setting_url = db_setting_url
+    constants_sheetname = constants_sheetname
+    serialized_rule_filename = serialized_rule_filename
+    backup_foldername = backup_foldername
+    database_url = database_url
+    custom_font = custom_font
+    drink_num = drink_num
+
+    fernet_key = get_key()
+
+    if fernet_key == 0:
+        print("安全密钥错误! ")
+    else:
+        outlet = get_outlet()
+        k_dict = get_k_dictionary(google_auth, db_setting_url, constants_sheetname, serialized_rule_filename, outlet, fernet_key, backup_foldername)
+
+        res = pyfiglet.figlet_format("Drink Report")
+        print(res)
+        time.sleep(0.15)
+
+        drink_db_sheetname = k_dict["drink_database_sheetname"]
+        local_db_filename = k_dict["local_database_filename"]
+
+        database_url = fernet_decrypt(database_url, fernet_key)
+
+        drink_pdf_foldername = "{}酒水明细PDF".format(outlet.strip().capitalize())
+
+        if not os.path.exists("{}/{}".format(os.getcwd(), drink_pdf_foldername)):
+            os.makedirs("{}/{}".format(os.getcwd(), drink_pdf_foldername))
+            print("检测出未创建酒水明细表文件名, 已自动创建酒水明细表文件名")
+                
+        print("初始化...")
+        print()
+        try:
+            ws = google_auth.open_by_url(database_url)
+            drink_db_sheetname_index = ws.worksheet(property="title", value=drink_db_sheetname).index
+            drink_db_online = ws[drink_db_sheetname_index].get_as_df()
+
+        except Exception as e:
+            print()
+            print("通过机器人读取酒水数据失败，错误描述如下：")
+            print(e)
+            print()
+            drink_db_online = None
+        
+        try:
+            drink_db_local = pd.read_excel("{}/{}/{}".format(os.getcwd(), backup_foldername, local_db_filename), sheet_name=drink_db_sheetname)
+        except Exception as e:
+            print()
+            print("本地读取酒水数据库失败，错误描述如下：")
+            print(e)
+            print()
+            drink_db_local = None
+        
+        if isinstance(drink_db_online, pd.DataFrame) or isinstance(drink_db_local, pd.DataFrame):
+            if isinstance(drink_db_online, pd.DataFrame):
+                if drink_db_online.empty:
+                    drink_db_online_max_date = None
+                else:
+                    drink_db_online["DATE"] = pd.to_datetime(drink_db_online["DATE"])
+                    drink_db_online_max_date = drink_db_online["DATE"].max()
+            
+            else:
+                drink_db_online_max_date = None
+
+            if isinstance(drink_db_local, pd.DataFrame):
+                if drink_db_local.empty:
+                    drink_db_local_max_date = None
+                else:
+                    drink_db_local["DATE"] = pd.to_datetime(drink_db_local["DATE"])
+                    drink_db_local_max_date = drink_db_local["DATE"].max()
+            else:
+                drink_db_local_max_date = None
+
+            if (drink_db_online_max_date == None) and (drink_db_local_max_date != None):
+                drink_database = drink_db_local.copy()
+            
+            elif (drink_db_local_max_date == None) and (drink_db_online_max_date != None):
+                drink_database = drink_db_online.copy()
+            
+            elif (drink_db_online_max_date != None) and (drink_db_local_max_date != None):
+                if drink_db_online_max_date >= drink_db_local_max_date:
+                    drink_database = drink_db_online.copy()
+                else:
+                    drink_database = drink_db_local.copy()
+            
+            else:
+                drink_database = None
+        
+        else:
+            drink_database = None
+        
+        if isinstance(drink_database, pd.DataFrame):
+            drink_database["DATE"] = pd.to_datetime(drink_database["DATE"])
+
+            print("初始化完成")
+            print()
+            user_input = 0
+            while user_input != 1:
+                options = option_num(["整月生成", "退出酒水明细表PDF生成"])
+                time.sleep(0.25)
+                user_input = option_limit(options, input("在这里输入>>>: "))
+
+                if user_input == 0:
+                    start_date, end_date = get_range_date(whole_month=True)
+                    date_range = pd.date_range(start=start_date, end=end_date)
+                    
+                    drink_db_copy = drink_database.copy()
+                    drink_db_copy["DATE"] = pd.to_datetime(drink_db_copy["DATE"])
+                    drink_db_copy = drink_db_copy[drink_db_copy["DATE"].isin(date_range)]
+                    drink_db_copy.sort_values(by=["DATE"], ascending=True, ignore_index=True, inplace=True)
+
+                    if drink_db_copy.empty:
+                        print("{}至{}没有任何酒水记录, 酒水明细PDF无法生存".format(start_date, end_date))
+                    
+                    else:
+                        if len(drink_db_copy) != len(date_range):
+                            print("{}年{}月的酒水明细没有整月完整的信息, 是否继续生成? ".format(start_date.year, start_date.month))
+                            select_options = option_num(["是", "否"])
+                            time.sleep(0.25)
+                            select_input = option_limit(select_options, input("在这里输入>>>: "))
+
+                            if select_input == 0:
+                                continue_gen = True
+                            else:
+                                continue_gen = False
+                        else:
+                            continue_gen = True
+
+                        drink_pdf_filename = "{}年{}月{}酒水明细表.pdf".format(start_date.year, start_date.month, outlet.strip().capitalize())
+
+                        if os.path.exists("{}/{}/{}".format(os.getcwd(), drink_pdf_foldername, drink_pdf_filename)):
+                            print("{}年{}月{}的酒水明细表已存在，是否生成新的来覆盖?".format(start_date.year, start_date.month, outlet.strip().capitalize()))
+                            print("如果你选择了覆盖, 之前的明细表会被系统删除, 此操作不可逆转")
+                            print()
+                            options = option_num(["继续生成明细表(覆盖旧文件)", "终止生成(保留旧文件)"])
+                            time.sleep(0.25)
+                            user_input = option_limit(options, input("在这里输入>>>: "))
+
+                            if user_input == 0:
+                                pass
+                            else:
+                                continue_gen = False
+                        else:
+                            pass
+
+                        if continue_gen:
+                            with tqdm(total=100) as pbar:
+                                pbar.set_description("获取酒水名称...")
+
+                                drink_names = []
+                                for n in range(drink_num):
+                                    if str(k_dict["drink{}".format(n)]).startswith("饮料"):
+                                        continue
+                                    else:
+                                        drink_names += [str(k_dict["drink{}".format(n)])]
+
+                                table_columns = ["日期", "上日存货", "进", "出", "实结存", "签名", "备注"]
+
+                                pbar.update(20)
+
+                                pbar.set_description("开始生成PDF...")
+                                Document = borb_Document()
+                                Page = borb_Page(width=Decimal(595), height=Decimal(842))
+                                Document.add_page(Page)
+
+                                layout: borb_PageLayout = borb_MCL(Page)
+
+                                drink_db_copy["DATE"] = drink_db_copy["DATE"].apply(lambda z : z.strftime("%d"))
+
+                                tables_dict = {}
+                                table_counter = 0
+                                df_dict = {}
+                                title_dict = {}
+                                for index in range(len(drink_names)):
+                                    dataframe = pd.DataFrame({
+                                        table_columns[0]: drink_db_copy["DATE"].values,
+                                        table_columns[1]: drink_db_copy["{}上日存货".format(drink_names[index])].values,
+                                        table_columns[2]: drink_db_copy["{}进".format(drink_names[index])].values,
+                                        table_columns[3]: drink_db_copy["{}出".format(drink_names[index])].values,
+                                        table_columns[4]: drink_db_copy["{}实结存".format(drink_names[index])].values,
+                                        table_columns[5]: np.repeat(np.nan, len(drink_db_copy["DATE"].values)),
+                                        table_columns[6]: drink_db_copy["{}备注".format(drink_names[index])].values,
+                                        
+                                    })
+                                    
+                                    df_dict.update({ "table{}".format(table_counter) : dataframe})
+                                    
+                                    tables_dict.update({ "table{}".format(table_counter) : borb_flex_Table(number_of_rows=32, number_of_columns=len(table_columns)) })
+
+                                    title_dict.update({ "table{}".format(table_counter) : "{}年{}月份{}明细".format(start_date.year, start_date.month, drink_names[index])})
+                                    
+                                    table_counter += 1
+                                
+                                pbar.update(20)
+                                
+                                #table manipulation
+                                for key in tables_dict:
+                                    space_avail = 32*len(table_columns)
+
+                                    for c in table_columns:
+                                        tables_dict[key].add(borb_TableCell(
+                                                                borb_Paragraph(c, font=custom_font, horizontal_alignment=borb_align.CENTERED)))
+                                    
+                                    space_avail -= len(table_columns)
+
+                                    for row in range(len(df_dict[key])):
+                                        for column in range(len(df_dict[key].columns)):
+                                            if str(df_dict[key].iloc[row, column]) == "nan":
+                                                tables_dict[key].add(borb_Paragraph(" ", font=custom_font, horizontal_alignment=borb_align.CENTERED))
+                                            else:
+                                                tables_dict[key].add(borb_Paragraph(str(df_dict[key].iloc[row, column]), font=custom_font, horizontal_alignment=borb_align.CENTERED))
+                                            
+                                            space_avail -= 1
+                                    
+                                    if space_avail > 0:
+                                        for extraSpace in range(space_avail):
+                                            tables_dict[key].add(borb_Paragraph(" ", font=custom_font, horizontal_alignment=borb_align.CENTERED))
+                                    else:
+                                        pass
+                                    
+                                    tables_dict[key].set_padding_on_all_cells(Decimal(1), Decimal(1), Decimal(1), Decimal(1))
+                                
+                                pbar.update(20)
+                                
+                                #append to layout
+                                for key in tables_dict:
+                                    layout.add(borb_Paragraph("三人行酒水明细表({})".format(outlet.strip().capitalize()), font=custom_font, horizontal_alignment=borb_align.CENTERED))
+                                    
+                                    layout.add(borb_Paragraph(str(title_dict[key]), font=custom_font, horizontal_alignment=borb_align.CENTERED))
+                                    
+                                    layout.add(tables_dict[key])
+                                
+                                pbar.update(35)
+                                pbar.set_description("PDF保存中...")
+                                
+                                drink_pdf_filename = "{}年{}月{}酒水明细表.pdf".format(start_date.year, start_date.month, outlet.strip().capitalize())
+
+                                with open("{}/{}/{}".format(os.getcwd(), drink_pdf_foldername, drink_pdf_filename), "wb") as pdf_file_handle:
+                                    borb_PDF.dumps(pdf_file_handle, Document)
+                                
+                                pbar.set_description("PDF任务完成")
+                                pbar.update(5)
+
+                        else:
+                            pass
+                
+                else:
+                    pass
+
+            else:
+                pass
+
+        else:
+            print("无法获取任何酒水数据库, 酒水明细表PDF生成无法继续")
         
 def main(database_url, db_setting_url, serialized_rule_filename, service_filename, constants_sheetname, google_auth, box_num, drink_num, promo_num, lun_sales, lun_gc, tb_sales, tb_gc, lun_fwc, lun_kwc, tb_fwc, tb_kwc, night_fwc, night_kwc, script_backup_filename, script, wifi, backup_foldername,cashier_on_duty, drink_on_duty, box_on_duty, payslip_on_duty, do_not_show_menu):
     database_url = database_url
@@ -5948,10 +6206,10 @@ def main(database_url, db_setting_url, serialized_rule_filename, service_filenam
         time.sleep(0.15)
 
         SRX_take_input = 0
-        while SRX_take_input != 4:
+        while SRX_take_input != 5:
             print()
             print("Main Menu")
-            options = option_num(["关帐", "盘点", "排班", "工具箱", "终止Super App"])
+            options = option_num(["关帐", "盘点", "排班", "生成酒水明细表", "工具箱", "终止Super App"])
             time.sleep(0.25)
             SRX_take_input = option_limit(options, input("在这里输入>>>: "))
 
@@ -5963,8 +6221,23 @@ def main(database_url, db_setting_url, serialized_rule_filename, service_filenam
 
             elif SRX_take_input == 2:
                 work_schedule_main(google_auth, db_setting_url, constants_sheetname, serialized_rule_filename, backup_foldername, database_url, payslip_on_duty)
-
+            
             elif SRX_take_input == 3:
+                outlet = get_outlet()
+                stock_count_foldername = "{}盘点文件".format(outlet.strip().capitalize())
+                songti_filename = "SongTi.ttf"
+
+                if not os.path.exists("{}/{}/{}".format(os.getcwd(), stock_count_foldername, songti_filename)):
+                    print("宋体TTF文件'{}'不存在, 酒水明细表的生成无法继续".format(songti_filename))
+                    print("请把宋体TTF文件'{}'保存至盘点文件名的目录下, 具体路径需在:'{}/{}/{}'".format(songti_filename, os.getcwd(), stock_count_foldername, songti_filename))
+                
+                else:
+                    print("生成PDF过程比较漫长, 请耐心等待...")
+                    custom_font_path = pathlib.Path("{}/{}/{}".format(os.getcwd(), stock_count_foldername, songti_filename))
+                    borb_custom_font = borb_TrueTypeFont.true_type_font_from_file(custom_font_path)
+                    gen_drink_pdf(google_auth, db_setting_url, constants_sheetname, serialized_rule_filename, backup_foldername, database_url, borb_custom_font, drink_num)
+
+            elif SRX_take_input == 4:
 
                 res = pyfiglet.figlet_format("Tool Box")
                 print(res)
