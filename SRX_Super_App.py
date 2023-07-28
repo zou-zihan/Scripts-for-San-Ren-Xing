@@ -3042,15 +3042,18 @@ def night_audit_main(database_url, db_setting_url, serialized_rule_filename, ser
                         print("宋体TTF文件'{}'不存在, 酒水明细表的生成无法继续".format(songti_filename))
                         print("请把宋体TTF文件'{}'保存至盘点文件名的目录下, 具体路径需在:'{}/{}/{}'".format(songti_filename, os.getcwd(), stock_count_foldername, songti_filename))
                         print()
-                        print("生成酒水明细表PDF步骤已跳过! ")
+                        print("生成酒水明细表PDF环节已跳过! ")
                     
                     else:
-                        print("月底了，已自动进入生成酒水明细表生成步骤! ")
-                        print("生成PDF过程比较漫长, 请耐心等待...")
-                        time.sleep(0.25)
+                        print("月底了，已自动进入酒水明细表生成环节! ")
+                        print()
+                        print("读取字体文件中...")
                         custom_font_path = pathlib.Path("{}/{}/{}".format(os.getcwd(), stock_count_foldername, songti_filename))
-                        time.sleep(0.25)
                         borb_custom_font = borb_TrueTypeFont.true_type_font_from_file(custom_font_path)
+                        print("字体文件读取完成。")
+                        print()
+                        print("进入酒水明细表生成环节后请准确选择你要生成的年份和月份")
+                        print()
                         gen_drink_pdf(google_auth, db_setting_url, constants_sheetname, serialized_rule_filename, backup_foldername, database_url, borb_custom_font, drink_num)
                 else:
                     pass
@@ -4675,10 +4678,13 @@ def inventory_main(google_auth, db_setting_url, constants_sheetname, serialized_
                                         pageTwoDf = pd.read_excel("{}/{}/{}/{}".format(os.getcwd(), stock_count_foldername, stock_count_excel_foldername, fileToShow[userInputEight]), sheet_name="Sheet2")
                                         pageThreeDf = pd.read_excel("{}/{}/{}/{}".format(os.getcwd(), stock_count_foldername, stock_count_excel_foldername, fileToShow[userInputEight]), sheet_name="Sheet3")
 
-                                        print("生成PDF过程比较漫长, 请耐心等待...")
+                                        print("读取字体文件中...")
                                         custom_font_path = pathlib.Path("{}/{}/{}".format(os.getcwd(), stock_count_foldername, songti_filename))
                                         borb_custom_font = borb_TrueTypeFont.true_type_font_from_file(custom_font_path)
-
+                                        print("字体文件读取完成。")
+                                        print()
+                                        print("库存盘点PDF生成过程比较漫长, 请耐心等待...")
+                                        print()
                                         stock_gen_pdf(customFont=borb_custom_font,
                                                       pageOneDf=pageOneDf,
                                                       pageTwoDf=pageTwoDf,
@@ -4696,7 +4702,7 @@ def inventory_main(google_auth, db_setting_url, constants_sheetname, serialized_
                                         print("Sheet1必须对应楼面盘点")
                                         print("Sheet2必须对应打包盒盘点")
                                         print("Sheet3必须对应收银盘点")
-                                        print("无法继续生成pdf")
+                                        print("无法继续生成PDF")
                                         print()
 
                                 else:
@@ -5964,7 +5970,6 @@ def gen_drink_pdf(google_auth, db_setting_url, constants_sheetname, serialized_r
             print("检测出未创建酒水明细表文件名, 已自动创建酒水明细表文件名")
                 
         print("初始化...")
-        print()
         try:
             ws = google_auth.open_by_url(database_url)
             drink_db_sheetname_index = ws.worksheet(property="title", value=drink_db_sheetname).index
@@ -6045,7 +6050,7 @@ def gen_drink_pdf(google_auth, db_setting_url, constants_sheetname, serialized_r
                     drink_db_copy.sort_values(by=["DATE"], ascending=True, ignore_index=True, inplace=True)
 
                     if drink_db_copy.empty:
-                        print("{}至{}没有任何酒水记录, 酒水明细PDF无法生存".format(start_date, end_date))
+                        print("{}至{}没有任何酒水记录, 酒水明细PDF无法生存".format(start_date.strftime("%Y-%m-%d"), end_date.strftime("%Y-%m-%d")))
                     
                     else:
                         if len(drink_db_copy) != len(date_range):
@@ -6079,6 +6084,7 @@ def gen_drink_pdf(google_auth, db_setting_url, constants_sheetname, serialized_r
                             pass
 
                         if continue_gen:
+                            print("生成酒水明细表PDF过程比较漫长, 请耐心等待...")
                             with tqdm(total=100) as pbar:
                                 pbar.set_description("获取酒水名称...")
 
@@ -6271,9 +6277,11 @@ def main(database_url, db_setting_url, serialized_rule_filename, service_filenam
                     print("请把宋体TTF文件'{}'保存至盘点文件名的目录下, 具体路径需在:'{}/{}/{}'".format(songti_filename, os.getcwd(), stock_count_foldername, songti_filename))
                 
                 else:
-                    print("生成PDF过程比较漫长, 请耐心等待...")
+                    print("读取字体文件中...")
                     custom_font_path = pathlib.Path("{}/{}/{}".format(os.getcwd(), stock_count_foldername, songti_filename))
                     borb_custom_font = borb_TrueTypeFont.true_type_font_from_file(custom_font_path)
+                    print("字体文件读取完成。")
+                    print()
                     gen_drink_pdf(google_auth, db_setting_url, constants_sheetname, serialized_rule_filename, backup_foldername, database_url, borb_custom_font, drink_num)
 
             elif SRX_take_input == 4:
