@@ -969,6 +969,7 @@ def parse_tabox(k_dict, google_auth, fernet_key, box_num, rule_df_dict, take_dat
                         box_value[key0] = 0
 
                     elif operation == "change value":
+                        key1 = float(etb_df["WITH KEY"][op])
                         box_value[key0] = key1
 
                     else:
