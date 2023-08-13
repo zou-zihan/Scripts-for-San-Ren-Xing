@@ -940,39 +940,39 @@ def parse_tabox(k_dict, google_auth, fernet_key, box_num, rule_df_dict, take_dat
                 else:
                     operation = str(etb_df["OPERATION"][op]).strip()
 
-                    criteria = (operation != "zero") and (operation != "change value")
-
-                    if criteria:
+                    if operation == "plus equal":
                         key0 = str(etb_df["BOX VALUE KEY TO OPERATE ON"][op])
                         key1 = str(etb_df["WITH KEY"][op])
+                        box_value[key0] += box_value[key1]
 
-                        if operation == "plus equal":
-                            box_value[key0] += box_value[key1]
+                    elif operation == "minus equal":
+                        key0 = str(etb_df["BOX VALUE KEY TO OPERATE ON"][op])
+                        key1 = str(etb_df["WITH KEY"][op])
+                        box_value[key0] -= box_value[key1]
 
-                        elif operation == "minus equal":
-                            box_value[key0] -= box_value[key1]
+                    elif operation == "divide equal":
+                        key0 = str(etb_df["BOX VALUE KEY TO OPERATE ON"][op])
+                        key1 = str(etb_df["WITH KEY"][op])
+                        box_value[key0] /= box_value[key1]
 
-                        elif operation == "divide equal":
-                            box_value[key0] /= box_value[key1]
+                    elif operation == "times equal":
+                        key0 = str(etb_df["BOX VALUE KEY TO OPERATE ON"][op])
+                        key1 = str(etb_df["WITH KEY"][op])
+                        box_value[key0] *= box_value[key1]
 
-                        elif operation == "times equal":
-                            box_value[key0] *= box_value[key1]
+                    elif operation == "equal":
+                        key0 = str(etb_df["BOX VALUE KEY TO OPERATE ON"][op])
+                        key1 = str(etb_df["WITH KEY"][op])
+                        box_value[key0] = box_value[key1]
 
-                        elif operation == "equal":
-                            box_value[key0] = box_value[key1]
+                    elif operation == "zero":
+                        box_value[key0] = 0
 
-                        else:
-                            pass
+                    elif operation == "change value":
+                        box_value[key0] = key1
 
                     else:
-                        if operation == "zero":
-                            box_value[key0] = 0
-
-                        elif operation == "change value":
-                            box_value[key0] = key1
-
-                        else:
-                            pass
+                        pass
 
         takeaway_box_db_sheetname = k_dict["takeaway_box_database_sheetname"]
         tb_data = take_databases[takeaway_box_db_sheetname]
