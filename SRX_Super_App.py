@@ -4903,6 +4903,17 @@ def assignLeaves(assign_for, employee_id, date, employee_info_df, shift_df, leav
     elif str(assign_for).strip().upper() == "AL":
         AssignValue = calculate_AL(employee_info_df=employee_info_df, employee_id=employee_id, date=date)
 
+        criteria3 = shift_df["SHIFT"] == str(assign_for).strip().upper()
+        criteria4 = shift_df["DATE"] == date
+        criteria5 = shift_df["SHIFT"].str.startswith(str(assign_for).strip().upper()+"/")
+        criteria6 = shift_df["SHIFT"].str.endswith("/"+str(assign_for).strip().upper())
+
+        num1 = len(shift_df[(criteria1)&(criteria4)&(criteria3)])
+        num2 = len(shift_df[(criteria1)&(criteria4)&(criteria3)])*0.5
+        num3 = len(shift_df[(criteria1)&(criteria4)&(criteria5)])*0.5
+
+        AssignValue -= (num1 + num2 + num3)
+        
     else:
         filter1 = shift_df["DATE"] == date
 
