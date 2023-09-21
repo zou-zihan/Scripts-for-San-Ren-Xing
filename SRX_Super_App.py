@@ -4909,8 +4909,8 @@ def assignLeaves(assign_for, employee_id, date, employee_info_df, shift_df, leav
         criteria6 = shift_df["SHIFT"].str.endswith("/"+str(assign_for).strip().upper())
 
         num1 = len(shift_df[(criteria1)&(criteria4)&(criteria3)])
-        num2 = len(shift_df[(criteria1)&(criteria4)&(criteria3)])*0.5
-        num3 = len(shift_df[(criteria1)&(criteria4)&(criteria5)])*0.5
+        num2 = len(shift_df[(criteria1)&(criteria4)&(criteria5)])*0.5
+        num3 = len(shift_df[(criteria1)&(criteria4)&(criteria6)])*0.5
 
         total_number = num1 + num2 + num3
 
