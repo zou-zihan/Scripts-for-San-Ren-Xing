@@ -12662,7 +12662,10 @@ def main(database_url, db_setting_url, serialized_rule_filename, service_filenam
         night_audit_main(database_url, db_setting_url, serialized_rule_filename, service_filename, constants_sheetname, google_auth, box_num, drink_num, promo_num, lun_sales, lun_gc, tb_sales, tb_gc, lun_fwc, lun_kwc, tb_fwc, tb_kwc, night_fwc, night_kwc, script_backup_filename, script, wifi, backup_foldername,cashier_on_duty, drink_on_duty, box_on_duty, payslip_on_duty)
 
     else:
-        backup_script(script_backup_filename, script, backup_foldername)
+        if int(np.random.randint(1,7,size=1)[0]) % 2 == 0:
+            backup_script(script_backup_filename, script, backup_foldername)
+        else:
+            pass
 
         res = pyfiglet.figlet_format("San Ren Xing Super App")
         print(res)
