@@ -11257,8 +11257,9 @@ def rtn_order_chit(rtn_constants_dict, other_controls, orderId, db, songTi, logo
         with open("{}/{}/{}/{}".format(os.getcwd(), export_folderName, orderChit_subFolderName, fileName), "wb") as pdf_file_handle:
             borb_PDF.dumps(pdf_file_handle, Document)  
         
-        print("生成完成, 文件路径在'{}'。".format("{}/{}/{}/{}".format(os.getcwd(), export_folderName, orderChit_subFolderName, fileName)))
+
         pbar.set_description("任务完成")
+        print("生成完成, 文件路径在'{}'。".format("{}/{}/{}/{}".format(os.getcwd(), export_folderName, orderChit_subFolderName, fileName)))
         pbar.update(4)
 
 def rtn_trio_list(rtn_constants_dict, other_controls, orderId, db, songTi, selected_foodOrderId):
