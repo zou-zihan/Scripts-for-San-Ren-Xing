@@ -12167,10 +12167,10 @@ def rtn_main(google_auth, rtn_control_url, rtn_database_url, constants_sheetname
                         print()
 
                         groupby_select = 0
-                        while groupby_select != 6:
+                        while groupby_select != 5:
                             
 
-                            groupby_option = ["按「预订时间」汇总", "按「轮数」汇总", "按「订单属性」汇总", "按「菜品属性」汇总", "按「订单创建时间」汇总", "高级汇总", "返回上一菜单"]
+                            groupby_option = ["按「预订时间」汇总", "按「轮数」汇总", "按「订单属性」汇总", "按「订单创建时间」汇总", "高级汇总", "返回上一菜单"]
                             groupby_options = option_num(groupby_option)
                             time.sleep(0.25)
                             groupby_select = option_limit(groupby_options, input("在这里输入>>>: "))
@@ -12185,7 +12185,7 @@ def rtn_main(google_auth, rtn_control_url, rtn_database_url, constants_sheetname
                                     isSpecial = False
                                     filterByDateRange = False
 
-                                elif groupby_select == 5:
+                                elif groupby_select == 4:
                                     isSpecial = True
                                     filterByDateRange = False
                                 
@@ -12332,8 +12332,8 @@ def rtn_main(google_auth, rtn_control_url, rtn_database_url, constants_sheetname
                                 print()
                                 if isinstance(slice_sm_bd_df, pd.DataFrame):
                                     if not slice_sm_bd_df.empty:
-                                        slice_sm_bd_df["菜肴名(备注)"] = slice_sm_bd_df["菜肴名"] + "(" + slice_sm_bd_df["备注"] + ")"
-                                        set_menu_summary = slice_sm_bd_df.groupby("菜肴名(备注)")[["数量"]].sum()
+                                        slice_sm_bd_df["(套餐名)菜肴名(备注)"] = "(" + slice_sm_bd_df["套餐名"] + ")" + slice_sm_bd_df["菜肴名"] + "(" + slice_sm_bd_df["备注"] + ")"
+                                        set_menu_summary = slice_sm_bd_df.groupby("(套餐名)菜肴名(备注)")[["数量"]].sum()
                                         set_menu_summary.reset_index(inplace=True)
                                         set_menu_summary["数量"] = set_menu_summary["数量"].astype(int)
                                         print("套餐内菜肴汇总: ")
