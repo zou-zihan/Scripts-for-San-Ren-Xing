@@ -11241,7 +11241,7 @@ def rtn_order_chit(rtn_constants_dict, other_controls, orderId, db, songTi, logo
         table5.no_borders()
         layout.add(borb_Paragraph("付款详情(新加坡元) Payment Details(Singapore Dollars):", font=songTi, horizontal_alignment=borb_align.CENTERED))
         layout.add(table5)
-        pbar.update(12)
+        pbar.update(24)
 
         layout.add(borb_Paragraph("This chit is not an official receipt, price subject to changes.", font=songTi, horizontal_alignment=borb_align.CENTERED))
         layout.add(borb_Paragraph("此凭证非正式收据,价格可能会有所改变。", font=songTi, horizontal_alignment=borb_align.CENTERED))
