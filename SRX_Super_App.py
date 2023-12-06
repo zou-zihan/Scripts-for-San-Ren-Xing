@@ -12175,13 +12175,13 @@ def rtn_main(google_auth, rtn_control_url, rtn_database_url, constants_sheetname
                             time.sleep(0.25)
                             groupby_select = option_limit(groupby_options, input("在这里输入>>>: "))
 
-                            if groupby_select != 6:
+                            if groupby_select != 5:
 
-                                if groupby_select in [0, 4]:
+                                if groupby_select in [0, 3]:
                                     isSpecial = False
                                     filterByDateRange = True
                                 
-                                elif groupby_select in [1,2,3]:
+                                elif groupby_select in [1,2]:
                                     isSpecial = False
                                     filterByDateRange = False
 
