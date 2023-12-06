@@ -11962,9 +11962,9 @@ def rtn_main(google_auth, rtn_control_url, rtn_database_url, constants_sheetname
                                                 remark = rtn_input_validation(rule="remark", title="一些备注内容", space_removal=False, rtn_constants_dict=rtn_constants_dict)
 
                                                 if filter_select == 18:
-                                                    slice_rtn_db = slice_rtn_db[slice_rtn_db["备注"].str.contains(remark)]
+                                                    slice_rtn_db = rtn_db[rtn_db["备注"].str.contains(remark)]
                                                 else:
-                                                    slice_rtn_db = slice_rtn_db[~slice_rtn_db["备注"].str.contains(remark)]
+                                                    slice_rtn_db = rtn_db[~rtn_db["备注"].str.contains(remark)]
 
                                             elif filter_select in [21, 22]:
                                                 existingIDinFoodDb = np.unique(food_db["订单ID"].astype(str).values).tolist()
