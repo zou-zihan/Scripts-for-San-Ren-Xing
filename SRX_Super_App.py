@@ -7792,8 +7792,6 @@ def rtn_create_order(rtn_constants_dict, other_controls, google_auth, fernet_key
                 if dbFiltered.empty:
                     orderNumber = takeOrderNumberRule+1
                 else:
-                    dbFiltered["订单状态"] = dbFiltered["订单状态"].astype(str)
-                    dbFiltered = dbFiltered[dbFiltered["订单状态"] != "取消"]
                     orderNumber = takeOrderNumberRule+len(dbFiltered)+1
                 
                 confirm_orderNumber = True
