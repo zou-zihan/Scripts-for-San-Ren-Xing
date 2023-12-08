@@ -12318,9 +12318,9 @@ def rtn_main(google_auth, rtn_control_url, rtn_database_url, constants_sheetname
 
                                     print("订单汇总: ")
                                     print("订单一共{}单。".format(len(slice_rtn_db)))
-                                    print("一共{}成人".format(slice_rtn_db["成人人数"].sum()))
-                                    print("一共{}儿童".format(slice_rtn_db["儿童人数"].sum()))
-                                    print("一共{}幼儿".format(slice_rtn_db["幼儿人数"].sum()))
+                                    print("一共{}成人。".format(slice_rtn_db["成人人数"].sum()))
+                                    print("一共{}儿童。".format(slice_rtn_db["儿童人数"].sum()))
+                                    print("一共{}幼儿。".format(slice_rtn_db["幼儿人数"].sum()))
                                     print()
                                     print()
 
