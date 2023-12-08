@@ -12269,6 +12269,9 @@ def rtn_main(google_auth, rtn_control_url, rtn_database_url, constants_sheetname
                                             else:
                                                 end_filter = False
 
+                                    else:
+                                        groupby_select = 5
+
                                 else:
                                     slice_rtn_db = rtn_db.copy()
                                     startIndex = groupby_option[groupby_select].find("「")+1
