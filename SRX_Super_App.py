@@ -7758,6 +7758,8 @@ def rtn_create_order(rtn_constants_dict, other_controls, google_auth, fernet_key
 
         if orderNumberSelect == 0:
             if not orderNumber_allow_dup:
+                print("提示: 如果你删除了以往的订单, 删除的订单号可能会重新分配给新订单。")
+                print()
                 cnyEveDIStartNumber = int(rtn_constants_dict["cny_eve_dine_in_orderNumber_start"])
                 cnyEveTAStartNumber = int(rtn_constants_dict["cny_eve_takeaway_orderNumber_start"])
                 othersDIStartNumber = int(rtn_constants_dict["others_dine_in_orderNumber_start"])
@@ -7790,6 +7792,8 @@ def rtn_create_order(rtn_constants_dict, other_controls, google_auth, fernet_key
                 if dbFiltered.empty:
                     orderNumber = takeOrderNumberRule+1
                 else:
+                    dbFiltered["订单状态"] = dbFiltered["订单状态"].astype(str)
+                    dbFiltered = dbFiltered[dbFiltered["订单状态"] != "取消"]
                     orderNumber = takeOrderNumberRule+len(dbFiltered)+1
                 
                 confirm_orderNumber = True
@@ -10645,13 +10649,15 @@ def rtn_edit_order(rtn_constants_dict, other_controls, google_auth, fernet_key, 
                                 print("目前订单状态: {}".format(currOrderStatus))
                                 print()
 
+                                option = str(rtn_constants_dict["order_status"]).split(",")
+
                                 end_record_loop = False
                                 while not end_record_loop:
                                     if payment_info["需付金额"] == 0:
-                                        option = ["完结", "悬单", "未完结"]
+                                        option = option
                                     else:
                                         print("未付全款的订单无法完结。")
-                                        option = ["悬单", "未完结"]
+                                        option.remove("完结")
                                     
                                     options = option_num(option)
                                     time.sleep(0.25)
@@ -10839,6 +10845,11 @@ def rtn_edit_order(rtn_constants_dict, other_controls, google_auth, fernet_key, 
                                 print()
 
                         elif second_select == 9:
+                            print()
+                            print()
+                            print("警告: 如果你删除了订单, 下一次新建的订单号可能会取代此订单号。")
+                            print("建议你把订单状态改成'取消', 而不是删除订单。")
+                            print()
                             print("你确定删除这个订单吗? ")
                             option = ["是的, 删除这个订单", "不是, 别删除这个订单"]
                             options = option_num(option)
@@ -11165,7 +11176,7 @@ def rtn_order_chit(rtn_constants_dict, other_controls, orderId, db, songTi, logo
             display_food_db.drop(["点餐ID", "订单ID","菜品ID", "套餐?", "换菜?", "点餐INDEX", "服务费", "GST", "税后价格"], axis=1, inplace=True)
             display_food_db = display_food_db[["数量", "菜名/套餐名", "菜品属性", "±价", "折扣", "税前价格", "备注"]]
 
-            table3_columns = ["量QTY", "食FOOD", "属ATTR", "±", "DIS折", "ST税前", "注RE"]
+            table3_columns = ["量QTY", "食FOOD", "属ATTR", "±", "折DIS", "税前ST", "注RE"]
 
             table3 = borb_Table(number_of_rows=len(display_food_db)+1, number_of_columns=len(table3_columns))
 
@@ -12195,14 +12206,15 @@ def rtn_main(google_auth, rtn_control_url, rtn_database_url, constants_sheetname
                                     dateRangeFilterDict = {"预订时间" : True,
                                                         "轮数" : False,
                                                         "订单属性" : False,
-                                                        "订单创建时间": True}
+                                                        "订单创建时间": True,
+                                                        "订单状态" : False,}
                                     
-                                    gb_adv_option = ["预订时间", "轮数", "订单属性", "订单创建时间", "退出高级汇总"]
+                                    gb_adv_option = ["预订时间", "轮数", "订单属性", "订单创建时间", "订单状态", "退出高级汇总"]
                                     options = option_num(gb_adv_option)
                                     time.sleep(0.25)
                                     gb_adv_select = option_limit(options, input("在这里输入>>>: "))
 
-                                    if gb_adv_select != 4:
+                                    if gb_adv_select != 5:
 
                                         end_filter = False
                                         while not end_filter:
