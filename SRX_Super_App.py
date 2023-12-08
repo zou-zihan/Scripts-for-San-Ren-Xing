@@ -12298,106 +12298,107 @@ def rtn_main(google_auth, rtn_control_url, rtn_database_url, constants_sheetname
 
                                         unique_value = unique_option[unique_select]
                                         slice_rtn_db = slice_rtn_db[slice_rtn_db[columnName] == unique_value]
-                        
-                                slice_orderId = slice_rtn_db["订单ID"].values.astype(str).tolist()
-                                slice_food_db = food_db.copy()
-                                slice_food_db = slice_food_db[slice_food_db["订单ID"].isin(slice_orderId)]
 
-                                slice_sm_bd = sm_bd.copy()
-                                slice_sm_bd = slice_sm_bd[slice_sm_bd["订单ID"].isin(slice_orderId)]
+                                if groupby_select != 5:
+                                    slice_orderId = slice_rtn_db["订单ID"].values.astype(str).tolist()
+                                    slice_food_db = food_db.copy()
+                                    slice_food_db = slice_food_db[slice_food_db["订单ID"].isin(slice_orderId)]
 
-                                slice_payment = payment.copy()
-                                slice_payment = slice_payment[slice_payment["订单ID"].isin(slice_orderId)]
+                                    slice_sm_bd = sm_bd.copy()
+                                    slice_sm_bd = slice_sm_bd[slice_sm_bd["订单ID"].isin(slice_orderId)]
 
-                                slice_display_food_db, slice_food_db, slice_sm_bd_df, slice_sm_bd, slice_payment_info = rtn_food_order_parser(food_db=slice_food_db, sm_bd=slice_sm_bd, payment=slice_payment, other_controls=other_controls)
+                                    slice_payment = payment.copy()
+                                    slice_payment = slice_payment[slice_payment["订单ID"].isin(slice_orderId)]
 
-                                if slice_rtn_db.empty:
-                                    pass
-                                else:
-                                    slice_rtn_db["成人人数"] = slice_rtn_db["成人人数"].astype(int)
-                                    slice_rtn_db["儿童人数"] = slice_rtn_db["儿童人数"].astype(int)
-                                    slice_rtn_db["幼儿人数"] = slice_rtn_db["幼儿人数"].astype(int)
-                                    slice_rtn_db["载客量"] = slice_rtn_db["载客量"].astype(int)
+                                    slice_display_food_db, slice_food_db, slice_sm_bd_df, slice_sm_bd, slice_payment_info = rtn_food_order_parser(food_db=slice_food_db, sm_bd=slice_sm_bd, payment=slice_payment, other_controls=other_controls)
 
-                                    print("订单汇总: ")
-                                    print("订单一共{}单。".format(len(slice_rtn_db)))
-                                    print("一共{}成人。".format(slice_rtn_db["成人人数"].sum()))
-                                    print("一共{}儿童。".format(slice_rtn_db["儿童人数"].sum()))
-                                    print("一共{}幼儿。".format(slice_rtn_db["幼儿人数"].sum()))
-                                    print()
-                                    print()
+                                    if slice_rtn_db.empty:
+                                        pass
+                                    else:
+                                        slice_rtn_db["成人人数"] = slice_rtn_db["成人人数"].astype(int)
+                                        slice_rtn_db["儿童人数"] = slice_rtn_db["儿童人数"].astype(int)
+                                        slice_rtn_db["幼儿人数"] = slice_rtn_db["幼儿人数"].astype(int)
+                                        slice_rtn_db["载客量"] = slice_rtn_db["载客量"].astype(int)
 
-                                if isinstance(slice_display_food_db, pd.DataFrame):
-                                    if not slice_display_food_db.empty:
-                                        slice_display_food_db["菜名/套餐名(备注)"] = slice_display_food_db["菜名/套餐名"] + "(" + slice_display_food_db["备注"] + ")"
-                                        food_summary = slice_display_food_db.groupby("菜名/套餐名(备注)")[["数量", "税前价格", "服务费", "GST", "税后价格"]].sum()
-                                        food_summary.reset_index(inplace=True)
-                                        food_summary["数量"] = food_summary["数量"].astype(int)
-                                        print("菜品汇总: ")
-                                        prtdf(food_summary)
+                                        print("订单汇总: ")
+                                        print("订单一共{}单。".format(len(slice_rtn_db)))
+                                        print("一共{}成人。".format(slice_rtn_db["成人人数"].sum()))
+                                        print("一共{}儿童。".format(slice_rtn_db["儿童人数"].sum()))
+                                        print("一共{}幼儿。".format(slice_rtn_db["幼儿人数"].sum()))
+                                        print()
+                                        print()
+
+                                    if isinstance(slice_display_food_db, pd.DataFrame):
+                                        if not slice_display_food_db.empty:
+                                            slice_display_food_db["菜名/套餐名(备注)"] = slice_display_food_db["菜名/套餐名"] + "(" + slice_display_food_db["备注"] + ")"
+                                            food_summary = slice_display_food_db.groupby("菜名/套餐名(备注)")[["数量", "税前价格", "服务费", "GST", "税后价格"]].sum()
+                                            food_summary.reset_index(inplace=True)
+                                            food_summary["数量"] = food_summary["数量"].astype(int)
+                                            print("菜品汇总: ")
+                                            prtdf(food_summary)
+
+                                        else:
+                                            print("暂无菜品汇总。")
+                                            food_summary = -404
 
                                     else:
                                         print("暂无菜品汇总。")
                                         food_summary = -404
-
-                                else:
-                                    print("暂无菜品汇总。")
-                                    food_summary = -404
-                                    
-                                print()
-                                print()
-                                if isinstance(slice_sm_bd_df, pd.DataFrame):
-                                    if not slice_sm_bd_df.empty:
-                                        slice_sm_bd_df["(套餐名)菜肴名(备注)"] = "(" + slice_sm_bd_df["套餐名"] + ")" + slice_sm_bd_df["菜肴名"] + "(" + slice_sm_bd_df["备注"] + ")"
-                                        set_menu_summary = slice_sm_bd_df.groupby("(套餐名)菜肴名(备注)")[["数量"]].sum()
-                                        set_menu_summary.reset_index(inplace=True)
-                                        set_menu_summary["数量"] = set_menu_summary["数量"].astype(int)
-                                        print("套餐内菜肴汇总: ")
-                                        prtdf(set_menu_summary)
+                                        
+                                    print()
+                                    print()
+                                    if isinstance(slice_sm_bd_df, pd.DataFrame):
+                                        if not slice_sm_bd_df.empty:
+                                            slice_sm_bd_df["(套餐名)菜肴名(备注)"] = "(" + slice_sm_bd_df["套餐名"] + ")" + slice_sm_bd_df["菜肴名"] + "(" + slice_sm_bd_df["备注"] + ")"
+                                            set_menu_summary = slice_sm_bd_df.groupby("(套餐名)菜肴名(备注)")[["数量"]].sum()
+                                            set_menu_summary.reset_index(inplace=True)
+                                            set_menu_summary["数量"] = set_menu_summary["数量"].astype(int)
+                                            print("套餐内菜肴汇总: ")
+                                            prtdf(set_menu_summary)
+                                        else:
+                                            print("暂无套餐内菜肴汇总。")
+                                            set_menu_summary = -404
                                     else:
                                         print("暂无套餐内菜肴汇总。")
                                         set_menu_summary = -404
-                                else:
-                                    print("暂无套餐内菜肴汇总。")
-                                    set_menu_summary = -404
-                                
-                                if isinstance(food_summary, pd.DataFrame):
-                                    print("财务详情汇总: ")
-                                    for key, value in slice_payment_info.items():
-                                        print("{} {} ".format(key, format(float(value), ".2f")))
-                                else:
-                                    print("暂无财务详情汇总。")
-
-                                if isinstance(food_summary, pd.DataFrame):
-                                    print()
-                                    print()
-                                    save_options = option_num(["导出", "返回上一菜单"])
-                                    time.sleep(0.25)
-                                    save_select = option_limit(save_options, input("在这里输入>>>: "))
-
-                                    if save_select == 0:
-                                        if isinstance(set_menu_summary, pd.DataFrame):
-                                            save_set_menu = True
-                                        else:
-                                            save_set_menu = False
-                                        
-                                        timeNow = pd.to_datetime(dt.datetime.now()).strftime("%Y_%m_%d_%H_%M_%S")
-                                        fileName = "{}.xlsx".format(timeNow)
-
-                                        export_folderName = rtn_constants_dict["export_folderName"]
-                                        summary_subFolderName = rtn_constants_dict["summary_subFolderName"]
-
-                                        if save_set_menu:
-                                            with pd.ExcelWriter("{}/{}/{}/{}".format(os.getcwd(), export_folderName, summary_subFolderName, fileName)) as writer:
-                                                food_summary.to_excel(writer, sheet_name="food_summary", index=False, header=True)
-                                                set_menu_summary.to_excel(writer, sheet_name="set_menu_summary", index=False, header=True)
-                                        else:
-                                            food_summary.to_excel("{}/{}/{}/{}".format(os.getcwd(), export_folderName, summary_subFolderName, fileName), sheet_name="food_summary", index=False, header=True)
-                                        
-                                        print("导出成功, 文件在'{}/{}/{}/{}'。".format(os.getcwd(), export_folderName, summary_subFolderName, fileName))
+                                    
+                                    if isinstance(food_summary, pd.DataFrame):
+                                        print("财务详情汇总: ")
+                                        for key, value in slice_payment_info.items():
+                                            print("{} {} ".format(key, format(float(value), ".2f")))
                                     else:
-                                        pass
-                                else:
+                                        print("暂无财务详情汇总。")
+
+                                    if isinstance(food_summary, pd.DataFrame):
+                                        print()
+                                        print()
+                                        save_options = option_num(["导出", "返回上一菜单"])
+                                        time.sleep(0.25)
+                                        save_select = option_limit(save_options, input("在这里输入>>>: "))
+
+                                        if save_select == 0:
+                                            if isinstance(set_menu_summary, pd.DataFrame):
+                                                save_set_menu = True
+                                            else:
+                                                save_set_menu = False
+                                            
+                                            timeNow = pd.to_datetime(dt.datetime.now()).strftime("%Y_%m_%d_%H_%M_%S")
+                                            fileName = "{}.xlsx".format(timeNow)
+
+                                            export_folderName = rtn_constants_dict["export_folderName"]
+                                            summary_subFolderName = rtn_constants_dict["summary_subFolderName"]
+
+                                            if save_set_menu:
+                                                with pd.ExcelWriter("{}/{}/{}/{}".format(os.getcwd(), export_folderName, summary_subFolderName, fileName)) as writer:
+                                                    food_summary.to_excel(writer, sheet_name="food_summary", index=False, header=True)
+                                                    set_menu_summary.to_excel(writer, sheet_name="set_menu_summary", index=False, header=True)
+                                            else:
+                                                food_summary.to_excel("{}/{}/{}/{}".format(os.getcwd(), export_folderName, summary_subFolderName, fileName), sheet_name="food_summary", index=False, header=True)
+                                            
+                                            print("导出成功, 文件在'{}/{}/{}/{}'。".format(os.getcwd(), export_folderName, summary_subFolderName, fileName))
+                                        else:
+                                            pass
+                                    else:
                                     pass
                     
                     elif main_menu_select == 2:
