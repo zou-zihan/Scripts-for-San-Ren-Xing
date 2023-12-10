@@ -47,6 +47,7 @@ from borb.pdf.canvas.layout.table.flexible_column_width_table import (
 from borb.pdf.canvas.layout.layout_element import Alignment as borb_align
 from borb.pdf.canvas.font.simple_font.true_type_font import TrueTypeFont as borb_TrueTypeFont
 from borb.pdf.canvas.layout.table.table import TableCell as borb_TableCell
+from borb.pdf import HexColor as borb_HexColor
 
 '''
 import requests
@@ -5299,7 +5300,7 @@ def work_schedule_main(google_auth, db_setting_url, constants_sheetname, seriali
 
             if isinstance(shift_database, pd.DataFrame):
                 userInputOne = 0
-                while userInputOne != 4:
+                while userInputOne != 5:
                     with tqdm(total=100) as pbar1:
 
                         pbar1.set_description("处理数据库")
@@ -5345,11 +5346,16 @@ def work_schedule_main(google_auth, db_setting_url, constants_sheetname, seriali
                         leaves_manual_df["ID"] = leaves_manual_df["ID"].astype(int)
                         leaves_manual_df["ID"] = leaves_manual_df["ID"].astype(str)
 
+                        pbar1.set_description("读取排班预览")
+                        previewSchedule = df[1]
+                        previewSchedule.drop("Unnamed: 0", axis=1, inplace=True)
+                        previewSchedule = previewSchedule.iloc[:20, :]
+
                         pbar1.set_description("完成")
                         pbar1.update(20)
 
                     print("排班主菜单")
-                    startAction = option_num(["录入排班表数据库", "工资单时间分析", "移除或添加排班", "移除手动录入的假期记录", "退出排班"])
+                    startAction = option_num(["录入排班表数据库", "工资单时间分析", "移除或添加排班", "移除手动录入的假期记录", "生成排班表PDF", "退出排班"])
                     time.sleep(0.25)
                     userInputOne = option_limit(startAction, input("在这里输入>>>: "))
 
@@ -5781,8 +5787,242 @@ def work_schedule_main(google_auth, db_setting_url, constants_sheetname, seriali
                         dr.clear()
                         print("手动录入的假期记录已清除完成")
 
+                    elif userInputOne == 4:
+                        isMonday = eval(str(previewSchedule.iloc[1,3]).capitalize())
+
+                        if isMonday:
+                            stock_count_foldername = "{}盘点文件".format(shiftOutlet.strip().capitalize())
+                            songti_filename = "SongTi.ttf"
+                            export_folderName = "{}预订导出".format(shiftOutlet.strip().capitalize())
+                            logo_fileName = "SRX_logo.jpeg"
+
+                            logo_path = "{}/{}/{}".format(os.getcwd(),export_folderName, logo_fileName)
+
+                            if not os.path.exists("{}/{}/{}".format(os.getcwd(), stock_count_foldername, songti_filename)):
+                                print("宋体TTF文件'{}'不存在, 排班表的生成无法继续".format(songti_filename))
+                                print("请把宋体TTF文件'{}'保存至盘点文件名的目录下, 具体路径需在:'{}/{}/{}'".format(songti_filename, os.getcwd(), stock_count_foldername, songti_filename))
+                            
+                            else:
+                                if not os.path.exists(logo_path):
+                                    print("公司标识图片'{}'不存在, 排班表的生成无法继续".format(logo_fileName))
+                                    print("请把公司标识图片'{}'保存至预订导出的目录下, 具体路径需在: {}".format(logo_fileName, logo_path))
+                                else:
+                                    logoImagePath = pathlib.Path(logo_path)
+                                    print("读取字体文件中...")
+                                    custom_font_path = pathlib.Path("{}/{}/{}".format(os.getcwd(), stock_count_foldername, songti_filename))
+                                    borb_custom_font = borb_TrueTypeFont.true_type_font_from_file(custom_font_path)
+                                    print("字体文件读取完成。")
+                                    print()
+                                    generate_schedule_pdf(songTi=borb_custom_font, logoImagePath=logoImagePath, outlet=shiftOutlet, shift_database=shift_database, previewSchedule=previewSchedule)
+                        else:
+                            print("选择的日期不是星期一, 排班表无法继续生存。")
+
             else:
                 print("无法获取排班数据库")
+
+def schedule_font_color(text):
+    if text in ["A", "B", "BG", "TS", "BD", "OT", "√", "√/", "/√"]:
+        return borb_HexColor("#4169E1")
+
+    elif text in ["OFF", "PH", "OIL", "AL", "CCL", "NP", "MC"]:
+        return borb_HexColor("#FF0000")
+
+    else:
+        if text.find("/") != -1:
+            return borb_HexColor("#979797")
+        else:
+            return borb_HexColor("#000000")
+
+def generate_schedule_pdf(songTi, logoImagePath, outlet, shift_database, previewSchedule):
+    with tqdm(total=100) as pbar:
+        pbar.set_description("处理信息...")
+    
+        monday = pd.to_datetime(str(previewSchedule.iloc[1,1]))
+
+        employee_id_show = previewSchedule.iloc[4:18, 0].astype(str).tolist()
+        
+        if "nan" in employee_id_show:
+            employee_id_show.remove("nan")
+        
+        if len(employee_id_show) < 14:
+            for _ in range(14-len(employee_id_show)):
+                employee_id_show += [" "]
+                
+        weekRange = [monday]
+        for num in np.arange(1,7):
+            weekRange += [ pd.to_datetime(monday + dt.timedelta(days=int(num)))]
+
+        pbar.update(15)
+        
+        workRange = previewSchedule.copy()
+        workRange = workRange.iloc[4:18, 0:10]
+    
+        work_schedule_df = {"序号" : np.arange(1, 15),
+                            "ID" : workRange.iloc[:, 0],
+                            "姓名" : workRange.iloc[:,1],
+                            "Mon" : workRange.iloc[:,2],
+                            "Tue" : workRange.iloc[:,3],
+                            "Wed" : workRange.iloc[:,4],
+                            "Thu" : workRange.iloc[:,5],
+                            "Fri" : workRange.iloc[:,6],
+                            "Sat" : workRange.iloc[:,7],
+                            "Sun" : workRange.iloc[:,8],}
+    
+        work_schedule_df["ID"] = work_schedule_df["ID"].astype(str)
+        
+        rest_days = {}
+        
+        keys = ["OIL", "PH", "AL", "CCL"]
+        sunday = weekRange[-1].strftime("%Y-%m-%d")
+        for key in keys:
+            key_list = []
+            for index in range(len(workRange.iloc[:, 0])):
+                id = str(workRange.iloc[:, 0].values.astype(str)[index])
+                id_string = "{}${}".format(id, sunday)
+                if shift_database[shift_database["FOR VLOOKUP"] == id_string].empty:
+                    key_list += [" "]
+                else:
+                    if float(str(shift_database[shift_database["FOR VLOOKUP"] == id_string][key].values[0])) == 0:
+                        key_list += ["-"]
+                    else:
+                        key_list += [str(shift_database[shift_database["FOR VLOOKUP"] == id_string][key].values[0])]
+        
+            rest_days.update({ key : key_list})
+        
+        for key, value in rest_days.items():
+            work_schedule_df.update( { key : value })
+        
+        work_schedule_df = pd.DataFrame(work_schedule_df)
+        work_schedule_df["SIGN"] = np.repeat(" ", len(workRange))
+        work_schedule_df["RE"] = workRange.iloc[:, 9]
+        work_schedule_df.drop("ID", axis=1, inplace=True)
+        
+        pbar.update(15)
+
+        workerCountRange = previewSchedule.copy()
+        workerCountRange = workerCountRange.iloc[18:, :9]
+        
+        for num in range(6):
+            workerCountRange["{}".format(num+1)] = np.repeat(" ", len(workerCountRange))
+
+        pbar.update(15)
+
+        weekRemark = str(previewSchedule.iloc[18,9])
+
+        Document = borb_Document()
+        Page = borb_Page(width=Decimal(842), height=Decimal(595))
+        Document.add_page(Page)
+        
+        layout: borb_PageLayout = borb_SCL(Page)
+        
+        table0 = borb_Table(number_of_rows=1, number_of_columns=3)
+        
+        if int(weekRange[0].year) == int(weekRange[-1].year):
+            table0.add(borb_Paragraph(str(weekRange[0].year) + "年", font=songTi, horizontal_alignment=borb_align.LEFT))
+        else:
+            table0.add(borb_Paragraph(str(weekRange[0].year)+"-"+str(weekRange[-1].year)+"年", font=songTi, horizontal_alignment=borb_align.LEFT))
+        
+        table0.add(borb_Paragraph("{}楼面排班表".format(outlet.strip().capitalize()), font=songTi, font_size=Decimal(22), horizontal_alignment=borb_align.CENTERED))
+        table0.add(borb_Image(logoImagePath, width=Decimal(80), height=Decimal(20), horizontal_alignment=borb_align.RIGHT,))
+        
+        table0.set_padding_on_all_cells(Decimal(1), Decimal(1), Decimal(1), Decimal(1))
+        table0.no_borders()
+        layout.add(table0)
+        pbar.update(15)
+        
+        table1 = borb_Table(number_of_rows=16, number_of_columns=15)
+        
+        table1_headers  = ["No", 
+                           "Name", 
+                           "Mon\n星期一", 
+                           "Tue\n星期二", 
+                           "Wed\n星期三", 
+                           "Thu\n星期四", 
+                           "Fri\n星期五", 
+                           "Sat\n星期六", 
+                           "Sun\n星期日", 
+                           "OIL", 
+                           "PH", 
+                           "AL", 
+                           "CCL", 
+                           "Sign", 
+                           "Remark"]
+        
+        for item in table1_headers:
+            table1.add(borb_Paragraph(item, font=songTi, horizontal_alignment=borb_align.CENTERED, font_color=borb_HexColor("#800020")))
+        
+        table1.add(borb_Paragraph("序号", font=songTi, horizontal_alignment=borb_align.CENTERED, font_color=borb_HexColor("#800020")))
+        table1.add(borb_Paragraph("姓名", font=songTi, horizontal_alignment=borb_align.CENTERED, font_color=borb_HexColor("#800020")))
+        
+        for day in weekRange:
+            table1.add(borb_Paragraph(day.strftime("%m-%d"), font=songTi, horizontal_alignment=borb_align.CENTERED))
+        
+        for item in ["公休", "公期", "年假", "育儿假", "签名", "备注"]:
+            table1.add(borb_Paragraph(item, font=songTi, horizontal_alignment=borb_align.CENTERED, font_color=borb_HexColor("#800020")))
+        
+        for index in range(len(work_schedule_df)):
+            for column in range(len(work_schedule_df.columns)):
+                text = str(work_schedule_df.iloc[index, column])
+                if text in ["nan", "", "None"]:
+                    table1.add(borb_Paragraph(" ", font=songTi))
+                else:
+                    if column >= 9:
+                        try:
+                            text = float(text)
+        
+                            if text == 0.5:
+                                text = "½"
+                            else:
+                                if format(text, ".1f").endswith(".5"):
+                                    text = "{}{}".format(int(text-0.5), "½")
+                                else:
+                                    text = str(int(text))
+                            
+                        except ValueError:
+                            text = text
+        
+                        table1.add(borb_Paragraph(text, horizontal_alignment=borb_align.CENTERED, font_color=borb_HexColor("#4169E1")))
+                    else:
+                        table1.add(borb_Paragraph(text, font=songTi, horizontal_alignment=borb_align.CENTERED, font_color=schedule_font_color(text)))
+        
+        table1.set_padding_on_all_cells(Decimal(2), Decimal(2), Decimal(2), Decimal(2))
+        layout.add(table1)
+        pbar.update(15)
+        
+        table2 = borb_Table(number_of_rows=2, number_of_columns=15)
+        
+        for index in range(len(workerCountRange)):
+            for column in range(len(workerCountRange.columns)):
+                text = str(workerCountRange.iloc[index, column])
+                if text in ["员工", "数量", "早上", "晚上"]:
+                    table2.add(borb_Paragraph(text, font=songTi, horizontal_alignment=borb_align.CENTERED, font_color=borb_HexColor("#800020")))
+                else:
+                    table2.add(borb_Paragraph(text, font=songTi, horizontal_alignment=borb_align.CENTERED, font_color=borb_HexColor("#4169E1")))
+                
+        table2.set_padding_on_all_cells(Decimal(1), Decimal(1), Decimal(1), Decimal(1))
+        table2.no_borders()
+        layout.add(table2)
+        pbar.update(20)
+    
+        if len(weekRemark) > 0:
+            if weekRemark not in ["nan", "-"]:
+                layout.add(borb_Paragraph(weekRemark, font=songTi, horizontal_alignment=borb_align.RIGHT))
+            else:
+                pass
+        else:
+            pass
+
+        schedule_export_folderName = "{}排班表PDF".format(outlet.strip().capitalize())
+        schedule_pdf_filename = "{}楼面排班表{}月{}日至{}月{}日.pdf".format(outlet.strip().capitalize(), weekRange[0].month, weekRange[0].day, weekRange[-1].month, weekRange[-1].day)
+        
+        if not os.path.exists("{}/{}".format(os.getcwd(), schedule_export_folderName)):
+            os.makedirs("{}/{}".format(os.getcwd(), schedule_export_folderName))
+            
+        with open("{}/{}/{}".format(os.getcwd(), schedule_export_folderName, schedule_pdf_filename), "wb") as pdf_file_handle:
+            borb_PDF.dumps(pdf_file_handle, Document)
+
+        pbar.set_description("任务完成")
+        pbar.update(5)
 
 def coin_reset(google_auth, db_setting_url, constants_sheetname, serialized_rule_filename, backup_foldername):
     google_auth = google_auth
