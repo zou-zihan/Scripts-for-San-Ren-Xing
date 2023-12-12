@@ -5808,12 +5808,21 @@ def work_schedule_main(google_auth, db_setting_url, constants_sheetname, seriali
                                     print("请把公司标识图片'{}'保存至预订导出的目录下, 具体路径需在: {}".format(logo_fileName, logo_path))
                                 else:
                                     logoImagePath = pathlib.Path(logo_path)
-                                    print("读取字体文件中...")
-                                    custom_font_path = pathlib.Path("{}/{}/{}".format(os.getcwd(), stock_count_foldername, songti_filename))
-                                    borb_custom_font = borb_TrueTypeFont.true_type_font_from_file(custom_font_path)
-                                    print("字体文件读取完成。")
-                                    print()
-                                    generate_schedule_pdf(songTi=borb_custom_font, logoImagePath=logoImagePath, outlet=shiftOutlet, shift_database=shift_database, previewSchedule=previewSchedule, ph_dates_df=ph_dates_df)
+                                    print("注意: 生成PDF之前先确保你已经录入最新的排班表数据,")
+                                    print("否则假期天数将会出现偏差! ")
+                                    schedule_pdf_options = option_num(["继续生成排班PDF", "返回上一菜单"])
+                                    time.sleep(0.25)
+                                    schedule_pdf_select = option_limit(schedule_pdf_options, input("在这里输入>>>: "))
+                                    if schedule_pdf_select == 0:
+                                        print("读取字体文件中...")
+                                        custom_font_path = pathlib.Path("{}/{}/{}".format(os.getcwd(), stock_count_foldername, songti_filename))
+                                        borb_custom_font = borb_TrueTypeFont.true_type_font_from_file(custom_font_path)
+                                        print("字体文件读取完成。")
+                                        print()
+                                        generate_schedule_pdf(songTi=borb_custom_font, logoImagePath=logoImagePath, outlet=shiftOutlet, shift_database=shift_database, previewSchedule=previewSchedule, ph_dates_df=ph_dates_df)
+
+                                    else:
+                                        pass
                         else:
                             print("选择的日期不是星期一, 排班表无法继续生存。")
 
@@ -8016,7 +8025,7 @@ def rtn_create_order(rtn_constants_dict, other_controls, google_auth, fernet_key
 
     confirm_orderNumber = False
     while not confirm_orderNumber:
-        orderNumberOptions = option_num(["自动生成序升订单号", "自动生成随机订单号", "手动输入订单号"])
+        orderNumberOptions = option_num(["自动生成升序订单号", "自动生成随机订单号", "手动输入订单号"])
         time.sleep(0.25)
         orderNumberSelect = option_limit(orderNumberOptions, input("在这里输入>>>: "))
 
@@ -11515,11 +11524,15 @@ def rtn_order_chit(rtn_constants_dict, other_controls, orderId, db, songTi, logo
 
             sequence5 = ["TOTAL: FREE OF CHARGE"]
 
-        for i in range(len(sequence5)):
-            if i % 2 == 0:
-                table5.add(borb_Paragraph(sequence5[i], font=songTi, horizontal_alignment=borb_align.RIGHT))
-            else:
-                table5.add(borb_Paragraph(sequence5[i], font=songTi, horizontal_alignment=borb_align.CENTERED))
+        if len(sequence5) == 1:
+            table5.add(borb_Paragraph(sequence5[0], font=songTi, horizontal_alignment=borb_align.CENTERED))
+        
+        else:
+            for i in range(len(sequence5)):
+                if i % 2 == 0:
+                    table5.add(borb_Paragraph(sequence5[i], font=songTi, horizontal_alignment=borb_align.RIGHT))
+                else:
+                    table5.add(borb_Paragraph(sequence5[i], font=songTi, horizontal_alignment=borb_align.CENTERED))
                 
         table5.set_padding_on_all_cells(Decimal(1.5), Decimal(1.5), Decimal(1.5), Decimal(1.5))
         table5.no_borders()
