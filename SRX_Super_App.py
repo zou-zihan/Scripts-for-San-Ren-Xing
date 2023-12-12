@@ -5813,7 +5813,7 @@ def work_schedule_main(google_auth, db_setting_url, constants_sheetname, seriali
                                     borb_custom_font = borb_TrueTypeFont.true_type_font_from_file(custom_font_path)
                                     print("字体文件读取完成。")
                                     print()
-                                    generate_schedule_pdf(songTi=borb_custom_font, logoImagePath=logoImagePath, outlet=shiftOutlet, shift_database=shift_database, previewSchedule=previewSchedule)
+                                    generate_schedule_pdf(songTi=borb_custom_font, logoImagePath=logoImagePath, outlet=shiftOutlet, shift_database=shift_database, previewSchedule=previewSchedule, ph_dates_df=ph_dates_df)
                         else:
                             print("选择的日期不是星期一, 排班表无法继续生存。")
 
@@ -5822,18 +5822,32 @@ def work_schedule_main(google_auth, db_setting_url, constants_sheetname, seriali
 
 def schedule_font_color(text):
     if text in ["A", "B", "BG", "TS", "BD", "OT", "√", "√/", "/√"]:
-        return borb_HexColor("#4169E1")
+        return borb_HexColor("#00308F")
 
     elif text in ["OFF", "PH", "OIL", "AL", "CCL", "NP", "MC"]:
-        return borb_HexColor("#FF0000")
+        return borb_HexColor("#990F02")
 
     else:
         if text.find("/") != -1:
-            return borb_HexColor("#979797")
+            findOFF = int(text.find("OFF"))
+            findPH = int(text.find("PH"))
+            findOIL = int(text.find("OIL"))
+            findAL = int(text.find("AL"))
+            findCCL = int(text.find("CCL"))
+            findNP = int(text.find("NP"))
+            findMC = int(text.find("MC"))
+
+            findValueTotal = findOFF + findPH + findOIL + findAL + findCCL + findNP + findMC
+
+            if findValueTotal == -7:
+                return borb_HexColor("#00308F")
+
+            else:
+                return borb_HexColor("#979797")
         else:
             return borb_HexColor("#000000")
 
-def generate_schedule_pdf(songTi, logoImagePath, outlet, shift_database, previewSchedule):
+def generate_schedule_pdf(songTi, logoImagePath, outlet, shift_database, previewSchedule, ph_dates_df):
     with tqdm(total=100) as pbar:
         pbar.set_description("处理信息...")
     
@@ -5955,7 +5969,10 @@ def generate_schedule_pdf(songTi, logoImagePath, outlet, shift_database, preview
         table1.add(borb_Paragraph("姓名", font=songTi, horizontal_alignment=borb_align.CENTERED, font_color=borb_HexColor("#800020")))
         
         for day in weekRange:
-            table1.add(borb_Paragraph(day.strftime("%m-%d"), font=songTi, horizontal_alignment=borb_align.CENTERED))
+            if day in ph_dates_df:
+                table1.add(borb_Paragraph(day.strftime("%m-%d"), font=songTi, horizontal_alignment=borb_align.CENTERED, background_color=borb_HexColor("#FF9999")))
+            else:
+                table1.add(borb_Paragraph(day.strftime("%m-%d"), font=songTi, horizontal_alignment=borb_align.CENTERED))
         
         for item in ["公休", "公期", "年假", "育儿假", "签名", "备注"]:
             table1.add(borb_Paragraph(item, font=songTi, horizontal_alignment=borb_align.CENTERED, font_color=borb_HexColor("#800020")))
@@ -5981,10 +5998,17 @@ def generate_schedule_pdf(songTi, logoImagePath, outlet, shift_database, preview
                         except ValueError:
                             text = text
         
-                        table1.add(borb_Paragraph(text, horizontal_alignment=borb_align.CENTERED, font_color=borb_HexColor("#4169E1")))
+                        table1.add(borb_Paragraph(text, horizontal_alignment=borb_align.CENTERED, font_color=borb_HexColor("#00308F")))
                     else:
-                        table1.add(borb_Paragraph(text, font=songTi, horizontal_alignment=borb_align.CENTERED, font_color=schedule_font_color(text)))
-        
+                        if column >= 2:
+                            dateIndex = column-2
+                            if weekRange[dateIndex] in ph_dates_df:
+                                table1.add(borb_Paragraph(text, font=songTi, horizontal_alignment=borb_align.CENTERED, font_color=schedule_font_color(text), background_color=borb_HexColor("#FF9999")))
+                            else:
+                                table1.add(borb_Paragraph(text, font=songTi, horizontal_alignment=borb_align.CENTERED, font_color=schedule_font_color(text)))
+                        else:
+                            table1.add(borb_Paragraph(text, font=songTi, horizontal_alignment=borb_align.CENTERED, font_color=schedule_font_color(text)))
+
         table1.set_padding_on_all_cells(Decimal(2), Decimal(2), Decimal(2), Decimal(2))
         layout.add(table1)
         pbar.update(15)
@@ -5997,7 +6021,7 @@ def generate_schedule_pdf(songTi, logoImagePath, outlet, shift_database, preview
                 if text in ["员工", "数量", "早上", "晚上"]:
                     table2.add(borb_Paragraph(text, font=songTi, horizontal_alignment=borb_align.CENTERED, font_color=borb_HexColor("#800020")))
                 else:
-                    table2.add(borb_Paragraph(text, font=songTi, horizontal_alignment=borb_align.CENTERED, font_color=borb_HexColor("#4169E1")))
+                    table2.add(borb_Paragraph(text, font=songTi, horizontal_alignment=borb_align.CENTERED, font_color=borb_HexColor("#00308F")))
                 
         table2.set_padding_on_all_cells(Decimal(1), Decimal(1), Decimal(1), Decimal(1))
         table2.no_borders()
@@ -8553,7 +8577,7 @@ def rtn_food_order_parser(food_db, sm_bd, payment, other_controls):
         display_food_db["税前价格"] = display_food_db["税前价格"].astype(float)
 
         payment["金额"] = payment["金额"].astype(float)
-        total_payment_required = rtn_point_zero_five_round(float(format(float(display_food_db["税后价格"].sum()), ".2f")))
+        total_payment_required = rtn_point_zero_five_round(float(format(float(display_food_db["税后价格"].sum()), ".4f")))
         already_paid = float(format(float(payment["金额"].sum()), ".2f"))
 
         if already_paid == total_payment_required:
@@ -8561,11 +8585,11 @@ def rtn_food_order_parser(food_db, sm_bd, payment, other_controls):
 
         else:
             pending_payment = total_payment_required - already_paid
-            pending_payment = float(format(float(pending_payment), ".2f"))
+            pending_payment = float(format(float(pending_payment), ".4f"))
 
-        total_svc = rtn_point_zero_five_round(float(format(float(display_food_db["服务费"].sum()), ".2f")))
-        total_gst = rtn_point_zero_five_round(float(format(float(display_food_db["GST"].sum()), ".2f")))
-        total_subtotal = float(format(float(display_food_db["税前价格"].sum()), ".2f"))
+        total_svc = float(format(float(display_food_db["服务费"].sum()), ".4f"))
+        total_gst = float(format(float(display_food_db["GST"].sum()), ".4f"))
+        total_subtotal = float(format(float(display_food_db["税前价格"].sum()), ".4f"))
 
         payment_info = {
             "总税前价格" : total_subtotal,
@@ -9040,19 +9064,19 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
                                         print("折扣为: {}".format(food_discount))
                                     
                                     total_subtotal = (base_price+foodAddOn)*foodQty-food_discount
-                                    total_subtotal = float(format(total_subtotal, ".2f"))
+                                    total_subtotal = float(format(total_subtotal, ".4f"))
 
                                     if foodOrderAtrribute == "堂食":
                                         svc_charge = svc_rate - 1
-                                        total_svc = rtn_point_zero_five_round(float(format(total_subtotal*svc_charge, ".2f")))
+                                        total_svc = float(format(total_subtotal*svc_charge, ".4f"))
 
                                     else:
                                         total_svc = 0.00
                                     
                                     gst_charge = gst_rate - 1
-                                    total_gst = rtn_point_zero_five_round(float(format((total_subtotal+total_svc)*gst_charge, ".2f")))
+                                    total_gst = float(format((total_subtotal+total_svc)*gst_charge, ".4f"))
 
-                                    total_payment = rtn_point_zero_five_round(float(format(total_subtotal+total_svc+total_gst, ".2f")))
+                                    total_payment = rtn_point_zero_five_round(float(format(total_subtotal+total_svc+total_gst, ".4f")))
 
                                     confirm_remark = False
                                     while not confirm_remark:
@@ -9322,19 +9346,19 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
                                                                 confirm_food_discount = rtn_confirm_input("{}%".format(food_discount_percentage*100))
 
                                                     total_subtotal = (base_price+foodAddOn)*foodQty-food_discount  
-                                                    total_subtotal = float(format(total_subtotal, ".2f"))
+                                                    total_subtotal = float(format(total_subtotal, ".4f"))
 
                                                     if foodOrderAtrribute == "堂食":
                                                         svc_charge = svc_rate - 1
-                                                        total_svc = rtn_point_zero_five_round(float(format(total_subtotal*svc_charge, ".2f")))
+                                                        total_svc = float(format(total_subtotal*svc_charge, ".4f"))
 
                                                     else:
                                                         total_svc = 0.00  
 
                                                     gst_charge = gst_rate - 1
-                                                    total_gst = rtn_point_zero_five_round(float(format((total_subtotal+total_svc)*gst_charge, ".2f")))
+                                                    total_gst = float(format((total_subtotal+total_svc)*gst_charge, ".4f"))
 
-                                                    total_payment = rtn_point_zero_five_round(float(format(total_subtotal+total_svc+total_gst), ".2f"))
+                                                    total_payment = rtn_point_zero_five_round(float(format(total_subtotal+total_svc+total_gst), ".4f"))
 
                                                     remark = str(display_food_db[display_food_db["点餐ID"] == foodOrderId]["备注"].values[0])
                                                     foodOrderIndex = int(display_food_db[display_food_db["点餐ID"] == foodOrderId]["点餐INDEX"].values[0])
@@ -9550,15 +9574,15 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
 
                                                     if foodOrderAttribute == "堂食":
                                                         svc_charge = svc_rate - 1
-                                                        total_svc = rtn_point_zero_five_round(float(format(total_subtotal*svc_charge, ".2f")))
+                                                        total_svc = float(format(total_subtotal*svc_charge, ".4f"))
 
                                                     else:
                                                         total_svc = 0.00
                                                     
                                                     gst_charge = gst_rate - 1
-                                                    total_gst = rtn_point_zero_five_round(float(format((total_subtotal+total_svc)*gst_charge, ".2f")))
+                                                    total_gst = float(format((total_subtotal+total_svc)*gst_charge, ".4f"))
 
-                                                    total_payment = rtn_point_zero_five_round(float(format(total_subtotal+total_svc+total_gst), ".2f"))
+                                                    total_payment = rtn_point_zero_five_round(float(format(total_subtotal+total_svc+total_gst), ".4f"))
 
                                                     print("修改详情: ")
                                                     print("菜名/套餐名: {}".format(foodName))
@@ -9644,19 +9668,19 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
                                                     base_price = float(format(float(sm[sm["菜品ID"] == str(foodId)]["价格"].values[0]), ".2f"))
 
                                                 total_subtotal = (base_price+foodAddOn)*foodQty-food_discount
-                                                total_subtotal = float(format(total_subtotal, ".2f"))
+                                                total_subtotal = float(format(total_subtotal, ".4f"))
 
                                                 if foodOrderAttribute == "堂食":
                                                     svc_charge = svc_rate - 1
-                                                    total_svc = rtn_point_zero_five_round(float(format(total_subtotal*svc_charge, ".2f")))
+                                                    total_svc = float(format(total_subtotal*svc_charge, ".4f"))
 
                                                 else:
                                                     total_svc = 0.00
                                                 
                                                 gst_charge = gst_rate - 1
-                                                total_gst = rtn_point_zero_five_round(float(format((total_subtotal+total_svc)*gst_charge, ".2f")))
+                                                total_gst = float(format((total_subtotal+total_svc)*gst_charge, ".4f"))
 
-                                                total_payment = rtn_point_zero_five_round(float(format(total_subtotal+total_svc+total_gst), ".2f"))
+                                                total_payment = rtn_point_zero_five_round(float(format(total_subtotal+total_svc+total_gst), ".4f"))
                                             
                                                 print("修改详情: ")
                                                 print("菜名/套餐名: {}".format(foodName))
@@ -11459,26 +11483,32 @@ def rtn_order_chit(rtn_constants_dict, other_controls, orderId, db, songTi, logo
             pass
         pbar.update(12)
 
-        table5 = borb_Table(number_of_rows = 6, number_of_columns = 2)
+        if float(format(payment_info["已付金额"], ".2f")) >= float(format(payment_info["总税后价格"], ".2f")):
+            table5 = borb_Table(number_of_rows = 5, number_of_columns = 2)
 
-        sequence5 = [
-            "SUBTOTAL:",
-            "$"+format(payment_info["总税前价格"], ".2f"),
+            sequence5 = [
+                "SUBTOTAL:",
+                "$"+format(payment_info["总税前价格"], ".2f"),
 
-            "S/C ({}%):".format(int(svc_rate)),
-            "$"+format(payment_info["总服务费"], ".2f"),
+                "S/C ({}%):".format(int(svc_rate)),
+                "$"+format(payment_info["总服务费"], ".2f"),
 
-            "GST ({}%):".format(int(gst_rate)),
-            "$"+format(payment_info["总GST"], ".2f"),
+                "GST ({}%):".format(int(gst_rate)),
+                "$"+format(payment_info["总GST"], ".2f"),
 
-            "TOTAL:",
-            "$"+format(payment_info["总税后价格"], ".2f"),
+                "TOTAL:",
+                "$"+format(payment_info["总税后价格"], ".2f"),
 
-            "PAID:",
-            "$"+format(payment_info["已付金额"], ".2f"),
+                "PAID:",
+                "$"+format(payment_info["已付金额"], ".2f"),]
 
-            "OUTSTANDING:",
-            "$"+format(payment_info["需付金额"], ".2f"),]
+        else:
+            table5 = borb_Table(number_of_rows=1, number_of_columns=2)
+
+            sequence5 = [
+                "DEPOSITED:",
+                "$"+format(payment_info["已付金额"], ".2f")]
+
 
         for i in range(len(sequence5)):
             if i % 2 == 0:
@@ -11492,8 +11522,8 @@ def rtn_order_chit(rtn_constants_dict, other_controls, orderId, db, songTi, logo
         layout.add(table5)
         pbar.update(24)
 
-        layout.add(borb_Paragraph("This chit is not an official receipt, price subject to changes.", font=songTi, horizontal_alignment=borb_align.CENTERED))
-        layout.add(borb_Paragraph("此凭证非正式收据,价格可能会有所改变。", font=songTi, horizontal_alignment=borb_align.CENTERED))
+        layout.add(borb_Paragraph("This chit is not an official receipt, price will be accurate on the day of spending.", font=songTi, horizontal_alignment=borb_align.CENTERED))
+        layout.add(borb_Paragraph("此凭证非正式收据,实际金额以当天消费为准。", font=songTi, horizontal_alignment=borb_align.CENTERED))
         layout.add(borb_Paragraph("_______________________________________________________________________________", horizontal_alignment=borb_align.CENTERED, font=songTi))
         layout.add(borb_Paragraph("三人行 福建四川 精聚一堂", font=songTi, horizontal_alignment=borb_align.CENTERED))
         layout.add(borb_Paragraph("{} {} {}".format(outlet_address, outlet_phone, website), font=songTi, horizontal_alignment=borb_align.CENTERED))
