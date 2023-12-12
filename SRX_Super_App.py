@@ -5850,6 +5850,7 @@ def schedule_font_color(text):
 def generate_schedule_pdf(songTi, logoImagePath, outlet, shift_database, previewSchedule, ph_dates_df):
     with tqdm(total=100) as pbar:
         pbar.set_description("处理信息...")
+        prtdf(ph_dates_df)
     
         monday = pd.to_datetime(str(previewSchedule.iloc[1,1]))
 
@@ -5970,8 +5971,10 @@ def generate_schedule_pdf(songTi, logoImagePath, outlet, shift_database, preview
         
         for day in weekRange:
             if day in ph_dates_df:
+                print(day, "ok")
                 table1.add(borb_Paragraph(day.strftime("%m-%d"), font=songTi, horizontal_alignment=borb_align.CENTERED, background_color=borb_HexColor("#FDA4BA")))
             else:
+                print(day, "not ok")
                 table1.add(borb_Paragraph(day.strftime("%m-%d"), font=songTi, horizontal_alignment=borb_align.CENTERED))
         
         for item in ["公休", "公期", "年假", "育儿假", "签名", "备注"]:
@@ -6003,8 +6006,10 @@ def generate_schedule_pdf(songTi, logoImagePath, outlet, shift_database, preview
                         if column >= 2:
                             dateIndex = column-2
                             if weekRange[dateIndex] in ph_dates_df:
+                                print(weekRange[dateIndex], "weekRange[dateIndex], ok")
                                 table1.add(borb_Paragraph(text, font=songTi, horizontal_alignment=borb_align.CENTERED, font_color=schedule_font_color(text), background_color=borb_HexColor("#FDA4BA")))
                             else:
+                                print(weekRange[dateIndex], "weekRange[dateIndex], not ok")
                                 table1.add(borb_Paragraph(text, font=songTi, horizontal_alignment=borb_align.CENTERED, font_color=schedule_font_color(text)))
                         else:
                             table1.add(borb_Paragraph(text, font=songTi, horizontal_alignment=borb_align.CENTERED, font_color=schedule_font_color(text)))
