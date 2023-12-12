@@ -5970,7 +5970,7 @@ def generate_schedule_pdf(songTi, logoImagePath, outlet, shift_database, preview
         
         for day in weekRange:
             if day in ph_dates_df:
-                table1.add(borb_Paragraph(day.strftime("%m-%d"), font=songTi, horizontal_alignment=borb_align.CENTERED, background_color=borb_HexColor("#FF9999")))
+                table1.add(borb_Paragraph(day.strftime("%m-%d"), font=songTi, horizontal_alignment=borb_align.CENTERED, background_color=borb_HexColor("#FDA4BA")))
             else:
                 table1.add(borb_Paragraph(day.strftime("%m-%d"), font=songTi, horizontal_alignment=borb_align.CENTERED))
         
@@ -6003,7 +6003,7 @@ def generate_schedule_pdf(songTi, logoImagePath, outlet, shift_database, preview
                         if column >= 2:
                             dateIndex = column-2
                             if weekRange[dateIndex] in ph_dates_df:
-                                table1.add(borb_Paragraph(text, font=songTi, horizontal_alignment=borb_align.CENTERED, font_color=schedule_font_color(text), background_color=borb_HexColor("#FF9999")))
+                                table1.add(borb_Paragraph(text, font=songTi, horizontal_alignment=borb_align.CENTERED, font_color=schedule_font_color(text), background_color=borb_HexColor("#FDA4BA")))
                             else:
                                 table1.add(borb_Paragraph(text, font=songTi, horizontal_alignment=borb_align.CENTERED, font_color=schedule_font_color(text)))
                         else:
