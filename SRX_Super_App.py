@@ -5850,7 +5850,6 @@ def schedule_font_color(text):
 def generate_schedule_pdf(songTi, logoImagePath, outlet, shift_database, previewSchedule, ph_dates_df):
     with tqdm(total=100) as pbar:
         pbar.set_description("处理信息...")
-        prtdf(ph_dates_df)
     
         monday = pd.to_datetime(str(previewSchedule.iloc[1,1]))
 
@@ -5866,6 +5865,9 @@ def generate_schedule_pdf(songTi, logoImagePath, outlet, shift_database, preview
         weekRange = [monday]
         for num in np.arange(1,7):
             weekRange += [ pd.to_datetime(monday + dt.timedelta(days=int(num)))]
+
+        for day in weekRange:
+            print(day)
 
         pbar.update(15)
         
