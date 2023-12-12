@@ -5966,14 +5966,14 @@ def generate_schedule_pdf(songTi, logoImagePath, outlet, shift_database, preview
             if index in [2,3,4,5,6,7,8]:
                 dateIndex = index - 2
                 if weekRange[dateIndex] in ph_dates_df["PH DATE"].values:
-                    table1.add(borb_Paragraph(table1_headers[index], font=songTi, horizontal_alignment=borb_align.CENTERED, font_color=borb_HexColor("#800020"), background_color=borb_HexColor("#FDA4BA")))
+                    table1.add(borb_Paragraph(table1_headers[index], font=songTi, horizontal_alignment=borb_align.CENTERED, font_color=borb_HexColor("#6F4E37"), background_color=borb_HexColor("#FDA4BA")))
                 else:
-                    table1.add(borb_Paragraph(table1_headers[index], font=songTi, horizontal_alignment=borb_align.CENTERED, font_color=borb_HexColor("#800020")))
+                    table1.add(borb_Paragraph(table1_headers[index], font=songTi, horizontal_alignment=borb_align.CENTERED, font_color=borb_HexColor("#6F4E37")))
             else:
-                table1.add(borb_Paragraph(table1_headers[index], font=songTi, horizontal_alignment=borb_align.CENTERED, font_color=borb_HexColor("#800020")))
+                table1.add(borb_Paragraph(table1_headers[index], font=songTi, horizontal_alignment=borb_align.CENTERED, font_color=borb_HexColor("#6F4E37")))
         
-        table1.add(borb_Paragraph("序号", font=songTi, horizontal_alignment=borb_align.CENTERED, font_color=borb_HexColor("#800020")))
-        table1.add(borb_Paragraph("姓名", font=songTi, horizontal_alignment=borb_align.CENTERED, font_color=borb_HexColor("#800020")))
+        table1.add(borb_Paragraph("序号", font=songTi, horizontal_alignment=borb_align.CENTERED, font_color=borb_HexColor("#6F4E37")))
+        table1.add(borb_Paragraph("姓名", font=songTi, horizontal_alignment=borb_align.CENTERED, font_color=borb_HexColor("#6F4E37")))
         
         for day in weekRange:
             if day in ph_dates_df["PH DATE"].values:
@@ -5982,7 +5982,7 @@ def generate_schedule_pdf(songTi, logoImagePath, outlet, shift_database, preview
                 table1.add(borb_Paragraph(day.strftime("%m-%d"), font=songTi, horizontal_alignment=borb_align.CENTERED))
         
         for item in ["公休", "公期", "年假", "育儿假", "签名", "备注"]:
-            table1.add(borb_Paragraph(item, font=songTi, horizontal_alignment=borb_align.CENTERED, font_color=borb_HexColor("#800020")))
+            table1.add(borb_Paragraph(item, font=songTi, horizontal_alignment=borb_align.CENTERED, font_color=borb_HexColor("#6F4E37")))
         
         for index in range(len(work_schedule_df)):
             for column in range(len(work_schedule_df.columns)):
@@ -6019,7 +6019,7 @@ def generate_schedule_pdf(songTi, logoImagePath, outlet, shift_database, preview
             for column in range(len(workerCountRange.columns)):
                 text = str(workerCountRange.iloc[index, column])
                 if text in ["员工", "数量", "早上", "晚上"]:
-                    table2.add(borb_Paragraph(text, font=songTi, horizontal_alignment=borb_align.CENTERED, font_color=borb_HexColor("#800020"), font_size=Decimal(15)))
+                    table2.add(borb_Paragraph(text, font=songTi, horizontal_alignment=borb_align.CENTERED, font_color=borb_HexColor("#6F4E37"), font_size=Decimal(15)))
                 else:
                     table2.add(borb_Paragraph(text, font=songTi, horizontal_alignment=borb_align.CENTERED, font_color=borb_HexColor("#00308F"), font_size=Decimal(15)))
                 
@@ -11483,32 +11483,37 @@ def rtn_order_chit(rtn_constants_dict, other_controls, orderId, db, songTi, logo
             pass
         pbar.update(12)
 
-        if float(format(payment_info["已付金额"], ".2f")) >= float(format(payment_info["总税后价格"], ".2f")):
-            table5 = borb_Table(number_of_rows = 5, number_of_columns = 2)
+        if float(format(payment_info["总税后价格"], ".2f")) != 0:
+            if float(format(payment_info["已付金额"], ".2f")) >= float(format(payment_info["总税后价格"], ".2f")):
+                table5 = borb_Table(number_of_rows = 5, number_of_columns = 2)
 
-            sequence5 = [
-                "SUBTOTAL:",
-                "$"+format(payment_info["总税前价格"], ".2f"),
+                sequence5 = [
+                    "SUBTOTAL:",
+                    "$"+format(payment_info["总税前价格"], ".2f"),
 
-                "S/C ({}%):".format(int(svc_rate)),
-                "$"+format(payment_info["总服务费"], ".2f"),
+                    "S/C ({}%):".format(int(svc_rate)),
+                    "$"+format(payment_info["总服务费"], ".2f"),
 
-                "GST ({}%):".format(int(gst_rate)),
-                "$"+format(payment_info["总GST"], ".2f"),
+                    "GST ({}%):".format(int(gst_rate)),
+                    "$"+format(payment_info["总GST"], ".2f"),
 
-                "TOTAL:",
-                "$"+format(payment_info["总税后价格"], ".2f"),
+                    "TOTAL:",
+                    "$"+format(payment_info["总税后价格"], ".2f"),
 
-                "PAID:",
-                "$"+format(payment_info["已付金额"], ".2f"),]
+                    "PAID:",
+                    "$"+format(payment_info["已付金额"], ".2f"),]
+
+            else:
+                table5 = borb_Table(number_of_rows=1, number_of_columns=2)
+
+                sequence5 = [
+                    "DEPOSITED:",
+                    "$"+format(payment_info["已付金额"], ".2f")]
 
         else:
-            table5 = borb_Table(number_of_rows=1, number_of_columns=2)
+            table5 = borb_Table(number_of_rows=1, number_of_columns=1)
 
-            sequence5 = [
-                "DEPOSITED:",
-                "$"+format(payment_info["已付金额"], ".2f")]
-
+            sequence5 = ["TOTAL: FREE OF CHARGE"]
 
         for i in range(len(sequence5)):
             if i % 2 == 0:
@@ -11525,7 +11530,7 @@ def rtn_order_chit(rtn_constants_dict, other_controls, orderId, db, songTi, logo
         layout.add(borb_Paragraph("This chit is not an official receipt, price will be accurate on the day of spending.", font=songTi, horizontal_alignment=borb_align.CENTERED))
         layout.add(borb_Paragraph("此凭证非正式收据,实际金额以当天消费为准。", font=songTi, horizontal_alignment=borb_align.CENTERED))
         layout.add(borb_Paragraph("_______________________________________________________________________________", horizontal_alignment=borb_align.CENTERED, font=songTi))
-        layout.add(borb_Paragraph("三人行 福建四川 精聚一堂", font=songTi, horizontal_alignment=borb_align.CENTERED))
+        layout.add(borb_Paragraph("三人行|福建四川|精聚一堂 Savor the Flavors of Fujian & Sichuan", font=songTi, horizontal_alignment=borb_align.CENTERED))
         layout.add(borb_Paragraph("{} {} {}".format(outlet_address, outlet_phone, website), font=songTi, horizontal_alignment=borb_align.CENTERED))
         pbar.update(4)
 
