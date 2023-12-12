@@ -5962,8 +5962,15 @@ def generate_schedule_pdf(songTi, logoImagePath, outlet, shift_database, preview
                            "Sign", 
                            "Remark"]
         
-        for item in table1_headers:
-            table1.add(borb_Paragraph(item, font=songTi, horizontal_alignment=borb_align.CENTERED, font_color=borb_HexColor("#800020")))
+        for index in range(len(table1_headers)):
+            if index in [2,3,4,5,6,7,8]:
+                dateIndex = index - 2
+                if weekRange[dateIndex] in ph_dates_df["PH DATE"].values:
+                    table1.add(borb_Paragraph(table1_headers[index], font=songTi, horizontal_alignment=borb_align.CENTERED, font_color=borb_HexColor("#800020"), background_color=borb_HexColor("#FDA4BA")))
+                else:
+                    table1.add(borb_Paragraph(table1_headers[index], font=songTi, horizontal_alignment=borb_align.CENTERED, font_color=borb_HexColor("#800020")))
+            else:
+                table1.add(borb_Paragraph(table1_headers[index], font=songTi, horizontal_alignment=borb_align.CENTERED, font_color=borb_HexColor("#800020")))
         
         table1.add(borb_Paragraph("序号", font=songTi, horizontal_alignment=borb_align.CENTERED, font_color=borb_HexColor("#800020")))
         table1.add(borb_Paragraph("姓名", font=songTi, horizontal_alignment=borb_align.CENTERED, font_color=borb_HexColor("#800020")))
@@ -6000,14 +6007,7 @@ def generate_schedule_pdf(songTi, logoImagePath, outlet, shift_database, preview
         
                         table1.add(borb_Paragraph(text, horizontal_alignment=borb_align.CENTERED, font_color=borb_HexColor("#00308F")))
                     else:
-                        if column >= 2:
-                            dateIndex = column-2
-                            if weekRange[dateIndex] in ph_dates_df["PH DATE"].values:
-                                table1.add(borb_Paragraph(text, font=songTi, horizontal_alignment=borb_align.CENTERED, font_color=schedule_font_color(text), background_color=borb_HexColor("#FDA4BA")))
-                            else:
-                                table1.add(borb_Paragraph(text, font=songTi, horizontal_alignment=borb_align.CENTERED, font_color=schedule_font_color(text)))
-                        else:
-                            table1.add(borb_Paragraph(text, font=songTi, horizontal_alignment=borb_align.CENTERED, font_color=schedule_font_color(text)))
+                        table1.add(borb_Paragraph(text, font=songTi, horizontal_alignment=borb_align.CENTERED, font_color=schedule_font_color(text)))
 
         table1.set_padding_on_all_cells(Decimal(2), Decimal(2), Decimal(2), Decimal(2))
         layout.add(table1)
@@ -6019,9 +6019,9 @@ def generate_schedule_pdf(songTi, logoImagePath, outlet, shift_database, preview
             for column in range(len(workerCountRange.columns)):
                 text = str(workerCountRange.iloc[index, column])
                 if text in ["员工", "数量", "早上", "晚上"]:
-                    table2.add(borb_Paragraph(text, font=songTi, horizontal_alignment=borb_align.CENTERED, font_color=borb_HexColor("#800020")))
+                    table2.add(borb_Paragraph(text, font=songTi, horizontal_alignment=borb_align.CENTERED, font_color=borb_HexColor("#800020"), font_size=Decimal(15)))
                 else:
-                    table2.add(borb_Paragraph(text, font=songTi, horizontal_alignment=borb_align.CENTERED, font_color=borb_HexColor("#00308F")))
+                    table2.add(borb_Paragraph(text, font=songTi, horizontal_alignment=borb_align.CENTERED, font_color=borb_HexColor("#00308F"), font_size=Decimal(15)))
                 
         table2.set_padding_on_all_cells(Decimal(1), Decimal(1), Decimal(1), Decimal(1))
         table2.no_borders()
