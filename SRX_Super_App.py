@@ -5866,9 +5866,6 @@ def generate_schedule_pdf(songTi, logoImagePath, outlet, shift_database, preview
         for num in np.arange(1,7):
             weekRange += [ pd.to_datetime(monday + dt.timedelta(days=int(num)))]
 
-        for day in weekRange:
-            print(day)
-
         pbar.update(15)
         
         workRange = previewSchedule.copy()
@@ -5972,11 +5969,9 @@ def generate_schedule_pdf(songTi, logoImagePath, outlet, shift_database, preview
         table1.add(borb_Paragraph("姓名", font=songTi, horizontal_alignment=borb_align.CENTERED, font_color=borb_HexColor("#800020")))
         
         for day in weekRange:
-            if day in ph_dates_df:
-                print(day, "ok")
+            if day in ph_dates_df["PH DATE"].values:
                 table1.add(borb_Paragraph(day.strftime("%m-%d"), font=songTi, horizontal_alignment=borb_align.CENTERED, background_color=borb_HexColor("#FDA4BA")))
             else:
-                print(day, "not ok")
                 table1.add(borb_Paragraph(day.strftime("%m-%d"), font=songTi, horizontal_alignment=borb_align.CENTERED))
         
         for item in ["公休", "公期", "年假", "育儿假", "签名", "备注"]:
@@ -6007,11 +6002,9 @@ def generate_schedule_pdf(songTi, logoImagePath, outlet, shift_database, preview
                     else:
                         if column >= 2:
                             dateIndex = column-2
-                            if weekRange[dateIndex] in ph_dates_df:
-                                print(weekRange[dateIndex], "weekRange[dateIndex], ok")
+                            if weekRange[dateIndex] in ph_dates_df["PH DATE"].values:
                                 table1.add(borb_Paragraph(text, font=songTi, horizontal_alignment=borb_align.CENTERED, font_color=schedule_font_color(text), background_color=borb_HexColor("#FDA4BA")))
                             else:
-                                print(weekRange[dateIndex], "weekRange[dateIndex], not ok")
                                 table1.add(borb_Paragraph(text, font=songTi, horizontal_alignment=borb_align.CENTERED, font_color=schedule_font_color(text)))
                         else:
                             table1.add(borb_Paragraph(text, font=songTi, horizontal_alignment=borb_align.CENTERED, font_color=schedule_font_color(text)))
