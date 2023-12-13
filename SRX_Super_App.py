@@ -10558,8 +10558,8 @@ def rtn_edit_order(rtn_constants_dict, other_controls, google_auth, fernet_key, 
                                     end_record_loop = False
                                     while not end_record_loop:
                                         adultPax = rtn_input_validation(rule="pax", title="成人人数", other_controls=other_controls)
-                                        childPax = rtn_input_validation(rule="pax", title="儿童人数", other_controls=other_controls)
-                                        toddlerPax = rtn_input_validation(rule="pax", title="幼儿人数", other_controls=other_controls)
+                                        childPax = rtn_input_validation(rule="notAdultPax", title="儿童人数", other_controls=other_controls)
+                                        toddlerPax = rtn_input_validation(rule="notAdultPax", title="幼儿人数", other_controls=other_controls)
 
                                         confirm_totalPax = False
                                         while not confirm_totalPax:
