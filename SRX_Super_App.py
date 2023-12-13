@@ -10540,7 +10540,7 @@ def rtn_edit_order(rtn_constants_dict, other_controls, google_auth, fernet_key, 
                                 delete_orderId = -404
                             
                             if isinstance(delete_orderId, int):
-                                orderAttribute = str(slice_rtn_db[slice_rtn_db["订单ID"] == orderId]["订单属性"])
+                                orderAttribute = str(slice_rtn_db[slice_rtn_db["订单ID"] == orderId]["订单属性"].values[0])
 
                                 if orderAttribute == "堂食":
                                     currAdultPax = int(slice_rtn_db[slice_rtn_db["订单ID"] == orderId]["成人人数"].values[0])
@@ -10634,7 +10634,8 @@ def rtn_edit_order(rtn_constants_dict, other_controls, google_auth, fernet_key, 
 
                                     outletCode = str(slice_rtn_db[slice_rtn_db["订单ID"] == orderId]["门店代号"].values[0])
                                     orderCreatedTime = pd.to_datetime(str(slice_rtn_db[slice_rtn_db["订单ID"] == orderId]["订单创建时间"].values[0]))
-                                    orderAttribute = str(slice_rtn_db[slice_rtn_db["订单ID"] == orderId]["订单属性"].values[0])                               
+                                    orderAttribute = str(slice_rtn_db[slice_rtn_db["订单ID"] == orderId]["订单属性"].values[0])
+                                    reserveTime = pd.to_datetime(str(slice_rtn_db[slice_rtn_db["订单ID"] == orderId]["预订时间"].values[0]))                               
                                     customerName = str(slice_rtn_db[slice_rtn_db["订单ID"] == orderId]["姓名"].values[0])
                                     orderNumber = str(slice_rtn_db[slice_rtn_db["订单ID"] == orderId]["订单号"].values[0])
                                     phone = str(slice_rtn_db[slice_rtn_db["订单ID"] == orderId]["电话"].values[0])
