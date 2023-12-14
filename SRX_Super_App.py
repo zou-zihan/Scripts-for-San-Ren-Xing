@@ -6050,9 +6050,26 @@ def generate_schedule_pdf(songTi, logoImagePath, outlet, shift_database, preview
         
         if not os.path.exists("{}/{}".format(os.getcwd(), schedule_export_folderName)):
             os.makedirs("{}/{}".format(os.getcwd(), schedule_export_folderName))
+        
+        if os.path.exists("{}/{}/{}".format(os.getcwd(), schedule_export_folderName, schedule_pdf_filename)):
+            print("发现到你已经生成过'{}'PDF了, 是否覆盖? ".format(schedule_pdf_filename))
+            overewrite_options = option_num(["覆盖(丢弃之前生成的PDF)", "不覆盖(保留之前生成的PDF)"])
+            time.sleep(0.25)
+            overewrite_select = option_limit(overewrite_options, input("在这里输入>>>: "))
+
+            if overewrite_select == 0:
+                with open("{}/{}/{}".format(os.getcwd(), schedule_export_folderName, schedule_pdf_filename), "wb") as pdf_file_handle:
+                    borb_PDF.dumps(pdf_file_handle, Document)
+                
+                print("PDF任务完成。")
             
-        with open("{}/{}/{}".format(os.getcwd(), schedule_export_folderName, schedule_pdf_filename), "wb") as pdf_file_handle:
-            borb_PDF.dumps(pdf_file_handle, Document)
+            else:
+                print("保留之前生成的PDF。")
+        else:
+            with open("{}/{}/{}".format(os.getcwd(), schedule_export_folderName, schedule_pdf_filename), "wb") as pdf_file_handle:
+                borb_PDF.dumps(pdf_file_handle, Document)
+            
+            print("PDF任务完成。")
 
         pbar.set_description("任务完成")
         pbar.update(5)
@@ -7721,11 +7738,11 @@ def rtn_edit_tables(rtn_constants_dict, other_controls):
                             print("桌名'{}'重复! 请重新输入! ".format(tableName))
                             confirm_tableName = False
                         else:
-                            pass
+                            confirm_tableName = rtn_confirm_input(tableName)
                     else:
-                        pass
+                        confirm_tableName = rtn_confirm_input(tableName)
 
-                    confirm_tableName = rtn_confirm_input(tableName)
+                    
                 
                 confirm_tableMin = False
                 while not confirm_tableMin:
