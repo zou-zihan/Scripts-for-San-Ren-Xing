@@ -9416,6 +9416,8 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
                                                     print()
                                                     
                                                     if isSet:
+                                                        print(food_item)
+                                                        print(food_remark)
                                                         print("套餐内菜肴修改详情: ")
                                                         for i in range(len(food_item.split(","))):
                                                             print("{} : {}".format(food_item[i], food_remark[i]))
