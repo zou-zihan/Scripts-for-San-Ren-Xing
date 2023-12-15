@@ -9875,6 +9875,10 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
                                         print()
                                         print()
                                         fourth_select = 5
+
+                                else:
+                                    slice_food_db = food_db
+                                    slice_sm_bd = sm_bd
                     else:
                         slice_food_db = food_db
                         slice_sm_bd = sm_bd
