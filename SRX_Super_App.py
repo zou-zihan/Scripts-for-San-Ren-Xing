@@ -9290,14 +9290,14 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
                                                         new_foodName = str(acm[acm["菜品ID"] == new_foodId]["菜名"].values[0])
                                                 
                                                     if hasFoodChange == 1:
-                                                        originalFoodItems = str(sm[sm["菜品ID"] == foodId]["菜肴"].values[0])
-                                                        foodName = str(sm[sm["菜品ID"] == foodId]["套餐名"].values[0])
+                                                        originalFoodItems = str(sm[sm["菜品ID"] == new_foodId]["菜肴"].values[0])
+                                                        foodName = str(sm[sm["菜品ID"] == new_foodId]["套餐名"].values[0])
 
                                                         food_item, food_remark = rtn_food_change_handler(foodName=foodName, rtn_constants_dict=rtn_constants_dict, food_items=originalFoodItems, food_remark="")
                                                     
                                                     else:
-                                                        food_item = str(sm[sm["菜品ID"] == foodId]["菜肴"].values[0])
-                                                        foodName = str(sm[sm["菜品ID"] == foodId]["套餐名"].values[0])
+                                                        food_item = str(sm[sm["菜品ID"] == new_foodId]["菜肴"].values[0])
+                                                        foodName = str(sm[sm["菜品ID"] == new_foodId]["套餐名"].values[0])
 
                                                         confirm_foodItemRemark = False
                                                         while not confirm_foodItemRemark:
