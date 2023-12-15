@@ -9416,11 +9416,11 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
                                                     print()
                                                     
                                                     if isSet:
-                                                        print(food_item)
-                                                        print(food_remark)
                                                         print("套餐内菜肴修改详情: ")
-                                                        for i in range(len(food_item.split(","))):
-                                                            print("{} : {}".format(food_item[i], food_remark[i]))
+                                                        food_items = food_item.split(",")
+                                                        food_remarks = food_remark.split(",")
+                                                        for i in range(len(food_items)):
+                                                            print("{} : {}".format(food_items[i], food_remarks[i]))
                                                     
                                                     print("你确定把'{}'改成'{}'吗? ".format(old_foodName, new_foodName))
                                                     confirm_save, end_record_loop = rtn_confirm_save("此修改")
@@ -9616,7 +9616,7 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
                                                     gst_charge = gst_rate - 1
                                                     total_gst = float(format((total_subtotal+total_svc)*gst_charge, ".4f"))
 
-                                                    total_payment = rtn_point_zero_five_round(float(format(total_subtotal+total_svc+total_gst), ".4f"))
+                                                    total_payment = rtn_point_zero_five_round(float(format(total_subtotal+total_svc+total_gst, ".4f")))
 
                                                     print("修改详情: ")
                                                     print("菜名/套餐名: {}".format(foodName))
