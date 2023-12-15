@@ -9283,17 +9283,12 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
                                                         old_foodName = str(sm[sm["菜品ID"] == foodId]["套餐名"].values[0])
                                                     else:
                                                         old_foodName = str(acm[acm["菜品ID"] == foodId]["菜名"])
-
-                                                    print(old_foodName, "old_foodName")
                                                         
                                                     if isSet == 1:
                                                         new_foodName = str(sm[sm["菜品ID"] == new_foodId]["套餐名"].values[0])
                                                     else:
-                                                        new_foodName = str(acm[acm["菜名ID"] == new_foodId]["菜名"].values[0])
+                                                        new_foodName = str(acm[acm["菜品ID"] == new_foodId]["菜名"].values[0])
                                                 
-                                                    print(new_foodname, "new_foodname")
-                                                    print(hasFoodChange, "hasFoodChange")
-                                                    print(isSet, "isSet")
                                                     if hasFoodChange == 1:
                                                         originalFoodItems = str(sm[sm["菜品ID"] == foodId]["菜肴"].values[0])
                                                         foodName = str(sm[sm["菜品ID"] == foodId]["套餐名"].values[0])
@@ -9301,7 +9296,7 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
                                                         food_item, food_remark = rtn_food_change_handler(foodName=foodName, rtn_constants_dict=rtn_constants_dict, food_items=originalFoodItems, food_remark="")
                                                     
                                                     else:
-                                                        food_item = str(sm[sm["菜名ID" == foodId]]["菜肴"].values[0])
+                                                        food_item = str(sm[sm["菜品ID"] == foodId]["菜肴"].values[0])
                                                         foodName = str(sm[sm["菜品ID"] == foodId]["套餐名"].values[0])
 
                                                         confirm_foodItemRemark = False
@@ -9864,8 +9859,12 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
                                                     display_food_db, food_db, sm_bd_df, sm_bd, payment_info = rtn_food_order_parser(food_db=food_db, sm_bd=sm_bd, payment=payment, other_controls=other_controls)
                                                     print("备注类操作完成。")
                                     except Exception as e:
+                                        print()
+                                        print()
+                                        print()
                                         print("错误描述: ")
                                         print(e)
+                                        print()
                                         print()
                                         fourth_select = 5
                     else:
