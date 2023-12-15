@@ -9306,13 +9306,19 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
                                                             confirm_foodItemRemark = rtn_confirm_input("这些备注")
                                                 
                                                     if isSet == 0:
-                                                        base_price = float(format(float(acm[acm["菜品ID"] == str(new_foodId)]["价格"].values[0]), ".2f"))
+                                                        base_price = float(acm[acm["菜品ID"] == str(new_foodId)]["价格"].values[0])
+                                                        base_price = format(base_price, ".2f")
+                                                        base_price = float(base_price)
                                                 
                                                     else:
-                                                        base_price = float(format(float(sm[sm["菜品ID"] == str(new_foodId)]["价格"].values[0]), ".2f"))
+                                                        base_price = float(sm[sm["菜品ID"] == str(new_foodId)]["价格"].values[0])
+                                                        base_price = format(base_price, ".2f")
+                                                        base_price = float(base_price)
                                                 
                                                     foodOrderAtrribute = str(display_food_db[display_food_db["点餐ID"] == foodOrderId]["菜品属性"].values[0])
-                                                    foodAddOn = float(format(float(display_food_db[display_food_db["点餐ID"] == foodOrderId]["±价"].values[0]), ".2f"))
+                                                    foodAddOn = float(display_food_db[display_food_db["点餐ID"] == foodOrderId]["±价"].values[0])
+                                                    foodAddOn = format(foodAddOn, ".2f")
+                                                    foodAddOn = float(foodAddOn)
 
                                                     if foodAddOn < -1*base_price:
                                                         print("换了菜品之后, 加减价减到倒贴钱了。")
