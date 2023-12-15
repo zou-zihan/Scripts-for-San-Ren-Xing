@@ -9863,7 +9863,10 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
                                                     
                                                     display_food_db, food_db, sm_bd_df, sm_bd, payment_info = rtn_food_order_parser(food_db=food_db, sm_bd=sm_bd, payment=payment, other_controls=other_controls)
                                                     print("备注类操作完成。")
-                                    except:
+                                    except Exception as e:
+                                        print("错误描述: ")
+                                        print(e)
+                                        print()
                                         fourth_select = 5
                     else:
                         slice_food_db = food_db
