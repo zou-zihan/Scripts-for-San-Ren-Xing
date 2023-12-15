@@ -9651,6 +9651,10 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
                                                         food_db_concat = pd.concat([food_db, modify_food_db], ignore_index=True)
                                                         food_db_concat.sort_values(by="点餐INDEX", ascending=True, inplace=True, ignore_index=True)
 
+                                                        food_db = food_db_concat
+                                                    
+                                                        display_food_db, food_db, sm_bd_df, sm_bd, payment_info = rtn_food_order_parser(food_db=food_db, sm_bd=sm_bd, payment=payment, other_controls=other_controls)
+
                                                         print("修改成功! ")
                                                     else:
                                                         print("未修改! ")
@@ -9664,6 +9668,7 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
                                                     if orderAttribute == "打包":
                                                         if original_foodOrderAttribute == "打包":
                                                             print("订单属性是'打包', 菜品属性必须是'打包'")
+                                                            input("按回车键继续>>>: ")
                                                             confirm_foodOrderAttribute = True
                                                     else:
                                                         option = option_num(["打包(无服务费)", "堂食(有服务费)"])
