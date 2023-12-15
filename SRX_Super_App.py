@@ -9289,6 +9289,9 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
                                                     else:
                                                         new_foodName = str(acm[acm["菜名ID"] == new_foodId]["菜名"].values[0])
                                                 
+                                                    print(new_foodname, "new_foodname")
+                                                    print(hasFoodChange, "hasFoodChange")
+                                                    print(isSet, "isSet")
                                                     if hasFoodChange == 1:
                                                         originalFoodItems = str(sm[sm["菜品ID"] == foodId]["菜肴"].values[0])
                                                         foodName = str(sm[sm["菜品ID"] == foodId]["套餐名"].values[0])
