@@ -8796,9 +8796,10 @@ def rtn_select_foodOrderId(display_food_db):
     if isinstance(display_food_db, pd.DataFrame):
         print()
         print("目前点餐详情: ")
-        prtdf(display_food_db)
-
         display_food_db.sort_values(by="点餐INDEX", ascending=True, inplace=True, ignore_index=True)
+        
+        prtdf(display_food_db.drop(["点餐ID", "订单ID", "菜品ID"], axis=1))
+        
         options = []
         for i in range(len(display_food_db)):
             foodIndex = display_food_db.iloc[i, 4]
