@@ -6000,21 +6000,24 @@ def generate_schedule_pdf(songTi, logoImagePath, outlet, shift_database, preview
                     table1.add(borb_Paragraph(" ", font=songTi))
                 else:
                     if column >= 9:
-                        try:
-                            text = float(text)
-        
-                            if text == 0.5:
-                                text = "½"
-                            else:
-                                if format(text, ".1f").endswith(".5"):
-                                    text = "{}{}".format(int(text-0.5), "½")
+                        if column != 14:
+                            try:
+                                text = float(text)
+            
+                                if text == 0.5:
+                                    text = "½"
                                 else:
-                                    text = str(int(text))
-                            
-                        except ValueError:
-                            text = text
-        
-                        table1.add(borb_Paragraph(text, horizontal_alignment=borb_align.CENTERED, font_color=borb_HexColor("#00308F")))
+                                    if format(text, ".1f").endswith(".5"):
+                                        text = "{}{}".format(int(text-0.5), "½")
+                                    else:
+                                        text = str(int(text))
+                                
+                            except ValueError:
+                                text = text
+            
+                            table1.add(borb_Paragraph(text, horizontal_alignment=borb_align.CENTERED, font_color=borb_HexColor("#00308F"), font_size=Decimal(15)))
+                        else:
+                            table1.add(borb_Paragraph(text, horizontal_alignment=borb_align.CENTERED, font_color=borb_HexColor("#00308F"), font=songTi))
                     else:
                         table1.add(borb_Paragraph(text, font=songTi, horizontal_alignment=borb_align.CENTERED, font_color=schedule_font_color(text)))
 
