@@ -9243,7 +9243,7 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
 
                                             foodId = str(display_food_db[display_food_db["点餐ID"] == foodOrderId]["菜品ID"].values[0])
                                             
-                                            fourth_options = option_num(["换个菜品", "删除菜品", "修改数量/加减价/折扣", "修改菜品属性", "编辑备注", "完成并退出编辑菜品"])
+                                            fourth_options = option_num(["换个菜品", "删除菜品", "修改数量/加减价/折扣", "修改菜品属性", "编辑备注", "返回上一菜单"])
                                             time.sleep(0.25)
                                             fourth_select = option_limit(fourth_options, input("在这里输入>>>: "))
 
