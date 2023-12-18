@@ -12216,7 +12216,7 @@ def rtn_summary_telegram(outlet, rtn_constants_dict, google_auth, fernet_key, rt
     for i in text_list:
         if isinstance(i, str):
             message_list += [i]
-        elif instance(i, dict):
+        elif isinstance(i, dict):
             if len(i) != 0:
                 for key, value in i.items():
                     message_list += ["{}: {}".format(key, value)]
