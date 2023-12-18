@@ -12068,9 +12068,15 @@ def rtn_summary_telegram(outlet, rtn_constants_dict, google_auth, fernet_key, rt
     cnyEveDineInFood = cnyEveDineInFood[cnyEveDineInFood["菜品属性"] == "堂食"]
     cnyEveDineInFood["数量"] = cnyEveDineInFood["数量"].astype(int)
 
+    prtdf(cnyEveDineInFood)
+    print("cny eve dine in food")
+
     cnyEveToGoFood = food_db.copy()
     cnyEveToGoFood["订单ID"] = cnyEveToGoFood["订单ID"].astype(str)
     cnyEveToGoFood = cnyEveToGoFood[cnyEveToGoFood["订单ID"].isin(cnyEveToGoOrderIDs)]
+
+    prtdf(cnyEveToGoFood)
+    print("cny eve to go food")
 
     cnyEveTakeawayFood = food_db.copy()
     cnyEveTakeawayFood["订单ID"] = cnyEveTakeawayFood["订单ID"].astype(str)
