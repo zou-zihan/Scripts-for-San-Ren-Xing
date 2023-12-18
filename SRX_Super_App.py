@@ -9106,7 +9106,7 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
                                     gst_charge = gst_rate - 1
                                     total_gst = float(format((total_subtotal+total_svc)*gst_charge, ".4f"))
 
-                                    total_payment = rtn_point_zero_five_round(float(format(total_subtotal+total_svc+total_gst, ".4f")))
+                                    total_payment = float(format(total_subtotal+total_svc+total_gst, ".4f"))
 
                                     confirm_remark = False
                                     while not confirm_remark:
@@ -9394,7 +9394,7 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
                                                     gst_charge = gst_rate - 1
                                                     total_gst = float(format((total_subtotal+total_svc)*gst_charge, ".4f"))
 
-                                                    total_payment = rtn_point_zero_five_round(float(format(total_subtotal+total_svc+total_gst, ".4f")))
+                                                    total_payment = float(format(total_subtotal+total_svc+total_gst, ".4f"))
 
                                                     remark = str(display_food_db[display_food_db["点餐ID"] == foodOrderId]["备注"].values[0])
                                                     foodOrderIndex = int(display_food_db[display_food_db["点餐ID"] == foodOrderId]["点餐INDEX"].values[0])
@@ -9620,7 +9620,7 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
                                                     gst_charge = gst_rate - 1
                                                     total_gst = float(format((total_subtotal+total_svc)*gst_charge, ".4f"))
 
-                                                    total_payment = rtn_point_zero_five_round(float(format(total_subtotal+total_svc+total_gst, ".4f")))
+                                                    total_payment = float(format(total_subtotal+total_svc+total_gst, ".4f"))
 
                                                     print("修改详情: ")
                                                     print("菜名/套餐名: {}".format(foodName))
@@ -9723,7 +9723,7 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
                                                 gst_charge = gst_rate - 1
                                                 total_gst = float(format((total_subtotal+total_svc)*gst_charge, ".4f"))
 
-                                                total_payment = rtn_point_zero_five_round(float(format(total_subtotal+total_svc+total_gst), ".4f"))
+                                                total_payment = float(format(total_subtotal+total_svc+total_gst, ".4f"))
                                             
                                                 print("修改详情: ")
                                                 print("菜名/套餐名: {}".format(foodName))
