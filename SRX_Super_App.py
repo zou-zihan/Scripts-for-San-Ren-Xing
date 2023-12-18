@@ -12038,193 +12038,85 @@ def rtn_summary_telegram(outlet, rtn_constants_dict, google_auth, fernet_key, rt
     payment = db["payment"].copy()
     
     sm = other_controls["sm"]
+    acm = other_controls["acm"]
 
-    cnyEveOrders = rtn_db.copy()
-    cnyEveOrders["预订时间"] = pd.to_datetime(cnyEveOrders["预订时间"])
-    cnyEveOrders["预订日期"] = cnyEveOrders["预订时间"].apply(lambda x: pd.to_datetime(x.strftime("%Y-%m-%d")))
+    sm["菜品ID"] = sm["菜品ID"].astype(str)
+    acm["菜品ID"] = acm["菜品ID"].astype(str)
 
-    excludeCnyEveOrders = cnyEveOrders.copy()
-    excludeCnyEveOrders["预订日期"] = pd.to_datetime(excludeCnyEveOrders["预订日期"])
-    excludeCnyEveOrdersFilter = (excludeCnyEveOrders["预订日期"] >= pd.to_datetime(dt.datetime.now().strftime("%Y-%m-%d")))
-    excludeCnyEveOrders = excludeCnyEveOrders[excludeCnyEveOrdersFilter]
-    excludeCnyEveOrders = excludeCnyEveOrders[excludeCnyEveOrders["预订日期"] != cnyEveDate]
+    food_db["订单ID"] = food_db["订单ID"].astype(str)
 
-    excludeCnyEveDineInOrderIDs = excludeCnyEveOrders[excludeCnyEveOrders["订单属性"] == "堂食"]["订单ID"].values.astype(str).tolist()
-    excludeCnyEveToGoOrderIDs = excludeCnyEveOrders[excludeCnyEveOrders["订单属性"] != "堂食"]["订单ID"].values.astype(str).tolist()
+    rtn_db["预订时间"] = pd.to_datetime(rtn_db["预订时间"])
+    rtn_db["预订日期"] = rtn_db["预订时间"].apply(lambda x: pd.to_datetime(x.strftime("%Y-%m-%d")))
+    rtn_db["预订日期"] = pd.to_datetime(rtn_db["预订日期"])
 
-    cnyEveOrders["订单创建时间"] = pd.to_datetime(cnyEveOrders["订单创建时间"])
-    startDate = cnyEveOrders["订单创建时间"].min().strftime("%Y年%m月%d日")
-    endDate = dt.datetime.now().strftime("%Y年%m月%d日")
+    df_filter0 = (df["订单属性"] == "堂食")
+    df_filter1 = (df["订单属性"] != "堂食")
+    df_filter2 = (df["预订日期"] >= pd.to_datetime(dt.datetime.now().strftime("%Y-%m-%d"))) & (df["订单属性"] == "堂食")
+    df_filter3 = (df["预订日期"] >= pd.to_datetime(dt.datetime.now().strftime("%Y-%m-%d"))) & (df["订单属性"] != "堂食")
+    filters = [df_filter0, df_filter1, df_filter2, df_filter3]
+    df_names = ["除夕堂食", "除夕打包", "非除夕堂食", "非除夕打包"]
 
-    cnyEveOrders["预订日期"] = pd.to_datetime(cnyEveOrders["预订日期"])
+    df_dict = {}
+    for index in range(len(filters)):
+        df = rtn_db.copy()
 
-    cnyEveOrders = cnyEveOrders[cnyEveOrders["预订日期"] == cnyEveDate]
+        if index in [0, 1]:
+            cnyEve_filter = (df["预订日期"] == cnyEveDate)
+        else:
+            cnyEve_filter = (df["预订日期"] != cnyEveDate)
+        
+        df = df[cnyEve_filter]
+        df = df[filters[index]]
+        df_dict.update({ df_names[index] : df })
+    
+    df_ids_dict = {}
+    for name in df_names:
+        df_ids_dict.update({ name : df_dict[name]["订单ID"].values.astype(str).tolist() })
 
-    cnyEveDineInOrderIDs = cnyEveOrders[cnyEveOrders["订单属性"] == "堂食"]["订单ID"].values.astype(str).tolist()
-    cnyEveToGoOrderIDs = cnyEveOrders[cnyEveOrders["订单属性"] != "堂食"]["订单ID"].values.astype(str).tolist()
+    
+    food_df_dict = {}
+    for name in df_names:
+        food_df = food_db.copy()
+        food_df = food_df[food_df["订单ID"].isin(df_ids_dict[name])]
 
-    cnyEveDineInFood = food_db.copy()
-    cnyEveDineInFood["订单ID"] = cnyEveDineInFood["订单ID"].astype(str)
-    cnyEveDineInFood = cnyEveDineInFood[cnyEveDineInFood["订单ID"].isin(cnyEveDineInOrderIDs)]
-    cnyEveDineInFood = cnyEveDineInFood[cnyEveDineInFood["菜品属性"] == "堂食"]
-    cnyEveDineInFood["套餐?"] = cnyEveDineInFood["套餐?"].astype(int)
-    cnyEveDineInFood = cnyEveDineInFood[cnyEveDineInFood["套餐?"] == 1]
-    cnyEveDineInFood["数量"] = cnyEveDineInFood["数量"].astype(int)
+        if not food_df.empty:
+            foodName = []
+            for index in range(len(food_df)):
+                if int(food_df.iloc[i, 4]) == 0:
+                    if str(food_df.iloc[index, 6] != "堂食"):
+                        foodName += [str(acm[acm["菜品ID"] == str(food_df.iloc[i, 3])]["菜名"].values[0])+"(打包)"]
+                    else:
+                        foodName += [str(acm[acm["菜品ID"] == str(food_df.iloc[i, 3])]["菜名"].values[0])]
+                else:
+                    if str(food_df.iloc[index, 6] != "堂食"):
+                        foodName += [str(sm[sm["菜品ID"] == str(food_df.iloc[i, 3])]["套餐名"].values[0])+"(打包)"]
+                    else:
+                        foodName += [str(sm[sm["菜品ID"] == str(food_df.iloc[i, 3])]["套餐名"].values[0])]
 
-    cnyEveToGoFood = food_db.copy()
-    cnyEveToGoFood["订单ID"] = cnyEveToGoFood["订单ID"].astype(str)
-    cnyEveToGoFood = cnyEveToGoFood[cnyEveToGoFood["订单ID"].isin(cnyEveToGoOrderIDs)]
-    cnyEveToGoFood["套餐?"] = cnyEveToGoFood["套餐?"].astype(int)
-    cnyEveToGoFood = cnyEveToGoFood[cnyEveToGoFood["套餐?"] == 1]
+            food_df["foodName"] = foodName
+        else:
+            pass
+            
+        food_df_dict.update({ name : food_df })
+    
+    msg_list = ["{}至{}".format(rtn_db["预订日期"].min().strftime("%Y年%m月%d日"), dt.datetime.now().strftime("%Y年%m月%d日")), 
+                "{}除夕预订状况".format(outlet.strip().capitalize())]
+    
+    for name in df_names:
+        fdf = food_df_dict[name]
+        if not fdf.empty:
+            msg_list += ["{}: ".format(name)]
+            fdf["数量"] = fdf["数量"].astype(int)
+            fdf_summary = fdf.groupby("foodName")[["数量"]].sum()
+            fdf_summary.reset_index(inplace=True)
+            fdf_summary["数量"] = fdf_summary["数量"].astype(int)
 
-    cnyEveTakeawayFood = food_db.copy()
-    cnyEveTakeawayFood["订单ID"] = cnyEveTakeawayFood["订单ID"].astype(str)
-    cnyEveTakeawayFood = cnyEveTakeawayFood[cnyEveTakeawayFood["订单ID"].isin(cnyEveDineInOrderIDs)]
-    cnyEveTakeawayFood = cnyEveTakeawayFood[cnyEveTakeawayFood["菜品属性"] != "堂食"]
-    cnyEveTakeawayFood["套餐?"] = cnyEveTakeawayFood["套餐?"].astype(int)
-    cnyEveTakeawayFood = cnyEveTakeawayFood[cnyEveTakeawayFood["套餐?"] == 1]
-
-    excludeCnyEveToGoFood = food_db.copy()
-    excludeCnyEveToGoFood["订单ID"] = excludeCnyEveToGoFood["订单ID"].astype(str)
-    excludeCnyEveToGoFood = excludeCnyEveToGoFood[excludeCnyEveToGoFood["订单ID"].isin(excludeCnyEveToGoOrderIDs)]
-    excludeCnyEveToGoFood["套餐?"] = excludeCnyEveToGoFood["套餐?"].astype(int)
-    excludeCnyEveToGoFood = excludeCnyEveToGoFood[excludeCnyEveToGoFood["套餐?"] == 1]
-
-    excludeCnyEveTakeawayFood = food_db.copy()
-    excludeCnyEveTakeawayFood["订单ID"] = excludeCnyEveTakeawayFood["订单ID"].astype(str)
-    excludeCnyEveTakeawayFood = excludeCnyEveTakeawayFood[excludeCnyEveTakeawayFood["订单ID"].isin(excludeCnyEveDineInOrderIDs)]
-    excludeCnyEveTakeawayFood = excludeCnyEveTakeawayFood[excludeCnyEveTakeawayFood["菜品属性"] != "堂食"]
-    excludeCnyEveTakeawayFood["套餐?"] = excludeCnyEveTakeawayFood["套餐?"].astype(int)
-    excludeCnyEveTakeawayFood = excludeCnyEveTakeawayFood[excludeCnyEveTakeawayFood["套餐?"] == 1]
-
-    cnyEve_display_food_db_dine_in = cnyEveDineInFood.copy()
-    cnyEve_display_food_db_dine_in["菜名/套餐名"] = cnyEve_display_food_db_dine_in["菜品ID"].apply(lambda x : 
-    if not cnyEve_display_food_db_dine_in.empty:
-        cnyEve_display_food_db_dine_in["数量"] = cnyEve_display_food_db_dine_in["数量"].astype(int)
-        cnyEve_dine_in_summary = cnyEve_display_food_db_dine_in.groupby("菜名/套餐名")[["数量"]].sum()
-        cnyEve_dine_in_summary.reset_index(inplace=True)
-        cnyEve_dine_in_summary["数量"] = cnyEve_dine_in_summary["数量"].astype(int)
-    else:
-        cnyEve_dine_in_summary = pd.DataFrame(columns=["菜名/套餐名", "数量"])
-
-    if not cnyEve_display_food_db_to_go.empty:
-        cnyEve_display_food_db_to_go["数量"] = cnyEve_display_food_db_to_go["数量"].astype(int)
-        cnyEve_to_go_summary = cnyEve_display_food_db_to_go.groupby("菜名/套餐名")[["数量"]].sum()
-        cnyEve_to_go_summary.reset_index(inplace=True)
-        cnyEve_to_go_summary["数量"] = cnyEve_to_go_summary["数量"].astype(int)
-
-    else:
-        cnyEve_to_go_summary = pd.DataFrame(columns=["菜名/套餐名", "数量"])
-
-    if not cnyEve_display_food_db_takeaway.empty:
-        cnyEve_display_food_db_takeaway["数量"] = cnyEve_display_food_db_takeaway["数量"].astype(int)
-        cnyEve_takeaway_summary = cnyEve_display_food_db_takeaway.groupby("菜名/套餐名")[["数量"]].sum()
-        cnyEve_takeaway_summary.reset_index(inplace=True)
-        cnyEve_takeaway_summary["数量"] = cnyEve_takeaway_summary["数量"].astype(int)
-
-    else:
-        cnyEve_takeaway_summary = pd.DataFrame(columns=["菜名/套餐名", "数量"])
-
-    if not excludeCnyEveToGoFood.empty:
-        excludeCnyEve_display_food_db_to_go["数量"] = excludeCnyEve_display_food_db_to_go["数量"].astype(int)
-        excludeCnyEve_to_go_summary = excludeCnyEve_display_food_db_to_go.groupby("菜名/套餐名")[["数量"]].sum()
-        excludeCnyEve_to_go_summary.reset_index(inplace=True)
-        excludeCnyEve_to_go_summary["数量"] = excludeCnyEve_to_go_summary["数量"].astype(int)
-
-    else:
-        excludeCnyEve_to_go_summary = pd.DataFrame(columns=["菜名/套餐名", "数量"])
-
-    if not excludeCnyEveTakeawayFood.empty:
-        excludeCnyEve_display_food_db_takeaway["数量"] = excludeCnyEve_display_food_db_takeaway["数量"].astype(int)
-        excludeCnyEve_takeaway_summary = excludeCnyEve_display_food_db_takeaway.groupby("菜名/套餐名")[["数量"]].sum()
-        excludeCnyEve_takeaway_summary.reset_index(inplace=True)
-        excludeCnyEve_takeaway_summary["数量"] = excludeCnyEve_takeaway_summary["数量"].astype(int)
-    else:
-        excludeCnyEve_takeaway_summary = pd.DataFrame(columns=["菜名/套餐名", "数量"])
-
-
-    if not cnyEve_dine_in_summary.empty:
-        cnyEveDineInDict = {}
-        for index in range(len(cnyEve_dine_in_summary)):
-            cnyEveDineInDict.update({ str(cnyEve_dine_in_summary.iloc[index, 0]) : cnyEve_dine_in_summary.iloc[index, 1] })
-
-    else:
-        cnyEveDineInDict = {}
-
-
-    if not excludeCnyEve_to_go_summary.empty:
-        cnyEveToGoDict = {}
-        for index in range(len(cnyEve_to_go_summary)):
-            cnyEveToGoDict.update({ str(cnyEve_to_go_summary.iloc[index, 0]) : cnyEve_to_go_summary.iloc[index, 1] })
-    else:
-        cnyEveToGoDict = {}
-
-    if not cnyEve_takeaway_summary.empty:
-        cnyEveTakeawayDict = {}
-        for index in range(len(cnyEve_takeaway_summary)):
-            cnyEveTakeawayDict.update({ str(cnyEve_takeaway_summary.iloc[index, 0]) : cnyEve_takeaway_summary.iloc[index, 1] })
-    else:
-        cnyEveTakeawayDict = {}
-
-    if not excludeCnyEve_to_go_summary.empty:
-        excludeCnyEveToGoDict = {}
-        for index in range(len(excludeCnyEve_to_go_summary)):
-            excludeCnyEveToGoDict.update({ str(excludeCnyEve_to_go_summary.iloc[index, 0]) : excludeCnyEve_to_go_summary.iloc[index, 1] })
-    else:
-        excludeCnyEveToGoDict = {}
-
-    if not excludeCnyEve_takeaway_summary.empty:
-        excludeCnyEveTakeawayDict = {}
-        for index in range(len(excludeCnyEve_takeaway_summary)):
-            excludeCnyEveTakeawayDict.update({ str(excludeCnyEve_takeaway_summary.iloc[index, 0]) : excludeCnyEve_takeaway_summary.iloc[index, 1] })
-    else:
-        excludeCnyEveTakeawayDict = {}
-
-    rtn_db["载客量"] = rtn_db["载客量"].astype(int)
-
-    if not cnyEve_dine_in_summary.empty:
-        totalSet = int(cnyEve_dine_in_summary[cnyEve_dine_in_summary["菜名/套餐名"].str.contains("套餐")]["数量"].sum())
-    else:
-        totalSet = 0
-
-    text_list = []
-
-    text_list += ["{}至{}".format(startDate, endDate), 
-                  "{}除夕预订状况".format(outlet.strip().capitalize()),
-                  " ",
-                  "除夕堂食: ",
-                  cnyEveDineInDict,
-                  " ",
-                  "累计套餐: {}".format(totalSet),
-                  "累计人数: {}".format(int(rtn_db[rtn_db["订单ID"].isin(cnyEveDineInOrderIDs)]["载客量"].sum())),
-                  " ",
-                  "除夕外卖: ",
-                  cnyEveToGoDict,
-                  " ",
-                  cnyEveTakeawayDict,
-                  " ",
-                  "其他时间外卖: ",
-                  excludeCnyEveToGoDict,
-                  " ",
-                  excludeCnyEveTakeawayDict,
-                  " "]
-
-    message_list = []
-    for i in text_list:
-        if isinstance(i, str):
-            message_list += [i]
-        elif isinstance(i, dict):
-            if len(i) != 0:
-                for key, value in i.items():
-                    message_list += ["{}: {}".format(key, value)]
-            else:
-                message_list += [" "]
-
-    send_string = ""
-    for m in message_list:
-        send_string += m + "\n"
-
-    sending_telegram(is_pr=False, message=send_string, api=telegram_api, receiver=receiver, wifi=True)
+            for index in range(len(fdf_summary)):
+                msg_list += ["{}: {}".format(fdf_summary.iloc[index, 0], fdf_summary.iloc[index, 1])]
+            
+            msg_list += [" "]
+                
+    sending_telegram(is_pr=True, message=send_string, api=telegram_api, receiver=receiver, wifi=True)
 
 def rtn_main(google_auth, rtn_control_url, rtn_database_url, constants_sheetname):
     google_auth = google_auth
