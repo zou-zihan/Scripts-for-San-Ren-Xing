@@ -12142,7 +12142,7 @@ def rtn_summary_telegram(outlet, rtn_constants_dict, google_auth, fernet_key, rt
         excludeCnyEve_to_go_summary["数量"] = excludeCnyEve_to_go_summary["数量"].astype(int)
 
     else:
-        excludeCnyEve_to_go_summary = pd.DatFrame(columns=["菜名/套餐名", "数量"])
+        excludeCnyEve_to_go_summary = pd.DataFrame(columns=["菜名/套餐名", "数量"])
 
     if not excludeCnyEveTakeawayFood.empty:
         excludeCnyEve_display_food_db_takeaway["数量"] = excludeCnyEve_display_food_db_takeaway["数量"].astype(int)
