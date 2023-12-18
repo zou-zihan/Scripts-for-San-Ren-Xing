@@ -12066,8 +12066,8 @@ def rtn_summary_telegram(outlet, rtn_constants_dict, google_auth, fernet_key, rt
         else:
             cnyEve_filter = (df["预订日期"] != cnyEveDate)
         
-        df = df[cnyEve_filter]
         df = df[filters[index]]
+        df = df[cnyEve_filter]
         df_dict.update({ df_names[index] : df })
     
     df_ids_dict = {}
@@ -12117,7 +12117,7 @@ def rtn_summary_telegram(outlet, rtn_constants_dict, google_auth, fernet_key, rt
             
             msg_list += [" "]
                 
-    sending_telegram(is_pr=True, message=send_string, api=telegram_api, receiver=receiver, wifi=True)
+    sending_telegram(is_pr=True, message=msg_list, api=telegram_api, receiver=receiver, wifi=True)
 
 def rtn_main(google_auth, rtn_control_url, rtn_database_url, constants_sheetname):
     google_auth = google_auth
