@@ -12061,13 +12061,13 @@ def rtn_summary_telegram(outlet, rtn_constants_dict, google_auth, fernet_key, rt
     df_dict = {}
     for index in range(len(filters)):
         df = rtn_db.copy()
+        df = df[filters[index]]
 
         if index in [0, 1]:
             cnyEve_filter = (df["预订日期"] == cnyEveDate)
         else:
             cnyEve_filter = (df["预订日期"] != cnyEveDate)
-        
-        df = df[filters[index]]
+            
         df = df[cnyEve_filter]
         df_dict.update({ df_names[index] : df })
     
@@ -12085,12 +12085,12 @@ def rtn_summary_telegram(outlet, rtn_constants_dict, google_auth, fernet_key, rt
             foodName = []
             for index in range(len(food_df)):
                 if int(food_df.iloc[index, 4]) == 0:
-                    if str(food_df.iloc[index, 6] != "堂食"):
+                    if str(food_df.iloc[index, 6]) != "堂食":
                         foodName += [str(acm[acm["菜品ID"] == str(food_df.iloc[index, 3])]["菜名"].values[0])+"(打包)"]
                     else:
                         foodName += [str(acm[acm["菜品ID"] == str(food_df.iloc[index, 3])]["菜名"].values[0])]
                 else:
-                    if str(food_df.iloc[index, 6] != "堂食"):
+                    if str(food_df.iloc[index, 6]) != "堂食":
                         foodName += [str(sm[sm["菜品ID"] == str(food_df.iloc[index, 3])]["套餐名"].values[0])+"(打包)"]
                     else:
                         foodName += [str(sm[sm["菜品ID"] == str(food_df.iloc[index, 3])]["套餐名"].values[0])]
