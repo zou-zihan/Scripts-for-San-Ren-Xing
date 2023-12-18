@@ -12064,6 +12064,7 @@ def rtn_summary_telegram(outlet, rtn_constants_dict, google_auth, fernet_key, rt
     cnyEveDineInFood["订单ID"] = cnyEveDineInFood["订单ID"].astype(str)
     cnyEveDineInFood = cnyEveDineInFood[cnyEveDineInFood["订单ID"].isin(cnyEveDineInOrderIDs)]
     cnyEveDineInFood = cnyEveDineInFood[cnyEveDineInFood["菜品属性"] == "堂食"]
+    cnyEveDineInFood["数量"] = cnyEveDineInFood["数量"].astype(int)
 
     cnyEveToGoFood = food_db.copy()
     cnyEveToGoFood["订单ID"] = cnyEveToGoFood["订单ID"].astype(str)
@@ -12190,6 +12191,8 @@ def rtn_summary_telegram(outlet, rtn_constants_dict, google_auth, fernet_key, rt
     else:
         excludeCnyEveTakeawayDict = {}
 
+    rtn_db["载客量"] = rtn_db["载客量"].astype(int)
+
     text_list = []
 
     text_list += ["{}至{}".format(startDate, endDate), 
@@ -12198,8 +12201,8 @@ def rtn_summary_telegram(outlet, rtn_constants_dict, google_auth, fernet_key, rt
                   "除夕堂食: ",
                   cnyEveDineInDict,
                   " ",
-                  "累计套餐: {}",
-                  "累计人数: {}",
+                  "累计套餐: {}".format(int(cnyEveDineInFood[cnyEveDineInFood["菜名/套餐名"].str.contains("套餐")]["数量"].sum())),
+                  "累计人数: {}".format(int(rtn_db[rtn_db["订单ID"].isin(cnyEveDineInOrderIDs)]["载客量"].sum())),
                   " ",
                   "除夕外卖: ",
                   cnyEveToGoDict,
@@ -12219,7 +12222,10 @@ def rtn_summary_telegram(outlet, rtn_constants_dict, google_auth, fernet_key, rt
         elif isinstance(i, dict):
             if len(i) != 0:
                 for key, value in i.items():
-                    message_list += ["{}: {}".format(key, value)]
+                    if key.find("套餐") == -1：
+                        pass
+                    else:
+                        message_list += ["{}: {}".format(key, value)]
             else:
                 message_list += [" "]
 
