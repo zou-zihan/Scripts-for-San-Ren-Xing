@@ -12083,12 +12083,32 @@ def rtn_summary_telegram(outlet, rtn_constants_dict, google_auth, fernet_key, rt
     excludeCnyEveTakeawayFood = excludeCnyEveTakeawayFood[excludeCnyEveTakeawayFood["订单ID"].isin(excludeCnyEveDineInOrderIDs)]
     excludeCnyEveTakeawayFood = excludeCnyEveTakeawayFood[excludeCnyEveTakeawayFood["菜品属性"] != "堂食"]
 
-    cnyEve_display_food_db_dine_in, a, b, c, d = rtn_food_order_parser(food_db=cnyEveDineInFood, sm_bd=sm_bd, payment=payment, other_controls=other_controls)
-    cnyEve_display_food_db_to_go, a,b,c,d = rtn_food_order_parser(food_db=cnyEveToGoFood, sm_bd=sm_bd, payment=payment, other_controls=other_controls)
-    cnyEve_display_food_db_takeaway, a,b,c,d = rtn_food_order_parser(food_db=cnyEveTakeawayFood, sm_bd=sm_bd, payment=payment, other_controls=other_controls)
-    excludeCnyEve_display_food_db_to_go, a,b,c,d = rtn_food_order_parser(food_db=excludeCnyEveToGoFood, sm_bd=sm_bd, payment=payment, other_controls=other_controls)
-    excludeCnyEve_display_food_db_takeaway, a,b,c,d = rtn_food_order_parser(food_db=excludeCnyEveTakeawayFood, sm_bd=sm_bd, payment=payment, other_controls=other_controls)
+    try:
+        cnyEve_display_food_db_dine_in, a, b, c, d = rtn_food_order_parser(food_db=cnyEveDineInFood, sm_bd=sm_bd, payment=payment, other_controls=other_controls)
+    except IndexError:
+        cnyEve_display_food_db_dine_in = pd.DataFrame()
 
+    try:
+        cnyEve_display_food_db_to_go, a,b,c,d = rtn_food_order_parser(food_db=cnyEveToGoFood, sm_bd=sm_bd, payment=payment, other_controls=other_controls)
+    except IndexError:
+        cnyEve_display_food_db_to_go = pd.DataFrame()
+
+    try:
+        cnyEve_display_food_db_takeaway, a,b,c,d = rtn_food_order_parser(food_db=cnyEveTakeawayFood, sm_bd=sm_bd, payment=payment, other_controls=other_controls)
+    
+    except IndexError:
+        cnyEve_display_food_db_takeaway = pd.DataFrame()
+
+    try:
+        excludeCnyEve_display_food_db_to_go, a,b,c,d = rtn_food_order_parser(food_db=excludeCnyEveToGoFood, sm_bd=sm_bd, payment=payment, other_controls=other_controls)
+    except IndexError:
+        excludeCnyEve_display_food_db_to_go = pd.DataFrame()
+
+    try:
+        excludeCnyEve_display_food_db_takeaway, a,b,c,d = rtn_food_order_parser(food_db=excludeCnyEveTakeawayFood, sm_bd=sm_bd, payment=payment, other_controls=other_controls)
+    except IndexError:
+         excludeCnyEve_display_food_db_takeaway = pd.DataFrame()   
+         
     if not cnyEve_display_food_db_dine_in.empty:
         cnyEve_display_food_db_dine_in["数量"] = cnyEve_display_food_db_dine_in["数量"].astype(int)
         cnyEve_dine_in_summary = cnyEve_display_food_db_dine_in.groupby("菜名/套餐名")[["数量"]].sum()
