@@ -12055,6 +12055,8 @@ def rtn_summary_telegram(outlet, rtn_constants_dict, google_auth, fernet_key, rt
     startDate = cnyEveOrders["订单创建时间"].min().strftime("%Y年%m月%d日")
     endDate = dt.datetime.now().strftime("%Y年%m月%d日")
 
+    cnyEveOrders["预订日期"] = pd.to_datetime(cnyEveOrders["预订日期"])
+
     cnyEveOrders = cnyEveOrders[cnyEveOrders["预订日期"] == cnyEveDate]
 
     cnyEveDineInOrderIDs = cnyEveOrders[cnyEveOrders["订单属性"] == "堂食"]["订单ID"].values.astype(str).tolist()
