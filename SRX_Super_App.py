@@ -12035,8 +12035,6 @@ def rtn_summary_telegram(outlet, rtn_constants_dict, google_auth, fernet_key, rt
 
     rtn_db = db["rtn_db"].copy()
     food_db = db["food_db"].copy()
-    sm_bd = db["sm_bd"].copy()
-    payment = db["payment"].copy()
     
     sm = other_controls["sm"]
     acm = other_controls["acm"]
@@ -12049,6 +12047,7 @@ def rtn_summary_telegram(outlet, rtn_constants_dict, google_auth, fernet_key, rt
     rtn_db["预订时间"] = pd.to_datetime(rtn_db["预订时间"])
     rtn_db["预订日期"] = rtn_db["预订时间"].apply(lambda x: pd.to_datetime(x.strftime("%Y-%m-%d")))
     rtn_db["预订日期"] = pd.to_datetime(rtn_db["预订日期"])
+    rtn_db["载客量"] = rtn_db["载客量"].astype(int)
 
     df = rtn_db.copy()
     df_filter0 = (df["订单属性"] == "堂食")
@@ -12067,7 +12066,7 @@ def rtn_summary_telegram(outlet, rtn_constants_dict, google_auth, fernet_key, rt
             cnyEve_filter = (df["预订日期"] == cnyEveDate)
         else:
             cnyEve_filter = (df["预订日期"] != cnyEveDate)
-            
+
         df = df[cnyEve_filter]
         df_dict.update({ df_names[index] : df })
     
@@ -12102,7 +12101,8 @@ def rtn_summary_telegram(outlet, rtn_constants_dict, google_auth, fernet_key, rt
         food_df_dict.update({ name : food_df })
     
     msg_list = ["{}至{}".format(rtn_db["预订日期"].min().strftime("%Y年%m月%d日"), dt.datetime.now().strftime("%Y年%m月%d日")), 
-                "{}除夕预订状况".format(outlet.strip().capitalize())]
+                "{}除夕预订状况".format(outlet.strip().capitalize()),
+                " ",]
     
     for name in df_names:
         fdf = food_df_dict[name]
@@ -12114,7 +12114,15 @@ def rtn_summary_telegram(outlet, rtn_constants_dict, google_auth, fernet_key, rt
             fdf_summary["数量"] = fdf_summary["数量"].astype(int)
 
             for index in range(len(fdf_summary)):
-                msg_list += ["{}: {}".format(fdf_summary.iloc[index, 0], fdf_summary.iloc[index, 1])]
+                if str(fdf_summary.iloc[index, 0]).find("套餐") == -1:
+                    pass
+                else:
+                    msg_list += ["{}: {}".format(fdf_summary.iloc[index, 0], fdf_summary.iloc[index, 1])]
+            
+            if name == "除夕堂食":
+                msg_list += ["累计套餐: {}".format(int(fdf_summary[fdf_summary["foodName"].str.contains("套餐")]["数量"].sum()))]
+                msg_list += ["累计人数: {}".format(int(rtn_db[rtn_db["订单ID"].isin(df_ids_dict[name])]["载客量"].sum()))]
+                msg_list += [" "]
             
             msg_list += [" "]
                 
