@@ -12021,7 +12021,196 @@ def rtn_whatsapp_sender(startDate, endDate, db, outlet):
     print("任务完成")
     driver.quit()
     return rtn_db
-     
+
+def rtn_summary_telegram(outlet, rtn_constants_dict, google_auth, fernet_key, rtn_database_url, other_controls):
+    rtn_database_url = fernet_decrypt(rtn_database_url, fernet_key)
+
+    cnyEveDate = pd.to_datetime(str(rtn_constants_dict["coming_cny_eve_date"]))
+
+    db = rtn_fetch_database(google_auth=google_auth, fernet_key=fernet_key, rtn_database_url=rtn_database_url, rtn_constants_dict=rtn_constants_dict)
+
+    telegram_api = "gAAAAABksuR1ublq7xZWMvT1ew9OnFeYe0XkFgtOvCUUDdnNWxTqxUFcZ371iHzXJjLlystj7GEbhuxAdCc96iOEltleDbflFiGuKa-iZ8JgBySNZA7X2W1mWZQfHH8G5WRuWxF_Ly5B"
+    telegram_api = fernet_decrypt(telegram_api, fernet_key)
+    receiver = "gAAAAABkwUq4M4o5yiikn2BJfGjXbTEupZWlR_hbv3lZ_dsOe2KOXis1CgJX8MEH_-tdK1EMaoRYRUrHbWyLqvX7T9Dus_0zUg=="
+    receiver = fernet_decrypt(receiver, fernet_key)
+
+    rtn_db = db["rtn_db"].copy()
+    food_db = db["food_db"].copy()
+    sm_bd = db["sm_bd"].copy()
+    payment = db["payment"].copy()
+
+
+    cnyEveOrders = rtn_db.copy()
+    cnyEveOrders["预订时间"] = pd.to_datetime(cnyEveOrders["预订时间"])
+    cnyEveOrders["预订日期"] = cnyEveOrders["预订时间"].apply(lambda x: pd.to_datetime(x.strftime("%Y-%m-%d")))
+
+    excludeCnyEveOrders = cnyEveOrders.copy()
+    excludeCnyEveOrders["预订日期"] = pd.to_datetime(excludeCnyEveOrders["预订日期"])
+    excludeCnyEveOrdersFilter = (excludeCnyEveOrders["预订日期"] >= pd.to_datetime(dt.datetime.now().strftime("%Y-%m-%d")))
+    excludeCnyEveOrders = excludeCnyEveOrders[excludeCnyEveOrdersFilter]
+    excludeCnyEveOrders = excludeCnyEveOrders[excludeCnyEveOrders["预订日期"] != cnyEveDate]
+
+    excludeCnyEveDineInOrderIDs = excludeCnyEveOrders[excludeCnyEveOrders["订单属性"] == "堂食"]["订单ID"].values.astype(str).tolist()
+    excludeCnyEveToGoOrderIDs = excludeCnyEveOrders[excludeCnyEveOrders["订单属性"] != "堂食"]["订单ID"].values.astype(str).tolist()
+
+    cnyEveOrders["订单创建时间"] = pd.to_datetime(cnyEveOrders["订单创建时间"])
+    startDate = cnyEveOrders["订单创建时间"].min().strftime("%Y年%m月%d日")
+    endDate = dt.datetime.now().strftime("%Y年%m月%d日")
+
+    cnyEveOrders = cnyEveOrders[cnyEveOrders["预订日期"] == cnyEveDate]
+
+    cnyEveDineInOrderIDs = cnyEveOrders[cnyEveOrders["订单属性"] == "堂食"]["订单ID"].values.astype(str).tolist()
+    cnyEveToGoOrderIDs = cnyEveOrders[cnyEveOrders["订单属性"] != "堂食"]["订单ID"].values.astype(str).tolist()
+
+    cnyEveDineInFood = food_db.copy()
+    cnyEveDineInFood["订单ID"] = cnyEveDineInFood["订单ID"].astype(str)
+    cnyEveDineInFood = cnyEveDineInFood[cnyEveDineInFood["订单ID"].isin(cnyEveDineInOrderIDs)]
+    cnyEveDineInFood = cnyEveDineInFood[cnyEveDineInFood["菜品属性"] == "堂食"]
+
+    cnyEveToGoFood = food_db.copy()
+    cnyEveToGoFood["订单ID"] = cnyEveToGoFood["订单ID"].astype(str)
+    cnyEveToGoFood = cnyEveToGoFood[cnyEveToGoFood["订单ID"].isin(cnyEveToGoOrderIDs)]
+
+    cnyEveTakeawayFood = food_db.copy()
+    cnyEveTakeawayFood["订单ID"] = cnyEveTakeawayFood["订单ID"].astype(str)
+    cnyEveTakeawayFood = cnyEveTakeawayFood[cnyEveTakeawayFood["订单ID"].isin(cnyEveDineInOrderIDs)]
+    cnyEveTakeawayFood = cnyEveTakeawayFood[cnyEveTakeawayFood["菜品属性"] != "堂食"]
+
+    excludeCnyEveToGoFood = food_db.copy()
+    excludeCnyEveToGoFood["订单ID"] = excludeCnyEveToGoFood["订单ID"].astype(str)
+    excludeCnyEveToGoFood = excludeCnyEveToGoFood[excludeCnyEveToGoFood["订单ID"].isin(excludeCnyEveToGoOrderIDs)]
+
+    excludeCnyEveTakeawayFood = food_db.copy()
+    excludeCnyEveTakeawayFood["订单ID"] = excludeCnyEveTakeawayFood["订单ID"].astype(str)
+    excludeCnyEveTakeawayFood = excludeCnyEveTakeawayFood[excludeCnyEveTakeawayFood["订单ID"].isin(excludeCnyEveDineInOrderIDs)]
+    excludeCnyEveTakeawayFood = excludeCnyEveTakeawayFood[excludeCnyEveTakeawayFood["菜品属性"] != "堂食"]
+
+    cnyEve_display_food_db_dine_in, a, b, c, d = rtn_food_order_parser(food_db=cnyEveDineInFood, sm_bd=sm_bd, payment=payment, other_controls=other_controls)
+    cnyEve_display_food_db_to_go, a,b,c,d = rtn_food_order_parser(food_db=cnyEveToGoFood, sm_bd=sm_bd, payment=payment, other_controls=other_controls)
+    cnyEve_display_food_db_takeaway, a,b,c,d = rtn_food_order_parser(food_db=cnyEveTakeawayFood, sm_bd=sm_bd, payment=payment, other_controls=other_controls)
+    excludeCnyEve_display_food_db_to_go, a,b,c,d = rtn_food_order_parser(food_db=excludeCnyEveToGoFood, sm_bd=sm_bd, payment=payment, other_controls=other_controls)
+    excludeCnyEve_display_food_db_takeaway, a,b,c,d = rtn_food_order_parser(food_db=excludeCnyEveTakeawayFood, sm_bd=sm_bd, payment=payment, other_controls=other_controls)
+
+    if not cnyEve_display_food_db_dine_in.empty:
+        cnyEve_display_food_db_dine_in["数量"] = cnyEve_display_food_db_dine_in["数量"].astype(int)
+        cnyEve_dine_in_summary = cnyEve_display_food_db_dine_in.groupby("菜名/套餐名")[["数量"]].sum()
+        cnyEve_dine_in_summary.reset_index(inplace=True)
+        cnyEve_dine_in_summary["数量"] = cnyEve_dine_in_summary["数量"].astype(int)
+    else:
+        cnyEve_dine_in_summary = pd.DataFrame(columns=["菜名/套餐名", "数量"])
+
+    if not cnyEve_display_food_db_to_go.empty:
+        cnyEve_display_food_db_to_go["数量"] = cnyEve_display_food_db_to_go["数量"].astype(int)
+        cnyEve_to_go_summary = cnyEve_display_food_db_to_go.groupby("菜名/套餐名")[["数量"]].sum()
+        cnyEve_to_go_summary.reset_index(inplace=True)
+        cnyEve_to_go_summary["数量"] = cnyEve_to_go_summary["数量"].astype(int)
+
+    else:
+        cnyEve_to_go_summary = pd.DataFrame(columns=["菜名/套餐名", "数量"])
+
+    if not cnyEve_display_food_db_takeaway.empty:
+        cnyEve_display_food_db_takeaway["数量"] = cnyEve_display_food_db_takeaway["数量"].astype(int)
+        cnyEve_takeaway_summary = cnyEve_display_food_db_takeaway.groupby("菜名/套餐名")[["数量"]].sum()
+        cnyEve_takeaway_summary.reset_index(inplace=True)
+        cnyEve_takeaway_summary["数量"] = cnyEve_takeaway_summary["数量"].astype(int)
+
+    else:
+        cnyEve_takeaway_summary = pd.DataFrame(columns=["菜名/套餐名", "数量"])
+
+    if not excludeCnyEveToGoFood.empty:
+        excludeCnyEve_display_food_db_to_go["数量"] = excludeCnyEve_display_food_db_to_go["数量"].astype(int)
+        excludeCnyEve_to_go_summary = excludeCnyEve_display_food_db_to_go.groupby("菜名/套餐名")[["数量"]].sum()
+        excludeCnyEve_to_go_summary.reset_index(inplace=True)
+        excludeCnyEve_to_go_summary["数量"] = excludeCnyEve_to_go_summary["数量"].astype(int)
+
+    else:
+        excludeCnyEve_to_go_summary = pd.DatFrame(columns=["菜名/套餐名", "数量"])
+
+    if not excludeCnyEveTakeawayFood.empty:
+        excludeCnyEve_display_food_db_takeaway["数量"] = excludeCnyEve_display_food_db_takeaway["数量"].astype(int)
+        excludeCnyEve_takeaway_summary = excludeCnyEve_display_food_db_takeaway.groupby("菜名/套餐名")[["数量"]].sum()
+        excludeCnyEve_takeaway_summary.reset_index(inplace=True)
+        excludeCnyEve_takeaway_summary["数量"] = excludeCnyEve_takeaway_summary["数量"].astype(int)
+    else:
+        excludeCnyEve_takeaway_summary = pd.DataFrame(columns=["菜名/套餐名", "数量"])
+
+
+    if not cnyEve_dine_in_summary.empty:
+        cnyEveDineInDict = {}
+        for index in range(len(cnyEve_dine_in_summary)):
+            cnyEveDineInDict.update({ str(cnyEve_dine_in_summary.iloc[index, 0]) : cnyEve_dine_in_summary.iloc[index, 1] })
+
+    else:
+        cnyEveDineInDict = {}
+
+
+    if not excludeCnyEve_to_go_summary.empty:
+        cnyEveToGoDict = {}
+        for index in range(len(cnyEve_to_go_summary)):
+            cnyEveToGoDict.update({ str(cnyEve_to_go_summary.iloc[index, 0]) : cnyEve_to_go_summary.iloc[index, 1] })
+    else:
+        cnyEveToGoDict = {}
+
+    if not cnyEve_takeaway_summary.empty:
+        cnyEveTakeawayDict = {}
+        for index in range(len(cnyEve_takeaway_summary)):
+            cnyEveTakeawayDict.update({ str(cnyEve_takeaway_summary.iloc[index, 0]) : cnyEve_takeaway_summary.iloc[index, 1] })
+    else:
+        cnyEveTakeawayDict = {}
+
+    if not excludeCnyEve_to_go_summary.empty:
+        excludeCnyEveToGoDict = {}
+        for index in range(len(excludeCnyEve_to_go_summary)):
+            excludeCnyEveToGoDict.update({ str(excludeCnyEve_to_go_summary.iloc[index, 0]) : excludeCnyEve_to_go_summary.iloc[index, 1] })
+    else:
+        excludeCnyEveToGoDict = {}
+
+    if not excludeCnyEve_takeaway_summary.empty:
+        excludeCnyEveTakeawayDict = {}
+        for index in range(len(excludeCnyEve_takeaway_summary)):
+            excludeCnyEveTakeawayDict.update({ str(excludeCnyEve_takeaway_summary.iloc[index, 0]) : excludeCnyEve_takeaway_summary.iloc[index, 1] })
+    else:
+        excludeCnyEveTakeawayDict = {}
+
+    text_list = []
+
+    text_list += ["{}至{}".format(startDate, endDate), 
+                  "{}除夕预订状况".format(outlet.strip().capitalize()),
+                  " ",
+                  "除夕堂食: ",
+                  cnyEveDineInDict,
+                  " ",
+                  "累计套餐: {}",
+                  "累计人数: {}",
+                  " ",
+                  "除夕外卖: ",
+                  cnyEveToGoDict,
+                  " ",
+                  cnyEveTakeawayDict,
+                  " ",
+                  "其他时间外卖: ",
+                  excludeCnyEveToGoDict,
+                  " ",
+                  excludeCnyEveTakeawayDict,
+                  " "]
+
+    message_list = []
+    for i in text_list:
+        if isinstance(i, str):
+            message_list += [i]
+        elif instance(i, dict):
+            if len(i) != 0:
+                for key, value in i.items():
+                    message_list += ["{}: {}".format(key, value)]
+            else:
+                message_list += [" "]
+
+    send_string = ""
+    for m in message_list:
+        send_string += m + "\n"
+
+    sending_telegram(is_pr=False, message=send_string, api=telegram_api, receiver=receiver, wifi=True)
+
 def rtn_main(google_auth, rtn_control_url, rtn_database_url, constants_sheetname):
     google_auth = google_auth
     rtn_control_url = rtn_control_url
@@ -12074,10 +12263,9 @@ def rtn_main(google_auth, rtn_control_url, rtn_database_url, constants_sheetname
                     os.makedirs("{}/{}/{}".format(os.getcwd(), exportFolderName, whatsappFile_subFolderName))
 
                 main_menu_select = 0
-                while main_menu_select != 6:
+                while main_menu_select != 7:
                     print("Reservation Main Menu")
-                    print("预订主菜单")
-                    main_menu = option_num(["预订", "汇总", "设置", "订单凭证", "三联单", "WhatsApp工具", "退出预订"])
+                    main_menu = option_num(["预订", "汇总", "预订状况", "设置", "订单凭证", "三联单", "WhatsApp工具", "退出预订"])
                     time.sleep(0.25)
                     main_menu_select = option_limit(main_menu, input("在这里输入>>>: "))
 
@@ -12736,8 +12924,11 @@ def rtn_main(google_auth, rtn_control_url, rtn_database_url, constants_sheetname
                                             pass
                                     else:
                                         pass
-                    
+
                     elif main_menu_select == 2:
+                        rtn_summary_telegram(outlet=outlet, rtn_constants_dict=rtn_constants_dict, google_auth=google_auth, fernet_key=fernet_key, rtn_database_url=rtn_database_url, other_controls=other_controls)
+                    
+                    elif main_menu_select == 3:
                         setting_menu_select = 0
                         while setting_menu_select != 2:
                             setting_menu = option_num(["菜品菜单", "桌台", "返回上一菜单"])
@@ -12820,7 +13011,7 @@ def rtn_main(google_auth, rtn_control_url, rtn_database_url, constants_sheetname
                                         isUploadSuccess = rtn_upload_database(df=tc, db_sheetname="table_control_sheetname", google_auth=google_auth, rtn_database_url=rtn_database_url, fernet_key=fernet_key, rtn_constants_dict=rtn_constants_dict, slice=False, rtn_control_url=rtn_control_url, isDb=False)
                                         print()
 
-                    elif main_menu_select == 3:
+                    elif main_menu_select == 4:
                         outlet = get_outlet()
                         stock_count_foldername = "{}盘点文件".format(outlet.strip().capitalize())
                         songti_filename = "SongTi.ttf"
@@ -12859,7 +13050,7 @@ def rtn_main(google_auth, rtn_control_url, rtn_database_url, constants_sheetname
                                 else:
                                     pass
 
-                    elif main_menu_select == 4:
+                    elif main_menu_select == 5:
                         outlet = get_outlet()
                         stock_count_foldername = "{}盘点文件".format(outlet.strip().capitalize())
                         songti_filename = "SongTi.ttf"
@@ -12936,7 +13127,7 @@ def rtn_main(google_auth, rtn_control_url, rtn_database_url, constants_sheetname
                                     else:
                                         pass
 
-                    elif main_menu_select == 5:
+                    elif main_menu_select == 6:
                         print("WhatsApp批量发信息工具只能在电脑端使用。")
                         print("移动端设备无法使用。")
                         print()
