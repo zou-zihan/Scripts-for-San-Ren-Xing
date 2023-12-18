@@ -12193,6 +12193,11 @@ def rtn_summary_telegram(outlet, rtn_constants_dict, google_auth, fernet_key, rt
 
     rtn_db["载客量"] = rtn_db["载客量"].astype(int)
 
+    if not cnyEve_dine_in_summary.empty:
+        totalSet = int(cnyEve_dine_in_summary[cnyEve_dine_in_summary["菜名/套餐名"].str.contains("套餐")]["数量"].sum())
+    else:
+        totalSet = 0
+
     text_list = []
 
     text_list += ["{}至{}".format(startDate, endDate), 
@@ -12201,7 +12206,7 @@ def rtn_summary_telegram(outlet, rtn_constants_dict, google_auth, fernet_key, rt
                   "除夕堂食: ",
                   cnyEveDineInDict,
                   " ",
-                  "累计套餐: {}".format(int(cnyEveDineInFood[cnyEveDineInFood["菜名/套餐名"].str.contains("套餐")]["数量"].sum())),
+                  "累计套餐: {}".format(totalSet),
                   "累计人数: {}".format(int(rtn_db[rtn_db["订单ID"].isin(cnyEveDineInOrderIDs)]["载客量"].sum())),
                   " ",
                   "除夕外卖: ",
