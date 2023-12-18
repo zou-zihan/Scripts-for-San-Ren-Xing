@@ -12023,6 +12023,7 @@ def rtn_whatsapp_sender(startDate, endDate, db, outlet):
     return rtn_db
 
 def rtn_summary_telegram(outlet, rtn_constants_dict, google_auth, fernet_key, rtn_database_url, other_controls):
+    print("请稍等...")
     cnyEveDate = pd.to_datetime(str(rtn_constants_dict["coming_cny_eve_date"]))
 
     db = rtn_fetch_database(google_auth=google_auth, fernet_key=fernet_key, rtn_database_url=rtn_database_url, rtn_constants_dict=rtn_constants_dict)
