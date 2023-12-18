@@ -12091,10 +12091,14 @@ def rtn_summary_telegram(outlet, rtn_constants_dict, google_auth, fernet_key, rt
     except IndexError:
         cnyEve_display_food_db_dine_in = pd.DataFrame()
 
+    prtdf(cnyEve_display_food_db_dine_in)
+
     try:
         cnyEve_display_food_db_to_go, a,b,c,d = rtn_food_order_parser(food_db=cnyEveToGoFood, sm_bd=sm_bd, payment=payment, other_controls=other_controls)
     except IndexError:
         cnyEve_display_food_db_to_go = pd.DataFrame()
+
+    prtdf(cnyEve_display_food_db_to_go)
 
     try:
         cnyEve_display_food_db_takeaway, a,b,c,d = rtn_food_order_parser(food_db=cnyEveTakeawayFood, sm_bd=sm_bd, payment=payment, other_controls=other_controls)
