@@ -12084,16 +12084,25 @@ def rtn_summary_telegram(outlet, rtn_constants_dict, google_auth, fernet_key, rt
         if not food_df.empty:
             foodName = []
             for index in range(len(food_df)):
-                if int(food_df.iloc[index, 4]) == 0:
-                    if str(food_df.iloc[index, 6]) != "堂食":
-                        foodName += [str(acm[acm["菜品ID"] == str(food_df.iloc[index, 3])]["菜名"].values[0])+"(打包)"]
+                if name == "除夕堂食":
+                    if int(food_df.iloc[index, 4]) == 0:
+                        if str(food_df.iloc[index, 6]) != "堂食":
+                            fn = str(acm[acm["菜品ID"] == str(food_df.iloc[index, 3])]["菜名"].values[0])+"(打包)"
+                        else:
+                            fn = str(acm[acm["菜品ID"] == str(food_df.iloc[index, 3])]["菜名"].values[0])
                     else:
-                        foodName += [str(acm[acm["菜品ID"] == str(food_df.iloc[index, 3])]["菜名"].values[0])]
+                        if str(food_df.iloc[index, 6]) != "堂食":
+                            fn = str(sm[sm["菜品ID"] == str(food_df.iloc[index, 3])]["套餐名"].values[0])+"(打包)"
+                        else:
+                            fn = str(sm[sm["菜品ID"] == str(food_df.iloc[index, 3])]["套餐名"].values[0])
                 else:
-                    if str(food_df.iloc[index, 6]) != "堂食":
-                        foodName += [str(sm[sm["菜品ID"] == str(food_df.iloc[index, 3])]["套餐名"].values[0])+"(打包)"]
+                    if int(food_df.iloc[index, 4]) == 0:
+                        fn = str(acm[acm["菜品ID"] == str(food_df.iloc[index, 3])]["菜名"].values[0])
+                    
                     else:
-                        foodName += [str(sm[sm["菜品ID"] == str(food_df.iloc[index, 3])]["套餐名"].values[0])]
+                        fn = str(sm[sm["菜品ID"] == str(food_df.iloc[index, 3])]["套餐名"].values[0])
+                
+                foodName += [fn]
 
             food_df["foodName"] = foodName
         else:
