@@ -12049,6 +12049,7 @@ def rtn_summary_telegram(outlet, rtn_constants_dict, google_auth, fernet_key, rt
     rtn_db["预订日期"] = rtn_db["预订时间"].apply(lambda x: pd.to_datetime(x.strftime("%Y-%m-%d")))
     rtn_db["预订日期"] = pd.to_datetime(rtn_db["预订日期"])
 
+    df = rtn_db.copy()
     df_filter0 = (df["订单属性"] == "堂食")
     df_filter1 = (df["订单属性"] != "堂食")
     df_filter2 = (df["预订日期"] >= pd.to_datetime(dt.datetime.now().strftime("%Y-%m-%d"))) & (df["订单属性"] == "堂食")
