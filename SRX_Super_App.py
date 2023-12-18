@@ -12222,7 +12222,7 @@ def rtn_summary_telegram(outlet, rtn_constants_dict, google_auth, fernet_key, rt
         elif isinstance(i, dict):
             if len(i) != 0:
                 for key, value in i.items():
-                    if key.find("套餐") == -1：
+                    if key.find("套餐") == -1:
                         pass
                     else:
                         message_list += ["{}: {}".format(key, value)]
