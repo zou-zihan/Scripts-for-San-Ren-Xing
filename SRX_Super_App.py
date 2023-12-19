@@ -12142,6 +12142,12 @@ def rtn_summary_telegram(outlet, rtn_constants_dict, google_auth, fernet_key, rt
 
         else:
             pass
+    
+    for m in msg_list:
+        print(m)
+    
+    print()
+    print()
                 
     sending_telegram(is_pr=True, message=msg_list, api=telegram_api, receiver=receiver, wifi=True)
     print()
