@@ -12125,12 +12125,14 @@ def rtn_summary_telegram(outlet, rtn_constants_dict, google_auth, fernet_key, rt
 
             for index in range(len(fdf_summary)):
                 if str(fdf_summary.iloc[index, 0]).find("套餐") == -1:
-                    pass
+                    if str(fdf_summary.iloc[index, 0]).find("盆菜") == -1:
+                        pass
+                    else:
+                        msg_list += ["{}: {}".format(fdf_summary.iloc[index, 0], fdf_summary.iloc[index, 1])]
                 else:
                     msg_list += ["{}: {}".format(fdf_summary.iloc[index, 0], fdf_summary.iloc[index, 1])]
             
             if name == "除夕堂食":
-                msg_list += [" "]
                 msg_list += [" "]
                 msg_list += ["累计套餐: {}".format(int(fdf_summary[fdf_summary["foodName"].str.contains("套餐")]["数量"].sum()))]
                 msg_list += ["累计人数: {}".format(int(rtn_db[rtn_db["订单ID"].isin(df_ids_dict[name])]["载客量"].sum()))]
