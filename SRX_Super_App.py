@@ -13115,7 +13115,7 @@ def rtn_main(google_auth, rtn_control_url, rtn_database_url, constants_sheetname
                                 print()
                                 print()
 
-def uniform_main(google_auth, db_setting_url, constants_sheetname, serialized_rule_filename, outlet, fernet_key, backup_foldername):
+def uniform_main(google_auth, db_setting_url, constants_sheetname, serialized_rule_filename, fernet_key, backup_foldername):
 
     res = pyfiglet.figlet_format("Uniform")
     print(res)
@@ -13135,6 +13135,7 @@ def uniform_main(google_auth, db_setting_url, constants_sheetname, serialized_ru
         if fernet_key == 0:
             print("安全密钥错误! ")
         else:
+            outlet = get_outlet()
             k_dict = get_k_dictionary(google_auth, db_setting_url, constants_sheetname, serialized_rule_filename, outlet, fernet_key, backup_foldername)
             uniformURL = fernet_decrypt(k_dict["uniform_sheet_url"], fernet_key)
 
