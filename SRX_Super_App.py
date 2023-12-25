@@ -13115,6 +13115,40 @@ def rtn_main(google_auth, rtn_control_url, rtn_database_url, constants_sheetname
                                 print()
                                 print()
 
+def uniform_main(google_auth, db_setting_url, constants_sheetname, serialized_rule_filename, outlet, fernet_key, backup_foldername):
+
+    res = pyfiglet.figlet_format("Uniform")
+    print(res)
+    time.sleep(0.15)
+
+    on_net = on_internet()
+
+    if not on_net:
+        print()
+        print()
+        print("无网络连接。")
+        print("制服库存的查看需要全程连接网络。")
+
+    else:
+        fernet_key = get_key()
+
+        if fernet_key == 0:
+            print("安全密钥错误! ")
+        else:
+            k_dict = get_k_dictionary(google_auth, db_setting_url, constants_sheetname, serialized_rule_filename, outlet, fernet_key, backup_foldername)
+            uniformURL = fernet_decrypt(k_dict["uniform_sheet_url"], fernet_key)
+
+            df = pd.read_html(uniformURL+"htmlview", encoding="utf-8")
+
+            uniform_df = df[1]
+            parseGoogleHTMLSheet(uniform_df)
+
+            print()
+            print("{}各尺码库存详情: ".format(outlet.strip().capitalize()))
+            prtdf(uniform_df)
+            print()
+            print()
+
 def main(database_url, db_setting_url, serialized_rule_filename, service_filename, constants_sheetname, google_auth, box_num, drink_num, promo_num, lun_sales, lun_gc, tb_sales, tb_gc, lun_fwc, lun_kwc, tb_fwc, tb_kwc, night_fwc, night_kwc, script_backup_filename, script, wifi, backup_foldername,cashier_on_duty, drink_on_duty, box_on_duty, payslip_on_duty, do_not_show_menu, rtn_control_url, rtn_database_url):
     database_url = database_url
     db_setting_url = db_setting_url
@@ -13161,10 +13195,10 @@ def main(database_url, db_setting_url, serialized_rule_filename, service_filenam
         time.sleep(0.15)
         
         SRX_take_input = 0
-        while SRX_take_input != 6:
+        while SRX_take_input != 7:
             print()
             print("Main Menu")
-            options = option_num(["关帐", "盘点", "排班", "生成酒水明细表", "预订", "工具箱", "终止Super App"])
+            options = option_num(["关帐", "盘点", "排班", "生成酒水明细表", "预订", "制服库存", "工具箱", "终止Super App"])
             time.sleep(0.25)
             SRX_take_input = option_limit(options, input("在这里输入>>>: "))
 
@@ -13198,6 +13232,9 @@ def main(database_url, db_setting_url, serialized_rule_filename, service_filenam
                 rtn_main(google_auth, rtn_control_url, rtn_database_url, constants_sheetname)
 
             elif SRX_take_input == 5:
+                uniform_main(google_auth, db_setting_url, constants_sheetname, serialized_rule_filename, outlet, fernet_key, backup_foldername)
+
+            elif SRX_take_input == 6:
 
                 res = pyfiglet.figlet_format("Tool Box")
                 print(res)
