@@ -12063,8 +12063,7 @@ def rtn_summary_telegram(outlet, rtn_constants_dict, google_auth, fernet_key, rt
     df_filter1 = (df["订单属性"] != "堂食")
     df_filter2 = (df["预订日期"] >= pd.to_datetime(dt.datetime.now().strftime("%Y-%m-%d"))) & (df["订单属性"] == "堂食")
     df_filter3 = (df["预订日期"] >= pd.to_datetime(dt.datetime.now().strftime("%Y-%m-%d"))) & (df["订单属性"] != "堂食")
-    df_filter4 = (df["订单状态"] != "取消")
-    filters = [df_filter0, df_filter1, df_filter2, df_filter3, df_filter4]
+    filters = [df_filter0, df_filter1, df_filter2, df_filter3]
     df_names = ["除夕堂食", "除夕打包", "非除夕堂食", "非除夕打包"]
 
     df_dict = {}
@@ -12078,6 +12077,7 @@ def rtn_summary_telegram(outlet, rtn_constants_dict, google_auth, fernet_key, rt
             cnyEve_filter = (df["预订日期"] != cnyEveDate)
 
         df = df[cnyEve_filter]
+        df = df[df["订单状态"] != "取消"]
         df_dict.update({ df_names[index] : df })
     
     df_ids_dict = {}
