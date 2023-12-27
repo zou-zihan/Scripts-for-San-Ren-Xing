@@ -9353,7 +9353,7 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
                                                         while not confirm_food_discount:
                                                             discount_option = option_num(["按价格给予折扣", "按百分比给予折扣"])
                                                             time.sleep(0.25)
-                                                            discount_option_select = option_limit(discount_option)
+                                                            discount_option_select = option_limit(discount_option, input("在这里输入>>>: "))
 
                                                             if discount_option_select == 0:
                                                                 food_discount = rtn_input_validation(rule="float", title="折扣价格")
@@ -9573,7 +9573,7 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
                                                         if food_discount_select == 0:
                                                             discount_option = option_num(["按价格给予折扣", "按百分比给予折扣"])
                                                             time.sleep(0.25)
-                                                            discount_option_select = option_limit(discount_option)
+                                                            discount_option_select = option_limit(discount_option, input("在这里输入>>>: "))
 
                                                             if discount_option_select == 0:
                                                                 food_discount = rtn_input_validation(rule="float", title="折扣价格")
