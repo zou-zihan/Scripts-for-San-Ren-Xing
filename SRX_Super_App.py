@@ -9243,7 +9243,8 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
                                             fourth_select = 5
                                         
                                         else:
-                                            prtdf(display_food_db[display_food_db["点餐ID"] == foodOrderId])
+                                            print()
+                                            print()
 
                                             foodId = str(display_food_db[display_food_db["点餐ID"] == foodOrderId]["菜品ID"].values[0])
                                             
@@ -9286,28 +9287,31 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
                                                     if acm[acm["菜品ID"] == foodId].empty:
                                                         old_foodName = str(sm[sm["菜品ID"] == foodId]["套餐名"].values[0])
                                                     else:
-                                                        old_foodName = str(acm[acm["菜品ID"] == foodId]["菜名"])
+                                                        old_foodName = str(acm[acm["菜品ID"] == foodId]["菜名"].values[0])
                                                         
                                                     if isSet == 1:
                                                         new_foodName = str(sm[sm["菜品ID"] == new_foodId]["套餐名"].values[0])
                                                     else:
                                                         new_foodName = str(acm[acm["菜品ID"] == new_foodId]["菜名"].values[0])
-                                                
-                                                    if hasFoodChange == 1:
-                                                        originalFoodItems = str(sm[sm["菜品ID"] == new_foodId]["菜肴"].values[0])
-                                                        foodName = str(sm[sm["菜品ID"] == new_foodId]["套餐名"].values[0])
 
-                                                        food_item, food_remark = rtn_food_change_handler(foodName=foodName, rtn_constants_dict=rtn_constants_dict, fi=originalFoodItems)
-                                                    
+                                                    if isSet == 1:
+                                                        if hasFoodChange == 1:
+                                                            originalFoodItems = str(sm[sm["菜品ID"] == new_foodId]["菜肴"].values[0])
+                                                            foodName = str(sm[sm["菜品ID"] == new_foodId]["套餐名"].values[0])
+
+                                                            food_item, food_remark = rtn_food_change_handler(foodName=foodName, rtn_constants_dict=rtn_constants_dict, fi=originalFoodItems)
+                                                        
+                                                        else:
+                                                            food_item = str(sm[sm["菜品ID"] == new_foodId]["菜肴"].values[0])
+                                                            foodName = str(sm[sm["菜品ID"] == new_foodId]["套餐名"].values[0])
+
+                                                            confirm_foodItemRemark = False
+                                                            while not confirm_foodItemRemark:
+                                                                food_remark = rtn_edit_food_change_remark(rtn_constants_dict=rtn_constants_dict, food_items=food_item, foodItemRemark="")
+                                                                print("你确定吗? ")
+                                                                confirm_foodItemRemark = rtn_confirm_input("这些备注")
                                                     else:
-                                                        food_item = str(sm[sm["菜品ID"] == new_foodId]["菜肴"].values[0])
-                                                        foodName = str(sm[sm["菜品ID"] == new_foodId]["套餐名"].values[0])
-
-                                                        confirm_foodItemRemark = False
-                                                        while not confirm_foodItemRemark:
-                                                            food_remark = rtn_edit_food_change_remark(rtn_constants_dict=rtn_constants_dict, food_items=food_item, foodItemRemark="")
-                                                            print("你确定吗? ")
-                                                            confirm_foodItemRemark = rtn_confirm_input("这些备注")
+                                                        pass
                                                 
                                                     if isSet == 0:
                                                         base_price = float(acm[acm["菜品ID"] == str(new_foodId)]["价格"].values[0])
@@ -12049,13 +12053,15 @@ def rtn_summary_telegram(outlet, rtn_constants_dict, google_auth, fernet_key, rt
     rtn_db["预订日期"] = pd.to_datetime(rtn_db["预订日期"])
     rtn_db["载客量"] = rtn_db["载客量"].astype(int)
     rtn_db["订单创建时间"] = pd.to_datetime(rtn_db["订单创建时间"])
+    rtn_db["订单状态"] = rtn_db["订单状态"].astype(str)
 
     df = rtn_db.copy()
     df_filter0 = (df["订单属性"] == "堂食")
     df_filter1 = (df["订单属性"] != "堂食")
     df_filter2 = (df["预订日期"] >= pd.to_datetime(dt.datetime.now().strftime("%Y-%m-%d"))) & (df["订单属性"] == "堂食")
     df_filter3 = (df["预订日期"] >= pd.to_datetime(dt.datetime.now().strftime("%Y-%m-%d"))) & (df["订单属性"] != "堂食")
-    filters = [df_filter0, df_filter1, df_filter2, df_filter3]
+    df_filter4 = (df["订单状态"] != "取消")
+    filters = [df_filter0, df_filter1, df_filter2, df_filter3, df_filter4]
     df_names = ["除夕堂食", "除夕打包", "非除夕堂食", "非除夕打包"]
 
     df_dict = {}
