@@ -13154,7 +13154,13 @@ def uniform_main(google_auth, db_setting_url, constants_sheetname, serialized_ru
             parseGoogleHTMLSheet(uniform_df)
 
             print()
+            print("报告生成时间: {}".format(dt.datetime.now().strftime("%Y年%m月%d日 %H:%M:%S")))
             print("{}各尺码库存详情: ".format(outlet.strip().capitalize()))
+            print("尺码: 库存量")
+            for index in range(len(uniform_df)):
+                print("{}: {}".format(uniform_df.iloc[index, 0], uniform_df.iloc[index, 1]))
+            print()
+            print()
             prtdf(uniform_df)
             print()
             print()
