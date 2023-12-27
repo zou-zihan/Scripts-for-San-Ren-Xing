@@ -9246,6 +9246,8 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
                                             print()
                                             print()
                                             print("目前选中的菜名/套餐名: {}".format(display_food_db[display_food_db["点餐ID"] == foodOrderId]["菜名/套餐名"].values[0]))
+                                            print()
+                                            print()
 
                                             foodId = str(display_food_db[display_food_db["点餐ID"] == foodOrderId]["菜品ID"].values[0])
                                             
