@@ -3259,11 +3259,12 @@ def night_audit_main(database_url, db_setting_url, serialized_rule_filename, ser
                 upload_db(database_url, take_databases, k_dict, fernet_key, google_auth, box_num, drink_num, wifi, backup_foldername)
                 pbar.update(5)
 
+                pbar.set_description("重置反馈信息")
+                feedback_reset(k_dict)
+
                 pbar.set_description("发信息")
                 parse_sending(payslip_on_duty, drink_on_duty, box_on_duty, cashier_on_duty, google_auth, outlet, send_dict, drink_message_string, tabox_message_string, print_result, k_dict, fernet_key, wifi, date_dict, value_dict, db_writables, backup_foldername, database_url, manager_on_duty)
 
-                pbar.set_description("重置反馈信息")
-                feedback_reset(k_dict)
                 pbar.update(5)
 
                 pbar.set_description("生成表格")
