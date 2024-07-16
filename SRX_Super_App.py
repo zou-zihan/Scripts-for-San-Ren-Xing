@@ -76,7 +76,7 @@ box_on_duty = ""
 #酒水管理负责人(加引号加逗号)
 drink_on_duty = ""
 
-#排班负责人(加引号加逗号)
+#排班负责人(加引号)
 payslip_on_duty = ""
 
 on_net = on_internet()
