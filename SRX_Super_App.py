@@ -70,13 +70,13 @@ githubBranchName = "main"
 script_backup_filename = "Encrypted Script.txt"
 backup_foldername = "NABK"
 
-#打包盒管理负责人(加引号)
+#打包盒管理负责人(加引号加逗号)
 box_on_duty = ""
 
-#酒水管理负责人(加引号)
+#酒水管理负责人(加引号加逗号)
 drink_on_duty = ""
 
-#排班负责人(加引号)
+#排班负责人(加引号加逗号)
 payslip_on_duty = ""
 
 on_net = on_internet()
@@ -151,8 +151,11 @@ night_fwc = ""
 #晚上厨房员工人数(加引号)
 night_kwc = ""
 
-#收银员(加引号)
+#收银员(加引号加逗号)
 cashier_on_duty = ""
+
+#经理(加引号加逗号)
+manager_on_duty = ""
 
 #不显示主菜单(True/False)
 do_not_show_menu = True
@@ -1540,7 +1543,50 @@ def parse_value_dict(promo_num, lun_sales, lun_gc, tb_sales, tb_gc, lun_fwc, lun
 
     return value_dict, write_finance_db, write_promo_db
 
-def parse_print_rule(value_dict, rule_df_dict, write_finance_db, write_promo_db, write_drink_db, tabox_write_db):
+def feedback_parser(k_dict):
+    food_filename = str(k_dict["food_feedback_filename"])
+    food_default = str(k_dict["food_feedback_default_text"])
+
+    if os.path.exists(food_filename):
+        with open(food_filename, "r") as file_handler:
+            food_feedback = file_handler.read()
+
+        food_feedback = food_feedback.split("\n")
+
+    else:
+        with open(food_filename, "w") as file_handler:
+            file_handler.write(food_default)
+
+        with open(food_filename, "r") as file_handler:
+            food_feedback = file_handler.read()
+
+        food_feedback = food_feedback.split("\n")
+        print("'{}'文件不存在, 菜肴反馈已采用默认文本。".format(food_filename))
+
+    service_filename = str(k_dict["service_feedback_filename"])
+    service_default = str(k_dict["service_feedback_default_text"])
+
+    if os.path.exists(service_filename):
+        with open(service_filename, "r") as file_handler:
+            service_feedback = file_handler.read()
+
+        service_feedback = service_feedback.split("\n")
+
+    else:
+        with open(service_filename, "w") as file_handler:
+            file_handler.write(service_default)
+
+        with open(service_filename, "r") as file_handler:
+            service_feedback = file_handler.read()
+
+        service_feedback = service_feedback.split("\n")
+        print("'{}'文件不存在, 服务反馈已采用默认文本。".format(service_filename))
+
+    return food_feedback, service_feedback
+
+def parse_print_rule(value_dict, rule_df_dict, write_finance_db, write_promo_db, write_drink_db, tabox_write_db, k_dict):
+
+    food_feedback, service_feedback = feedback_parser(k_dict=k_dict)
 
     pr_df = rule_df_dict["pr_df"]
 
@@ -1575,6 +1621,16 @@ def parse_print_rule(value_dict, rule_df_dict, write_finance_db, write_promo_db,
         else:
             continue
 
+    print_result += ["服务反馈: "]
+
+    for line in service_feedback:
+        print_result += [line]
+
+    print_result += [" ", "菜肴反馈: "]
+
+    for line in food_feedback:
+        print_result += [line]
+
     print_error = False
     for booleans in [write_finance_db,write_promo_db,write_drink_db,tabox_write_db]:
         if not booleans:
@@ -1586,6 +1642,63 @@ def parse_print_rule(value_dict, rule_df_dict, write_finance_db, write_promo_db,
         print("注意！由于有些数据的缺失，部分显示的数字可能不会准确！")
 
     return print_result
+
+def feedback_reset(k_dict):
+    food_default = str(k_dict["food_feedback_default_text"])
+    service_default = str(k_dict["service_feedback_default_text"])
+
+    food_filename = str(k_dict["food_feedback_filename"])
+    service_filename = str(k_dict["service_feedback_filename"])
+
+    auto_hour = 20
+    auto_min = 55
+
+    NOW = dt.datetime.now()
+    AUTO_TIME = dt.datetime(NOW.year, NOW.month, NOW.day, auto_hour, auto_min)
+
+    if NOW < AUTO_TIME:
+        print("是否重置服务反馈为默认文本?")
+        print()
+        action_req = option_num(["是", "否"])
+        time.sleep(0.25)
+        user_input = option_limit(action_req, input("在这里输入>>>: "))
+
+        if user_input == 0:
+            with open(service_filename, "w") as file_handler:
+                file_handler.write(service_default)
+
+            print("服务反馈已取代为默认文本。")
+
+        else:
+            print("好的，服务反馈没有被重置。")
+
+    else:
+        with open(service_filename, "w") as file_handler:
+            file_handler.write(service_default)
+
+        print("服务反馈已自动取代为默认文本。")
+
+    if NOW < AUTO_TIME:
+        print("是否重置菜肴反馈为默认文本?")
+        print()
+        action_req = option_num(["是", "否"])
+        time.sleep(0.25)
+        user_input = option_limit(action_req, input("在这里输入>>>: "))
+
+        if user_input == 0:
+            with open(food_filename, "w") as file_handler:
+                file_handler.write(food_default)
+
+            print("菜肴反馈已取代为默认文本。")
+
+        else:
+            print("好的，菜肴反馈没有被重置。")
+
+    else:
+        with open(food_filename, "w") as file_handler:
+            file_handler.write(food_default)
+
+        print("菜肴反馈已自动取代为默认文本。")
 
 def drink_remarks(drink_out, drink_inv_function):
     if drink_inv_function:
@@ -2360,7 +2473,7 @@ def get_rcv(fernet_key, k_dict, google_auth, backup_foldername, local_database_f
 
         return rcv_telegram, rcv_email
 
-def parse_sending(payslip_on_duty, drink_on_duty, box_on_duty, cashier_on_duty, google_auth, outlet, send_dict, drink_message_string, tabox_message_string, print_result, k_dict, fernet_key, wifi, date_dict, value_dict, db_writables, backup_foldername, database_url):
+def parse_sending(payslip_on_duty, drink_on_duty, box_on_duty, cashier_on_duty, google_auth, outlet, send_dict, drink_message_string, tabox_message_string, print_result, k_dict, fernet_key, wifi, date_dict, value_dict, db_writables, backup_foldername, database_url, manager_on_duty):
     database_url = fernet_decrypt(database_url, fernet_key)
 
     date = date_dict["dfb"].strftime("%Y-%m-%d")
@@ -2386,6 +2499,7 @@ def parse_sending(payslip_on_duty, drink_on_duty, box_on_duty, cashier_on_duty, 
     drink_on_duty = str(drink_on_duty).strip().upper()
     box_on_duty = str(box_on_duty).strip().upper()
     payslip_on_duty = str(payslip_on_duty).strip().upper()
+    manager_on_duty = str(manager_on_duty).strip().upper()
 
     write_finance_db = db_writables["write_finance_db"]
 
@@ -2403,22 +2517,28 @@ def parse_sending(payslip_on_duty, drink_on_duty, box_on_duty, cashier_on_duty, 
         if send_drink_msg:
             if len(drink_message_string) > 0:
                 if drink_send_channel.strip().capitalize() == "Telegram":
-                    receivers = rcv_telegram[drink_on_duty]
-                    sending_telegram(is_pr=False,
-                                      message=drink_message_string,
-                                      api = drink_stock_telegram_bot_api,
-                                      receiver=receivers,
-                                      wifi=wifi)
+                    drinkers = drink_on_duty.split(",")
+
+                    for d in drinkers:
+                        receivers = rcv_telegram[d]
+                        sending_telegram(is_pr=False,
+                                          message=drink_message_string,
+                                          api = drink_stock_telegram_bot_api,
+                                          receiver=receivers,
+                                          wifi=wifi)
+
                 elif drink_send_channel.strip().capitalize() == "Email":
-                    receivers = rcv_email[drink_on_duty]
-                    sending_email(is_pr=False,
-                                  mail_server=drink_stock_email_server,
-                                  mail_sender=drink_stock_email_sender,
-                                  mail_sender_password=drink_stock_sender_password,
-                                  mail_receivers=receivers,
-                                  mail_subject="{}的酒水库存通知{}".format(outlet, date),
-                                  message_string = drink_message_string,
-                                  wifi = wifi)
+                    drinkers = drink_on_duty.split(",")
+                    for d in drinkers:
+                        receivers = rcv_email[d]
+                        sending_email(is_pr=False,
+                                      mail_server=drink_stock_email_server,
+                                      mail_sender=drink_stock_email_sender,
+                                      mail_sender_password=drink_stock_sender_password,
+                                      mail_receivers=receivers,
+                                      mail_subject="{}的酒水库存通知{}".format(outlet, date),
+                                      message_string = drink_message_string,
+                                      wifi = wifi)
                 else:
                     print("Drink alert sending channel is not defined correctly")
             else:
@@ -2437,22 +2557,27 @@ def parse_sending(payslip_on_duty, drink_on_duty, box_on_duty, cashier_on_duty, 
         if send_tabox_msg:
             if len(tabox_message_string) > 0:
                 if tabox_send_channel.strip().capitalize() == "Telegram":
-                    receivers = rcv_telegram[box_on_duty]
-                    sending_telegram(is_pr=False,
-                                      message=tabox_message_string,
-                                      api = box_stock_telegram_bot_api,
-                                      receiver=receivers,
-                                      wifi=wifi)
+                    boxers = box_on_duty.split(",")
+                    for b in boxers:
+                        receivers = rcv_telegram[b]
+                        sending_telegram(is_pr=False,
+                                          message=tabox_message_string,
+                                          api = box_stock_telegram_bot_api,
+                                          receiver=receivers,
+                                          wifi=wifi)
+
                 elif tabox_send_channel.strip().capitalize() == "Email":
-                    receivers = rcv_email[box_on_duty]
-                    sending_email(is_pr=False,
-                                  mail_server=box_stock_email_server,
-                                  mail_sender=box_stock_email_sender,
-                                  mail_sender_password=box_stock_sender_password,
-                                  mail_receivers=receivers,
-                                  mail_subject="{}的打包盒库存通知{}".format(outlet, date),
-                                  message_string = tabox_message_string,
-                                  wifi = wifi)
+                    boxers = box_on_duty.split(",")
+                    for b in boxers:
+                        receivers = rcv_email[b]
+                        sending_email(is_pr=False,
+                                      mail_server=box_stock_email_server,
+                                      mail_sender=box_stock_email_sender,
+                                      mail_sender_password=box_stock_sender_password,
+                                      mail_receivers=receivers,
+                                      mail_subject="{}的打包盒库存通知{}".format(outlet, date),
+                                      message_string = tabox_message_string,
+                                      wifi = wifi)
                 else:
                     print("Takeaway box alert sending channel is not defined correctly")
             else:
@@ -2461,7 +2586,6 @@ def parse_sending(payslip_on_duty, drink_on_duty, box_on_duty, cashier_on_duty, 
             pass
     else:
         pass
-
 
     if night_audit_alert:
         night_audit_email_server = fernet_decrypt(k_dict["night_audit_email_server"], fernet_key)
@@ -2476,32 +2600,82 @@ def parse_sending(payslip_on_duty, drink_on_duty, box_on_duty, cashier_on_duty, 
         if send_print_result:
             if len(print_result) > 0:
                 if night_audit_send_channel.strip().capitalize() == "Telegram":
-                    receivers = rcv_telegram[cashier_on_duty]
-                    sending_telegram(is_pr=True,
-                                      message=print_result,
-                                      api = night_audit_telegram_bot_api,
-                                      receiver=receivers,
-                                      wifi=wifi)
+                    cashiers = cashier_on_duty.split(",")
+                    for c in cashiers:
+                        receivers = rcv_telegram[c]
+                        sending_telegram(is_pr=True,
+                                          message=print_result,
+                                          api = night_audit_telegram_bot_api,
+                                          receiver=receivers,
+                                          wifi=wifi)
 
-                    second_message = "服务费: ${}\n GST: ${}\n 日均营业额: ${}\n ".format(svc, gst, ads)
-                    sending_telegram(is_pr=False,
-                                     message=second_message,
-                                     api = night_audit_telegram_bot_api,
-                                     receiver=receivers,
-                                     wifi=wifi)
+                        second_message = "服务费: ${}\n GST: ${}\n 日均营业额: ${}\n ".format(svc, gst, ads)
+                        sending_telegram(is_pr=False,
+                                         message=second_message,
+                                         api = night_audit_telegram_bot_api,
+                                         receiver=receivers,
+                                         wifi=wifi)
+
+                    print()
+                    print()
+                    print("请查看Telegram, 信息可以直接发给经理吗? ")
+                    time.sleep(0.25)
+                    send_mgr_options = option_num(["信息准确无误,可以直接发给经理", "还有要修改的地方,我会自行发给经理"])
+                    send_mgr_input = option_limit(send_mgr_options, input("在这里输入>>>: "))
+
+                    if send_mgr_input == 0:
+                        managers = manager_on_duty.split(",")
+                        for m in managers:
+                            receivers = rcv_telegram[m]
+                            sending_telegram(is_pr=True,
+                                              message=print_result,
+                                              api = night_audit_telegram_bot_api,
+                                              receiver=receivers,
+                                              wifi=wifi)
+                    else:
+                        print()
+                        print("好的, 没有发给经理。")
+
 
                 elif night_audit_send_channel.strip().capitalize() == "Email":
                     print_result += ["——————————————", "服务费: ${}".format(svc),
                                      "GST: ${}".format(gst), "日均营业额: ${}".format(ads)]
-                    receivers = rcv_email[cashier_on_duty]
-                    sending_email(is_pr=True,
-                                  mail_server=night_audit_email_server,
-                                  mail_sender=night_audit_email_sender,
-                                  mail_sender_password=night_audit_sender_password,
-                                  mail_receivers=receivers,
-                                  mail_subject="{}的报表信息{}".format(outlet, date),
-                                  message_string = print_result,
-                                  wifi = wifi)
+
+                    cashiers = cashier_on_duty.split(",")
+                    for c in cashiers:
+                        receivers = rcv_email[c]
+                        sending_email(is_pr=True,
+                                      mail_server=night_audit_email_server,
+                                      mail_sender=night_audit_email_sender,
+                                      mail_sender_password=night_audit_sender_password,
+                                      mail_receivers=receivers,
+                                      mail_subject="{}的报表信息{}".format(outlet, date),
+                                      message_string = print_result,
+                                      wifi = wifi)
+
+
+                    print()
+                    print()
+                    print("请查看电邮, 信息可以直接发给经理吗? ")
+                    time.sleep(0.25)
+                    send_mgr_options = option_num(["信息准确无误,可以直接发给经理", "还有要修改的地方,我会自行发给经理"])
+                    send_mgr_input = option_limit(send_mgr_options, input("在这里输入>>>: "))
+
+                    if send_mgr_input == 0:
+                        managers = manager_on_duty.split(",")
+                        for m in managers:
+                            receivers = rcv_email[m]
+                            sending_email(is_pr=True,
+                                          mail_server=night_audit_email_server,
+                                          mail_sender=night_audit_email_sender,
+                                          mail_sender_password=night_audit_sender_password,
+                                          mail_receivers=receivers,
+                                          mail_subject="{}的报表信息{}".format(outlet, date),
+                                          message_string = print_result,
+                                          wifi = wifi)
+                    else:
+                        print()
+                        print("好的, 没有发给经理。")
                 else:
                     print("Night audit alert sending channel is not defined correctly")
         else:
@@ -2515,34 +2689,84 @@ def parse_sending(payslip_on_duty, drink_on_duty, box_on_duty, cashier_on_duty, 
 
                         if user_input == 0:
                             if night_audit_send_channel.strip().capitalize() == "Telegram":
-                                receivers = rcv_telegram[cashier_on_duty]
-                                sending_telegram(is_pr=True,
-                                                  message=print_result,
-                                                  api = night_audit_telegram_bot_api,
-                                                  receiver=receivers,
-                                                  wifi=wifi)
+                                cashiers = cashier_on_duty.split(",")
+                                for c in cashiers:
+                                    receivers = rcv_telegram[c]
+                                    sending_telegram(is_pr=True,
+                                                      message=print_result,
+                                                      api = night_audit_telegram_bot_api,
+                                                      receiver=receivers,
+                                                      wifi=wifi)
 
-                                second_message = "服务费: ${}\n GST: ${}\n 日均营业额: ${}\n ".format(svc, gst, ads)
-                                sending_telegram(is_pr=False,
-                                                 message=second_message,
-                                                 api = night_audit_telegram_bot_api,
-                                                 receiver=receivers,
-                                                 wifi=wifi)
+                                    second_message = "服务费: ${}\n GST: ${}\n 日均营业额: ${}\n ".format(svc, gst, ads)
+                                    sending_telegram(is_pr=False,
+                                                     message=second_message,
+                                                     api = night_audit_telegram_bot_api,
+                                                     receiver=receivers,
+                                                     wifi=wifi)
+
+                                print()
+                                print()
+                                print("请查看Telegram, 信息重新发给经理吗? ")
+                                time.sleep(0.25)
+                                send_mgr_options = option_num(["重新发送", "不重新发送"])
+                                send_mgr_input = option_limit(send_mgr_options, input("在这里输入>>>: "))
+
+                                if send_mgr_input == 0:
+                                    managers = manager_on_duty.split(",")
+                                    for m in managers:
+                                        receivers = rcv_telegram[m]
+                                        sending_telegram(is_pr=True,
+                                                          message=print_result,
+                                                          api = night_audit_telegram_bot_api,
+                                                          receiver=receivers,
+                                                          wifi=wifi)
+                                else:
+                                    print()
+                                    print("好的, 没有重新发给经理。")
+
 
                             elif night_audit_send_channel.strip().capitalize() == "Email":
                                 print_result += ["——————————————", "服务费: ${}".format(svc),
                                                  "GST: ${}".format(gst), "日均营业额: ${}".format(ads)]
 
-                                receivers = rcv_email[cashier_on_duty]
+                                cashiers = cashier_on_duty.split(",")
 
-                                sending_email(is_pr=True,
-                                              mail_server=night_audit_email_server,
-                                              mail_sender=night_audit_email_sender,
-                                              mail_sender_password=night_audit_sender_password,
-                                              mail_receivers=receivers,
-                                              mail_subject="{}的报表信息{}".format(outlet, date),
-                                              message_string = print_result,
-                                              wifi = wifi)
+                                for c in cashiers:
+                                    receivers = rcv_email[c]
+
+                                    sending_email(is_pr=True,
+                                                  mail_server=night_audit_email_server,
+                                                  mail_sender=night_audit_email_sender,
+                                                  mail_sender_password=night_audit_sender_password,
+                                                  mail_receivers=receivers,
+                                                  mail_subject="{}的报表信息{}".format(outlet, date),
+                                                  message_string = print_result,
+                                                  wifi = wifi)
+
+                                print()
+                                print()
+                                print("请查看电邮, 信息重新发给经理吗? ")
+                                time.sleep(0.25)
+                                send_mgr_options = option_num(["重新发送", "不重新发送"])
+                                send_mgr_input = option_limit(send_mgr_options, input("在这里输入>>>: "))
+
+                                if send_mgr_input == 0:
+                                    managers = manager_on_duty.split(",")
+                                    for m in managers:
+                                        receivers = rcv_email[m]
+                                        sending_email(is_pr=True,
+                                                      mail_server=night_audit_email_server,
+                                                      mail_sender=night_audit_email_sender,
+                                                      mail_sender_password=night_audit_sender_password,
+                                                      mail_receivers=receivers,
+                                                      mail_subject="{}的报表信息{}".format(outlet, date),
+                                                      message_string = print_result,
+                                                      wifi = wifi)
+                                else:
+                                    print()
+                                    print("好的, 没有重新发给经理。")
+
                             else:
                                 print("Night audit alert sending channel is not defined correctly")
     else:
@@ -2897,7 +3121,7 @@ def backup_script(script_backup_filename, script, backup_foldername):
     with open("{}/{}/{}".format(os.getcwd(), backup_foldername, script_backup_filename), "wb") as sfile:
         sfile.write(encrypted_script)
 
-def night_audit_main(database_url, db_setting_url, serialized_rule_filename, service_filename, constants_sheetname, google_auth, box_num, drink_num, promo_num, lun_sales, lun_gc, tb_sales, tb_gc, lun_fwc, lun_kwc, tb_fwc, tb_kwc, night_fwc, night_kwc, script_backup_filename, script, wifi, backup_foldername,cashier_on_duty, drink_on_duty, box_on_duty, payslip_on_duty):
+def night_audit_main(database_url, db_setting_url, serialized_rule_filename, service_filename, constants_sheetname, google_auth, box_num, drink_num, promo_num, lun_sales, lun_gc, tb_sales, tb_gc, lun_fwc, lun_kwc, tb_fwc, tb_kwc, night_fwc, night_kwc, script_backup_filename, script, wifi, backup_foldername,cashier_on_duty, drink_on_duty, box_on_duty, payslip_on_duty, manager_on_duty):
     database_url = database_url
     db_setting_url = db_setting_url
     serialized_rule_filename = serialized_rule_filename
@@ -2925,6 +3149,7 @@ def night_audit_main(database_url, db_setting_url, serialized_rule_filename, ser
     drink_on_duty = drink_on_duty
     box_on_duty = box_on_duty
     payslip_on_duty = payslip_on_duty
+    manager_on_duty = manager_on_duty
 
     fernet_key = get_key()
 
@@ -3020,7 +3245,7 @@ def night_audit_main(database_url, db_setting_url, serialized_rule_filename, ser
                 pbar.update(12)
 
                 pbar.set_description("整理报表")
-                print_result = parse_print_rule(value_dict, rule_df_dict, write_finance_db, write_promo_db, write_drink_db, tabox_write_db)
+                print_result = parse_print_rule(value_dict, rule_df_dict, write_finance_db, write_promo_db, write_drink_db, tabox_write_db, k_dict)
                 pbar.update(5)
 
                 pbar.set_description("更新数据库")
@@ -3035,7 +3260,10 @@ def night_audit_main(database_url, db_setting_url, serialized_rule_filename, ser
                 pbar.update(5)
 
                 pbar.set_description("发信息")
-                parse_sending(payslip_on_duty, drink_on_duty, box_on_duty, cashier_on_duty, google_auth, outlet, send_dict, drink_message_string, tabox_message_string, print_result, k_dict, fernet_key, wifi, date_dict, value_dict, db_writables, backup_foldername, database_url)
+                parse_sending(payslip_on_duty, drink_on_duty, box_on_duty, cashier_on_duty, google_auth, outlet, send_dict, drink_message_string, tabox_message_string, print_result, k_dict, fernet_key, wifi, date_dict, value_dict, db_writables, backup_foldername, database_url, manager_on_duty)
+
+                pbar.set_description("重置反馈信息")
+                feedback_reset(k_dict)
                 pbar.update(5)
 
                 pbar.set_description("生成表格")
@@ -5801,7 +6029,7 @@ def work_schedule_main(google_auth, db_setting_url, constants_sheetname, seriali
                             if not os.path.exists("{}/{}/{}".format(os.getcwd(), stock_count_foldername, songti_filename)):
                                 print("宋体TTF文件'{}'不存在, 排班表的生成无法继续".format(songti_filename))
                                 print("请把宋体TTF文件'{}'保存至盘点文件名的目录下, 具体路径需在:'{}/{}/{}'".format(songti_filename, os.getcwd(), stock_count_foldername, songti_filename))
-                            
+
                             else:
                                 if not os.path.exists(logo_path):
                                     print("公司标识图片'{}'不存在, 排班表的生成无法继续".format(logo_fileName))
@@ -5859,27 +6087,27 @@ def schedule_font_color(text):
 def generate_schedule_pdf(songTi, logoImagePath, outlet, shift_database, previewSchedule, ph_dates_df):
     with tqdm(total=100) as pbar:
         pbar.set_description("处理信息...")
-    
+
         monday = pd.to_datetime(str(previewSchedule.iloc[1,1]))
 
         employee_id_show = previewSchedule.iloc[4:18, 0].astype(str).tolist()
-        
+
         if "nan" in employee_id_show:
             employee_id_show.remove("nan")
-        
+
         if len(employee_id_show) < 14:
             for _ in range(14-len(employee_id_show)):
                 employee_id_show += [" "]
-                
+
         weekRange = [monday]
         for num in np.arange(1,7):
             weekRange += [ pd.to_datetime(monday + dt.timedelta(days=int(num)))]
 
         pbar.update(15)
-        
+
         workRange = previewSchedule.copy()
         workRange = workRange.iloc[4:18, 0:10]
-    
+
         work_schedule_df = {"序号" : np.arange(1, 15),
                             "ID" : workRange.iloc[:, 0],
                             "姓名" : workRange.iloc[:,1],
@@ -5890,11 +6118,11 @@ def generate_schedule_pdf(songTi, logoImagePath, outlet, shift_database, preview
                             "Fri" : workRange.iloc[:,6],
                             "Sat" : workRange.iloc[:,7],
                             "Sun" : workRange.iloc[:,8],}
-    
+
         work_schedule_df["ID"] = work_schedule_df["ID"].astype(str)
-        
+
         rest_days = {}
-        
+
         keys = ["OIL", "PH", "AL", "CCL"]
         sunday = weekRange[-1].strftime("%Y-%m-%d")
         for key in keys:
@@ -5909,22 +6137,22 @@ def generate_schedule_pdf(songTi, logoImagePath, outlet, shift_database, preview
                         key_list += ["-"]
                     else:
                         key_list += [str(shift_database[shift_database["FOR VLOOKUP"] == id_string][key].values[0])]
-        
+
             rest_days.update({ key : key_list})
-        
+
         for key, value in rest_days.items():
             work_schedule_df.update( { key : value })
-        
+
         work_schedule_df = pd.DataFrame(work_schedule_df)
         work_schedule_df["SIGN"] = np.repeat(" ", len(workRange))
         work_schedule_df["RE"] = workRange.iloc[:, 9]
         work_schedule_df.drop("ID", axis=1, inplace=True)
-        
+
         pbar.update(15)
 
         workerCountRange = previewSchedule.copy()
         workerCountRange = workerCountRange.iloc[18:, :9]
-        
+
         for num in range(6):
             workerCountRange["{}".format(num+1)] = np.repeat(" ", len(workerCountRange))
 
@@ -5935,42 +6163,42 @@ def generate_schedule_pdf(songTi, logoImagePath, outlet, shift_database, preview
         Document = borb_Document()
         Page = borb_Page(width=Decimal(842), height=Decimal(595))
         Document.add_page(Page)
-        
+
         layout: borb_PageLayout = borb_SCL(Page)
-        
+
         table0 = borb_Table(number_of_rows=1, number_of_columns=3)
-        
+
         if int(weekRange[0].year) == int(weekRange[-1].year):
             table0.add(borb_Paragraph(str(weekRange[0].year) + "年", font=songTi, horizontal_alignment=borb_align.LEFT))
         else:
             table0.add(borb_Paragraph(str(weekRange[0].year)+"-"+str(weekRange[-1].year)+"年", font=songTi, horizontal_alignment=borb_align.LEFT))
-        
+
         table0.add(borb_Paragraph("{}楼面排班表".format(outlet.strip().capitalize()), font=songTi, font_size=Decimal(22), horizontal_alignment=borb_align.CENTERED))
         table0.add(borb_Image(logoImagePath, width=Decimal(80), height=Decimal(20), horizontal_alignment=borb_align.RIGHT,))
-        
+
         table0.set_padding_on_all_cells(Decimal(1), Decimal(1), Decimal(1), Decimal(1))
         table0.no_borders()
         layout.add(table0)
         pbar.update(15)
-        
+
         table1 = borb_Table(number_of_rows=16, number_of_columns=15)
-        
-        table1_headers  = ["No", 
-                           "Name", 
-                           "Mon\n星期一", 
-                           "Tue\n星期二", 
-                           "Wed\n星期三", 
-                           "Thu\n星期四", 
-                           "Fri\n星期五", 
-                           "Sat\n星期六", 
-                           "Sun\n星期日", 
-                           "OIL", 
-                           "PH", 
-                           "AL", 
-                           "CCL", 
-                           "Sign", 
+
+        table1_headers  = ["No",
+                           "Name",
+                           "Mon\n星期一",
+                           "Tue\n星期二",
+                           "Wed\n星期三",
+                           "Thu\n星期四",
+                           "Fri\n星期五",
+                           "Sat\n星期六",
+                           "Sun\n星期日",
+                           "OIL",
+                           "PH",
+                           "AL",
+                           "CCL",
+                           "Sign",
                            "Remark"]
-        
+
         for index in range(len(table1_headers)):
             if index in [2,3,4,5,6,7,8]:
                 dateIndex = index - 2
@@ -5980,19 +6208,19 @@ def generate_schedule_pdf(songTi, logoImagePath, outlet, shift_database, preview
                     table1.add(borb_Paragraph(table1_headers[index], font=songTi, horizontal_alignment=borb_align.CENTERED, font_color=borb_HexColor("#6F4E37")))
             else:
                 table1.add(borb_Paragraph(table1_headers[index], font=songTi, horizontal_alignment=borb_align.CENTERED, font_color=borb_HexColor("#6F4E37")))
-        
+
         table1.add(borb_Paragraph("序号", font=songTi, horizontal_alignment=borb_align.CENTERED, font_color=borb_HexColor("#6F4E37")))
         table1.add(borb_Paragraph("姓名", font=songTi, horizontal_alignment=borb_align.CENTERED, font_color=borb_HexColor("#6F4E37")))
-        
+
         for day in weekRange:
             if day in ph_dates_df["PH DATE"].values:
                 table1.add(borb_Paragraph(day.strftime("%m-%d"), font=songTi, horizontal_alignment=borb_align.CENTERED, background_color=borb_HexColor("#FDA4BA")))
             else:
                 table1.add(borb_Paragraph(day.strftime("%m-%d"), font=songTi, horizontal_alignment=borb_align.CENTERED))
-        
+
         for item in ["公休", "公期", "年假", "育儿假", "签名", "备注"]:
             table1.add(borb_Paragraph(item, font=songTi, horizontal_alignment=borb_align.CENTERED, font_color=borb_HexColor("#6F4E37")))
-        
+
         for index in range(len(work_schedule_df)):
             for column in range(len(work_schedule_df.columns)):
                 text = str(work_schedule_df.iloc[index, column])
@@ -6003,7 +6231,7 @@ def generate_schedule_pdf(songTi, logoImagePath, outlet, shift_database, preview
                         if column != 14:
                             try:
                                 text = float(text)
-            
+
                                 if text == 0.5:
                                     text = "½"
                                 else:
@@ -6011,10 +6239,10 @@ def generate_schedule_pdf(songTi, logoImagePath, outlet, shift_database, preview
                                         text = "{}{}".format(int(text-0.5), "½")
                                     else:
                                         text = str(int(text))
-                                
+
                             except ValueError:
                                 text = text
-            
+
                             table1.add(borb_Paragraph(text, horizontal_alignment=borb_align.CENTERED, font_color=borb_HexColor("#00308F"), font_size=Decimal(15)))
                         else:
                             table1.add(borb_Paragraph(text, horizontal_alignment=borb_align.CENTERED, font_color=borb_HexColor("#00308F"), font=songTi))
@@ -6024,9 +6252,9 @@ def generate_schedule_pdf(songTi, logoImagePath, outlet, shift_database, preview
         table1.set_padding_on_all_cells(Decimal(2), Decimal(2), Decimal(2), Decimal(2))
         layout.add(table1)
         pbar.update(15)
-        
+
         table2 = borb_Table(number_of_rows=2, number_of_columns=15)
-        
+
         for index in range(len(workerCountRange)):
             for column in range(len(workerCountRange.columns)):
                 text = str(workerCountRange.iloc[index, column])
@@ -6034,12 +6262,12 @@ def generate_schedule_pdf(songTi, logoImagePath, outlet, shift_database, preview
                     table2.add(borb_Paragraph(text, font=songTi, horizontal_alignment=borb_align.CENTERED, font_color=borb_HexColor("#6F4E37"), font_size=Decimal(15)))
                 else:
                     table2.add(borb_Paragraph(text, font=songTi, horizontal_alignment=borb_align.CENTERED, font_color=borb_HexColor("#00308F"), font_size=Decimal(15)))
-                
+
         table2.set_padding_on_all_cells(Decimal(1), Decimal(1), Decimal(1), Decimal(1))
         table2.no_borders()
         layout.add(table2)
         pbar.update(20)
-    
+
         if len(weekRemark) > 0:
             if weekRemark not in ["nan", "-"]:
                 layout.add(borb_Paragraph(weekRemark, font=songTi, horizontal_alignment=borb_align.RIGHT))
@@ -6050,10 +6278,10 @@ def generate_schedule_pdf(songTi, logoImagePath, outlet, shift_database, preview
 
         schedule_export_folderName = "{}排班表PDF".format(outlet.strip().capitalize())
         schedule_pdf_filename = "{}楼面排班表{}月{}日至{}月{}日.pdf".format(outlet.strip().capitalize(), weekRange[0].month, weekRange[0].day, weekRange[-1].month, weekRange[-1].day)
-        
+
         if not os.path.exists("{}/{}".format(os.getcwd(), schedule_export_folderName)):
             os.makedirs("{}/{}".format(os.getcwd(), schedule_export_folderName))
-        
+
         if os.path.exists("{}/{}/{}".format(os.getcwd(), schedule_export_folderName, schedule_pdf_filename)):
             print("发现到你已经生成过'{}'PDF了, 是否覆盖? ".format(schedule_pdf_filename))
             overewrite_options = option_num(["覆盖(丢弃之前生成的PDF)", "不覆盖(保留之前生成的PDF)"])
@@ -6063,15 +6291,15 @@ def generate_schedule_pdf(songTi, logoImagePath, outlet, shift_database, preview
             if overewrite_select == 0:
                 with open("{}/{}/{}".format(os.getcwd(), schedule_export_folderName, schedule_pdf_filename), "wb") as pdf_file_handle:
                     borb_PDF.dumps(pdf_file_handle, Document)
-                
+
                 print("PDF任务完成。")
-            
+
             else:
                 print("保留之前生成的PDF。")
         else:
             with open("{}/{}/{}".format(os.getcwd(), schedule_export_folderName, schedule_pdf_filename), "wb") as pdf_file_handle:
                 borb_PDF.dumps(pdf_file_handle, Document)
-            
+
             print("PDF任务完成。")
 
         pbar.set_description("任务完成")
@@ -6540,7 +6768,7 @@ def rtn_datetime_column_convert(df):
                 df_copy[column] = pd.to_datetime(df_copy[column])
             else:
                 pass
-    
+
     return df_copy
 
 def rtn_datetime_strftime(df):
@@ -6553,7 +6781,7 @@ def rtn_datetime_strftime(df):
                 df_copy[column] = df_copy[column].apply(lambda x : x.strftime("%Y-%m-%d %H:%M"))
             else:
                 pass
-    
+
     return df_copy
 
 def rtn_get_controls(google_auth, fernet_key, outlet, rtn_control_url, constants_sheetname):
@@ -6571,7 +6799,7 @@ def rtn_get_controls(google_auth, fernet_key, outlet, rtn_control_url, constants
         rtn_constants_dict = {}
         for index in range(len(rtn_constants)):
             rtn_constants_dict.update({ str(rtn_constants.iloc[index, 0]) : str(rtn_constants.iloc[index, outlet_col_index]) })
-        
+
         #other controls
         other_controls = {}
         title_list = ["tc", "acm", "sm"]
@@ -6580,7 +6808,7 @@ def rtn_get_controls(google_auth, fernet_key, outlet, rtn_control_url, constants
                           rtn_constants_dict["ala_carte_menu_sheetname"],
                           rtn_constants_dict["set_menu_sheetname"]
                          ]
-        
+
         for item in range(len(title_list)):
             the_sheetname = sheetname_list[item]
             the_index = rtn_control_sheet.worksheet(property="title", value= the_sheetname).index
@@ -6593,7 +6821,7 @@ def rtn_get_controls(google_auth, fernet_key, outlet, rtn_control_url, constants
         print(e)
         rtn_constants_dict = {}
         other_controls = {}
-    
+
     return rtn_constants_dict, other_controls
 
 def rtn_confirm_input(userInput):
@@ -6620,7 +6848,7 @@ def rtn_confirm_save(userInput):
     else:
         confirm_save = False
         end_record_loop = True
-    
+
     return confirm_save, end_record_loop
 
 def rtn_edit_food_item(foodName, rtn_constants_dict, food_items=""):
@@ -6631,13 +6859,13 @@ def rtn_edit_food_item(foodName, rtn_constants_dict, food_items=""):
         foodItem = []
     else:
         foodItem = food_items.split(",")
-    
+
     userInput = 0
     while userInput != 3:
         if len(foodItem) > 0:
             for item in foodItem:
                 print(item)
-        
+
         options = option_num(["添加菜肴", "编辑菜肴", "删除菜肴", "我已完成编辑菜肴"])
         time.sleep(0.25)
         userInput = option_limit(options, input("在这里输入>>>: "))
@@ -6647,13 +6875,13 @@ def rtn_edit_food_item(foodName, rtn_constants_dict, food_items=""):
             while not confirm_foodItemName:
                 foodItemName = rtn_input_validation(rule="foodItemName", title="菜肴名", space_removal=True, rtn_constants_dict=rtn_constants_dict)
                 confirm_foodItemName = rtn_confirm_input(foodItemName)
-            
+
             foodItem += [foodItemName]
-        
+
         elif userInput == 1:
             if len(foodItem) <= 0:
                 print("没有可编辑的菜肴。")
-            
+
             else:
                 edit_foodItem = []
                 for index in range(len(foodItem)):
@@ -6668,18 +6896,18 @@ def rtn_edit_food_item(foodName, rtn_constants_dict, food_items=""):
                     print("正在编辑{}内的菜肴'{}'".format(foodName, foodItem[editUserInput]))
                     edit_foodItemName = rtn_input_validation(rule="foodItemName", title="菜肴名", space_removal=True, rtn_constants_dict=rtn_constants_dict)
                     confirm_edit_foodItemName = rtn_confirm_input(edit_foodItemName)
-                
+
                 foodItem[editUserInput] = edit_foodItemName
-        
+
         elif userInput == 2:
             if len(foodItem) <= 0:
                 print("没有可删除的菜肴。")
-            
+
             else:
                 remove_foodItem = []
                 for index in range(len(foodItem)):
                     remove_foodItem += ["删除'{}'".format(foodItem[index])]
-                
+
                 remove_options = option_num(remove_foodItem)
                 time.sleep(0.25)
                 removeUserInput = option_limit(remove_options, input("在这里输入>>>: "))
@@ -6720,11 +6948,11 @@ def rtn_input_validation(rule, title, space_removal=False, ala_carte=False, rtn_
                 print("空格已自动移除。")
             else:
                 pass
-            
+
             if len(userInput) < minimum_len:
                 print("输入了{}串字符, 最少输入{}串字符, 请重新输入! ".format(len(userInput), minimum_len))
                 len_test = False
-            
+
             else:
                 if len(userInput) > maximum_len:
                     print("输入了{}串字符, 最多输入{}串字符, 请重新输入! ".format(len(userInput), maximum_len))
@@ -6741,7 +6969,7 @@ def rtn_input_validation(rule, title, space_removal=False, ala_carte=False, rtn_
 
             if float_check(userInput):
                 input_validate = True
-            
+
             else:
                 print("输入的'{}'无效, 必须是数字, 请重新输入! ".format(userInput))
                 input_validate = False
@@ -6803,13 +7031,13 @@ def rtn_input_validation(rule, title, space_removal=False, ala_carte=False, rtn_
                     len_test = False
                 else:
                     len_test = True
-            
+
             if not foodName_allow_dup:
                 if ala_carte:
                     emptiness = menu[menu["菜名"] == userInput].empty
                 else:
                     emptiness = menu[menu["套餐名"] == userInput].empty
-                
+
                 if not emptiness:
                     print("菜名/套餐名'{}'重复, 请重新输入! ".format(userInput))
                     foodName_dup_test = False
@@ -6857,11 +7085,11 @@ def rtn_input_validation(rule, title, space_removal=False, ala_carte=False, rtn_
                 print("空格已自动移除。")
             else:
                 pass
-            
+
             if len(userInput) < minimum_len:
                 print("输入了{}串字符, 最少输入{}串字符, 请重新输入! ".format(len(userInput), minimum_len))
                 len_test = False
-            
+
             else:
                 if len(userInput) > maximum_len:
                     print("输入了{}串字符, 最多输入{}串字符, 请重新输入! ".format(len(userInput), maximum_len))
@@ -6960,11 +7188,11 @@ def rtn_input_validation(rule, title, space_removal=False, ala_carte=False, rtn_
                 print("空格已自动移除。")
             else:
                 pass
-            
+
             if len(userInput) < minimum_len:
                 print("输入了{}串字符, 最少输入{}串字符, 请重新输入! ".format(len(userInput), minimum_len))
                 len_test = False
-            
+
             else:
                 if len(userInput) > maximum_len:
                     print("输入了{}串字符, 最多输入{}串字符, 请重新输入! ".format(len(userInput), maximum_len))
@@ -7053,11 +7281,11 @@ def rtn_input_validation(rule, title, space_removal=False, ala_carte=False, rtn_
                 print("空格已自动移除。")
             else:
                 pass
-            
+
             if len(userInput) < minimum_len:
                 print("输入了{}串字符, 最少输入{}串字符, 请重新输入! ".format(len(userInput), minimum_len))
                 len_test = False
-            
+
             else:
                 if len(userInput) > maximum_len:
                     print("输入了{}串字符, 最多输入{}串字符, 请重新输入! ".format(len(userInput), maximum_len))
@@ -7090,7 +7318,7 @@ def rtn_input_validation(rule, title, space_removal=False, ala_carte=False, rtn_
                 input_validate = False
         else:
             return int(userInput)
-    
+
     elif rule == "notAdultPax":
         tc = other_controls["tc"]
         tc["最小载客量"] = tc["最小载客量"].astype(int)
@@ -7150,15 +7378,15 @@ def rtn_select_table(rtn_constants_dict, other_controls):
                 search_string_title = "桌名"
             else:
                 search_string_title = "桌子ID"
-            
+
             search_string = rtn_input_validation(rule="searchString", title=search_string_title, space_removal=True, rtn_constants_dict=rtn_constants_dict)
 
             if userInput == 0:
                 slice_tc = slice_tc[slice_tc["桌名"].str.contains(search_string)]
-            
+
             else:
                 slice_tc = slice_tc[slice_tc["桌子ID"].str.contains(search_string)]
-        
+
         elif userInput == 2:
             filterOptions = option_num([
                 "按桌名从大到小排列",
@@ -7176,32 +7404,32 @@ def rtn_select_table(rtn_constants_dict, other_controls):
 
             if filter_select == 0:
                 slice_tc.sort_values(by="桌名", ascending=False, inplace=True, ignore_index=True)
-            
+
             elif filter_select == 1:
                 slice_tc.sort_values(by="桌名", ascending=True, inplace=True, ignore_index=True)
-            
+
             elif filter_select == 2:
                 slice_tc.sort_values(by="最小载客量", ascending=False, inplace=True, ignore_index=True)
-            
+
             elif filter_select == 3:
                 slice_tc.sort_values(by="最小载客量", ascending=True, inplace=True, ignore_index=True)
-            
+
             elif filter_select == 4:
                 slice_tc.sort_values(by="最大载客量", ascending=False, inplace=True, ignore_index=True)
 
             elif filter_select == 5:
                 slice_tc.sort_values(by="最大载客量", ascending=True, inplace=True, ignore_index=True)
-            
+
             elif filter_select == 6:
                 slice_tc.sort_values(by="桌子ID", ascending=False, inplace=True, ignore_index=True)
-            
+
             elif filter_select == 7:
                 slice_tc.sort_values(by="桌子ID", ascending=True, inplace=True, ignore_index=True)
-        
+
         elif userInput == 3:
             print("好的, 已退出桌台选取。")
             choose_table_input = None
-        
+
         if userInput != 3:
             if slice_tc.empty:
                 print("未找到任何匹配的桌台。")
@@ -7214,13 +7442,13 @@ def rtn_select_table(rtn_constants_dict, other_controls):
 
                 for index in range(len(slice_tc)):
                     slice_tc_list += ["'桌名: {}, {}-{}人桌'".format(slice_tc.iloc[index, 1], slice_tc.iloc[index, 2], slice_tc.iloc[index, 3])]
-                
+
                 choose_table_options = option_num(slice_tc_list)
                 time.sleep(0.25)
                 choose_table_input = option_limit(choose_table_options, input("在这里输入>>>: "))
         else:
             choose_table_input = None
-    
+
     if isinstance(choose_table_input, int):
         return str(slice_tc.iloc[choose_table_input, 0])
     else:
@@ -7264,7 +7492,7 @@ def rtn_select_food(ala_carte, rtn_constants_dict, other_controls):
                 search_string_title = "菜品ID"
 
             search_string = rtn_input_validation(rule="searchString", title=search_string_title, space_removal=True, rtn_constants_dict=rtn_constants_dict)
-            
+
             if userInput == 0:
                 if ala_carte:
                     slice_menu = slice_menu[slice_menu["菜名"].str.contains(search_string)]
@@ -7272,11 +7500,11 @@ def rtn_select_food(ala_carte, rtn_constants_dict, other_controls):
                     slice_menu = slice_menu[slice_menu["套餐名"].str.contains(search_string)]
             else:
                 slice_menu = slice_menu[slice_menu["菜品ID"].str.contains(search_string)]
-        
+
         elif userInput == 1:
             float_value = rtn_input_validation(rule="float", title="价格")
             slice_menu = slice_menu[slice_menu["价格"] == float_value]
-        
+
         elif userInput == 3:
             print("好的，已退出菜品选取")
             choose_food_input = None
@@ -7294,7 +7522,7 @@ def rtn_select_food(ala_carte, rtn_constants_dict, other_controls):
 
                 for index in range(len(slice_menu)):
                     slice_menu_list += ["'菜名/套餐名: {}, 价格: {} '".format(slice_menu.iloc[index, 1], slice_menu.iloc[index, 2])]
-                
+
                 choose_food_options = option_num(slice_menu_list)
                 time.sleep(0.25)
                 choose_food_input = option_limit(choose_food_options, input("在这里输入>>>: "))
@@ -7344,7 +7572,7 @@ def rtn_edit_menu(rtn_constants_dict, other_controls):
 
                 for i in range(len(food_items)):
                     print("第{}道菜: {}".format(i+1, food_items[i]))
-                
+
                 print()
         print()
         print()
@@ -7363,19 +7591,19 @@ def rtn_edit_menu(rtn_constants_dict, other_controls):
                 while not confirm_foodName:
                     foodName = rtn_input_validation(rule="foodName", title="菜名/套餐名", space_removal=True, ala_carte=True, rtn_constants_dict=rtn_constants_dict, other_controls=other_controls)
                     confirm_foodName = rtn_confirm_input(foodName)
-                
+
                 confirm_foodPrice = False
                 while not confirm_foodPrice:
                     foodPrice = rtn_input_validation(rule="foodPrice", title="价格", rtn_constants_dict=rtn_constants_dict)
                     confirm_foodPrice = rtn_confirm_input(foodPrice)
-                
+
                 time_created = pd.to_datetime(dt.datetime.now())
                 sequencial_list = [foodId, foodName, foodPrice, time_created]
 
                 new_ac_food = {}
                 for index in range(len(acm_columns)):
                     new_ac_food.update({ acm_columns[index] : [sequencial_list[index]] })
-                
+
                 new_ac_food = pd.DataFrame(new_ac_food)
 
                 confirm_save, end_record_loop = rtn_confirm_save(foodName)
@@ -7404,12 +7632,12 @@ def rtn_edit_menu(rtn_constants_dict, other_controls):
                     end_record_loop = False
                     while not end_record_loop:
                         foodName = rtn_input_validation(rule="foodName", title="菜名/套餐名", space_removal=True, ala_carte=True, rtn_constants_dict=rtn_constants_dict, other_controls=other_controls)
-                        
+
                         print()
                         print("确定把'{}'换成'{}'吗? ".format(old_foodName, foodName))
 
                         confirm_save, end_record_loop = rtn_confirm_save(foodName)
-                    
+
                     else:
                         if confirm_save:
                             #foodName = str(acm[acm["菜品ID"] == foodId]["菜名"].values[0])
@@ -7441,7 +7669,7 @@ def rtn_edit_menu(rtn_constants_dict, other_controls):
                             print("编辑成功, '{}'已成功换成'{}'! ".format(old_foodName, foodName))
                         else:
                             print("编辑失败, 保留其菜名'{}'。".format(old_foodName))
-                    
+
                 elif edit_select == 1:
                     end_record_loop = False
                     while not end_record_loop:
@@ -7499,10 +7727,10 @@ def rtn_edit_menu(rtn_constants_dict, other_controls):
 
                     other_controls["acm"] = acm
                     print("'{}'删除成功。".format(foodName))
-                
+
                 else:
                     print("好的，没有删除。")
-        
+
         elif actionInput == 3:
             end_record_loop = False
             while not end_record_loop:
@@ -7520,14 +7748,14 @@ def rtn_edit_menu(rtn_constants_dict, other_controls):
                     confirm_foodPrice = rtn_confirm_input(foodPrice)
 
                 foodItem = rtn_edit_food_item(foodName=foodName, rtn_constants_dict=rtn_constants_dict, food_items="")
-                
+
                 time_created = pd.to_datetime(dt.datetime.now())
                 sequencial_list = [foodId, foodName, foodPrice, foodItem, time_created]
 
                 new_sm_food = {}
                 for index in range(len(sm_columns)):
                     new_sm_food.update({ sm_columns[index] : [sequencial_list[index]] })
-                
+
                 new_sm_food = pd.DataFrame(new_sm_food)
                 confirm_save, end_record_loop = rtn_confirm_save(foodName)
             else:
@@ -7578,7 +7806,7 @@ def rtn_edit_menu(rtn_constants_dict, other_controls):
                                 foodItem,
                                 foodCreatedTime,
                             ]
-                            
+
                             modify = {}
                             for index in range(len(sm_columns)):
                                 modify.update({ sm_columns[index] : [ sequence[index] ] })
@@ -7593,7 +7821,7 @@ def rtn_edit_menu(rtn_constants_dict, other_controls):
                             print("编辑成功, '{}'已成功换成'{}'! ".format(old_foodName, foodName))
                         else:
                             print("编辑失败, 保留其套餐名'{}'。".format(old_foodName))
-                
+
                 elif edit_select == 1:
                     end_record_loop = False
                     while not end_record_loop:
@@ -7622,7 +7850,7 @@ def rtn_edit_menu(rtn_constants_dict, other_controls):
                                 foodItem,
                                 foodCreatedTime,
                             ]
-                            
+
                             modify = {}
                             for index in range(len(sm_columns)):
                                 modify.update({ sm_columns[index] : [ sequence[index] ] })
@@ -7638,7 +7866,7 @@ def rtn_edit_menu(rtn_constants_dict, other_controls):
 
                         else:
                             print("编辑失败, 保留其价格'{}'。".format(old_foodPrice))
-                            
+
                 elif edit_select == 2:
                     foodItem = rtn_edit_food_item(foodName=foodName, rtn_constants_dict=rtn_constants_dict, food_items=old_foodItem)
 
@@ -7661,7 +7889,7 @@ def rtn_edit_menu(rtn_constants_dict, other_controls):
                             foodItem,
                             foodCreatedTime,
                         ]
-                        
+
                         modify = {}
                         for index in range(len(sm_columns)):
                             modify.update({ sm_columns[index] : [ sequence[index] ] })
@@ -7672,7 +7900,7 @@ def rtn_edit_menu(rtn_constants_dict, other_controls):
                         sm["创建时间"] = pd.to_datetime(sm["创建时间"])
                         sm.sort_values(by="创建时间", ascending=False, ignore_index=True, inplace=True)
                         other_controls["sm"] = sm
-                        
+
                         print("套餐'{}'的菜肴已成功修改! ".format(foodName))
                     else:
                         print("套餐'{}'的菜肴未修改, 保留其原来的菜肴! ".format(foodName))
@@ -7694,12 +7922,12 @@ def rtn_edit_menu(rtn_constants_dict, other_controls):
                     other_controls["sm"] = sm
 
                     print("'{}'删除成功。".format(foodName))
-                
+
                 else:
                     print("好的, 没有删除。")
 
     else:
-        return acm, sm, other_controls               
+        return acm, sm, other_controls
 
 def rtn_edit_tables(rtn_constants_dict, other_controls):
     tc = other_controls["tc"]
@@ -7745,18 +7973,18 @@ def rtn_edit_tables(rtn_constants_dict, other_controls):
                     else:
                         confirm_tableName = rtn_confirm_input(tableName)
 
-                    
-                
+
+
                 confirm_tableMin = False
                 while not confirm_tableMin:
                     tableMin = rtn_input_validation(rule="tableMin", title="最小载客量", rtn_constants_dict=rtn_constants_dict)
                     confirm_tableMin = rtn_confirm_input(tableMin)
-                
+
                 confirm_tableMax = False
                 while not confirm_tableMax:
                     tableMax = rtn_input_validation(rule="tableMax", title="最大载客量", rtn_constants_dict=rtn_constants_dict, table_minimum_pax=tableMin)
                     confirm_tableMax = rtn_confirm_input(tableMax)
-                
+
                 tableId = str(uuid.uuid1().hex)
                 table_time_created = pd.to_datetime(dt.datetime.now())
 
@@ -7765,7 +7993,7 @@ def rtn_edit_tables(rtn_constants_dict, other_controls):
                 new_table = {}
                 for i in range(len(tc_columns)):
                     new_table.update({ tc_columns[i] : [table_sequencial_list[i]] })
-                
+
                 new_table = pd.DataFrame(new_table)
                 prtdf(new_table.drop("桌子ID", axis=1))
                 print()
@@ -7820,7 +8048,7 @@ def rtn_edit_tables(rtn_constants_dict, other_controls):
                             modify = {}
                             for index in range(len(tc_columns)):
                                 modify.update({ tc_columns[index] : [sequence[index]] })
-                            
+
                             modify = pd.DataFrame(modify)
                             tc = other_controls["tc"].copy()
                             tc["桌子ID"] = tc["桌子ID"].astype(str)
@@ -7832,7 +8060,7 @@ def rtn_edit_tables(rtn_constants_dict, other_controls):
                             print("编辑成功, 其桌台的最小载客量已从'{}'成功换成'{}'! ".format(old_tableMin, tableMin))
                         else:
                             print("编辑失败, 保留其原值。")
-                
+
                 elif edit_select == 1:
                     tableName = str(tc[tc["桌子ID"] == tableId]["桌名"].values[0])
                     old_tableMax = int(tc[tc["桌子ID"] == tableId]["最大载客量"].values[0])
@@ -7860,7 +8088,7 @@ def rtn_edit_tables(rtn_constants_dict, other_controls):
                             modify = {}
                             for index in range(len(tc_columns)):
                                 modify.update({ tc_columns[index] : [sequence[index]] })
-                            
+
                             modify = pd.DataFrame(modify)
                             tc = other_controls["tc"].copy()
                             tc["桌子ID"] = tc["桌子ID"].astype(str)
@@ -7879,7 +8107,7 @@ def rtn_edit_tables(rtn_constants_dict, other_controls):
                     print()
                     print("为了保持订单的同步性, 桌名不可更改。")
                     input("按回车键继续>>>: ")
-                            
+
         elif tc_select == 2:
             print()
             print()
@@ -7901,16 +8129,16 @@ def rtn_edit_datetime(datetime=0):
                 minute = intRange(integer=input("几分? : "), lower=0, upper=59)
 
                 date = dt.datetime(year=int(year), month=int(month), day=int(day), hour=int(hour), minute=int(minute))
-            
+
             except ValueError:
                 print("日期输入有误, 请重新输入! ")
                 date = None
-            
+
         else:
             if not isinstance(date, int):
                 date = pd.to_datetime(date)
             return date
-    
+
     elif isinstance(datetime, pd.to_datetime):
         end_record_loop = False
         while not end_record_loop:
@@ -7929,17 +8157,17 @@ def rtn_edit_datetime(datetime=0):
                         minute = intRange(integer=input("几分? : "), lower=0, upper=59)
 
                         date = dt.datetime(year=int(year), month=int(month), day=int(day), hour=int(hour), minute=int(minute))
-                    
+
                     except ValueError:
                         print("日期输入有误, 请重新输入! ")
                         date = None
-                    
+
                 else:
                     date = pd.to_datetime(date)
-                
+
                 print("从'{}'改成'{}', 确定修改吗? ".format(datetime.strftime("%Y-%m-%d %H:%M"), date.strftime("%Y-%m-%d %H:%M")))
                 confirm_save_new_datetime, end_record_loop = rtn_confirm_save(date.strftime("%Y-%m-%d %H:%M"))
-            
+
             elif modify_select == 1:
                 confirm_save_new_datetime = False
                 end_record_loop = True
@@ -7950,7 +8178,7 @@ def rtn_edit_datetime(datetime=0):
             else:
                 datetime = datetime
                 print("修改不成功, 保留其原值。")
-        
+
         return pd.to_datetime(datetime)
 
 def rtn_fetch_database(google_auth, fernet_key, rtn_database_url, rtn_constants_dict):
@@ -7973,7 +8201,7 @@ def rtn_fetch_database(google_auth, fernet_key, rtn_database_url, rtn_constants_
         sheetname_indexes = []
         for i in range(len(sheetnames)):
             sheetname_indexes += [rtn_database_sheet.worksheet(property="title", value=str(sheetnames[i])).index]
-        
+
         db_keys = ["rtn_db", "food_db", "sm_bd", "payment"]
 
         database = {}
@@ -7986,7 +8214,7 @@ def rtn_fetch_database(google_auth, fernet_key, rtn_database_url, rtn_constants_
         print()
         print(e)
         database = {}
-    
+
     return database
 
 def rtn_create_order(rtn_constants_dict, other_controls, google_auth, fernet_key, rtn_database_url):
@@ -8017,7 +8245,7 @@ def rtn_create_order(rtn_constants_dict, other_controls, google_auth, fernet_key
         print("预订日期: ")
         reserveDatetime = rtn_edit_datetime()
         confirm_reserveDatetime = rtn_confirm_input(reserveDatetime.strftime("%Y-%m-%d %H:%M"))
-    
+
     #预订除夕？
     CnyEveDate = dt.datetime(year=comingCnyEve.year, month=comingCnyEve.month, day=comingCnyEve.day)
     reserve_date = dt.datetime(year=reserveDatetime.year, month=reserveDatetime.month, day=reserveDatetime.day)
@@ -8026,13 +8254,13 @@ def rtn_create_order(rtn_constants_dict, other_controls, google_auth, fernet_key
         isCnyEve = 1
     else:
         isCnyEve = 0
-    
+
     print()
     confirm_customerName = False
     while not confirm_customerName:
         customerName = rtn_input_validation(rule="searchString", title="客户名", space_removal=False, rtn_constants_dict=rtn_constants_dict)
         confirm_customerName = rtn_confirm_input(customerName)
-    
+
     #订单号
     print()
     existingDb = rtn_fetch_database(google_auth=google_auth, fernet_key=fernet_key, rtn_database_url=rtn_database_url, rtn_constants_dict=rtn_constants_dict)["rtn_db"]
@@ -8058,7 +8286,7 @@ def rtn_create_order(rtn_constants_dict, other_controls, google_auth, fernet_key
                 othersDIStartNumber = int(rtn_constants_dict["others_dine_in_orderNumber_start"])
                 othersTAStartNumber = int(rtn_constants_dict["others_takeaway_orderNumber_start"])
 
-                
+
                 #订单属性, 预订除夕?
                 if isCnyEve == 1:
                     if orderAttribute == orderAttributeList[0]:
@@ -8078,7 +8306,7 @@ def rtn_create_order(rtn_constants_dict, other_controls, google_auth, fernet_key
                         #不在除夕和打包
                         filter = (existingDb["订单属性"] == orderAttributeList[1]) & (existingDb["预订除夕?"] == 0)
                         takeOrderNumberRule = othersTAStartNumber
-                
+
                 dbFiltered = existingDb.copy()
                 dbFiltered = dbFiltered[filter]
 
@@ -8086,20 +8314,20 @@ def rtn_create_order(rtn_constants_dict, other_controls, google_auth, fernet_key
                     orderNumber = takeOrderNumberRule+1
                 else:
                     orderNumber = takeOrderNumberRule+len(dbFiltered)+1
-                
+
                 confirm_orderNumber = True
 
             else:
                 print("订单号允许重复,请选择别的订单号生成方案。")
                 confirm_orderNumber = False
-                
+
         elif orderNumberSelect == 1:
             orderNumber = str(uuid.uuid1().hex)
             confirm_orderNumber = rtn_confirm_input(orderNumber)
-        
+
         else:
             orderNumber = rtn_input_validation(rule="orderNumber", title="订单号", space_removal=True, rtn_constants_dict=rtn_constants_dict)
-            
+
             if not orderNumber_allow_dup:
                 db_copy = existingDb.copy()
                 db_copy["订单号"] = db_copy["订单号"].astype(str)
@@ -8114,7 +8342,7 @@ def rtn_create_order(rtn_constants_dict, other_controls, google_auth, fernet_key
 
     else:
         print("此单订单号为: {}".format(orderNumber))
-    
+
     print()
     confirm_customerPhone = False
     while not confirm_customerPhone:
@@ -8126,31 +8354,31 @@ def rtn_create_order(rtn_constants_dict, other_controls, google_auth, fernet_key
         if phoneOptionSelect == 0:
             customerPhone = rtn_input_validation(rule="localPhone", title="本地号码")
             confirm_customerPhone = rtn_confirm_input(customerPhone)
-        
+
         elif phoneOptionSelect == 1:
             print("外国号码请添加国际代码,但无需'+'号。")
             customerPhone = rtn_input_validation(rule="searchString", title="外国号码", remove_spaces=True, rtn_constants_dict=rtn_constants_dict)
             if "+" in customerPhone:
                 customerPhone = customerPhone.replace("+", "")
                 print("'+'已自动移除, 无需添加'+'号。")
-            
+
             confirm_customerPhone = rtn_confirm_input(customerPhone)
-        
+
         else:
             print("无预留电话将以'-'呈现。")
             customerPhone = "-"
             confirm_customerPhone = True
-    
+
     #本地电话?
     if phoneOptionList[phoneOptionSelect] == phoneOptionList[0]:
         isLocalPhone = 1
     else:
         isLocalPhone = 0
-    
+
     #round
     print()
     round_time_param = str(rtn_constants_dict["cny_eve_round_time_param"]).split(",")
-    
+
     round_time_dt_bind = {}
     for t in range(len(round_time_param)):
         dt_format = dt.datetime.strptime(round_time_param[t], "%Y-%m-%d %H:%M")
@@ -8159,29 +8387,29 @@ def rtn_create_order(rtn_constants_dict, other_controls, google_auth, fernet_key
 
         if reserveDatetime in list(round_time_dt_bind.keys()):
             round = round_time_dt_bind[reserveDatetime]
-        
+
         else:
             round = "无效"
-    
+
     print("轮数选定为'{}'。".format(round))
-    
+
     print()
     if orderAttribute == orderAttributeList[0]:
         confirm_adultPax = False
         while not confirm_adultPax:
             adultPax = rtn_input_validation(rule="pax", title="成人人数", other_controls=other_controls)
             confirm_adultPax = rtn_confirm_input(adultPax)
-        
+
         confirm_childPax = False
         while not confirm_childPax:
             childPax = rtn_input_validation(rule="notAdultPax", title="儿童人数", other_controls=other_controls)
             confirm_childPax = rtn_confirm_input(childPax)
-        
+
         confirm_toddlerPax = False
         while not confirm_toddlerPax:
             toddlerPax = rtn_input_validation(rule="notAdultPax", title="幼儿人数", other_controls=other_controls)
             confirm_toddlerPax = rtn_confirm_input(toddlerPax)
-        
+
         confirm_totalPax = False
         while not confirm_totalPax:
             totalPax = rtn_input_validation(rule="pax", title="载客量", other_controls=other_controls)
@@ -8214,7 +8442,7 @@ def rtn_create_order(rtn_constants_dict, other_controls, google_auth, fernet_key
                 table_assign = "未排位"
                 tableName = table_assign
                 confirm_table_assign = True
-            
+
             elif tableAssignSelect == 1:
                 table_occupancy, unassigned_df = rtn_table_occupancy(rtn_db=db_copy, round=round, reserveTime=reserveDatetime, other_controls=other_controls)
                 print("目前占位状况: ")
@@ -8227,12 +8455,12 @@ def rtn_create_order(rtn_constants_dict, other_controls, google_auth, fernet_key
                 if not isinstance(table_assign, str):
                     print("选台位失败, 请重新选择! ")
                     confirm_table_assign = False
-                
+
                 else:
                     table_assigned = tc.copy()
                     table_assigned = table_assigned[table_assigned["桌子ID"] == str(table_assign)]
                     tableName = str(table_assigned["桌名"].values[0])
-                    
+
                     if int(totalPax) <= int(table_assigned["最大载客量"].values[0]):
                         if int(totalPax) >= int(table_assigned["最小载客量"].values[0]):
                             if str(tableName) in db_copy["桌台"].values.astype(str).tolist():
@@ -8274,12 +8502,12 @@ def rtn_create_order(rtn_constants_dict, other_controls, google_auth, fernet_key
                 print("无备注是吧? 自动用'-'呈现。")
                 remark = "-"
             confirm_remark = rtn_confirm_input("该备注")
-        
+
         else:
             print("无备注将用'-'呈现。")
             remark = "-"
             confirm_remark = True
-    
+
     orderStatusList = str(rtn_constants_dict["order_status"]).strip().split(",")
     orderStatus = orderStatusList[0]
 
@@ -8321,19 +8549,19 @@ def rtn_create_order(rtn_constants_dict, other_controls, google_auth, fernet_key
         else:
             print("超售率考量通过。")
             save_order = True
-    
+
     else:
         save_order = True
-    
+
     if save_order:
-        sequencial_list = [outletCode, 
-                           orderId, 
-                           orderTimeCreated, 
-                           orderAttribute, 
-                           reserveDatetime, 
-                           isCnyEve, 
-                           customerName, 
-                           orderNumber, 
+        sequencial_list = [outletCode,
+                           orderId,
+                           orderTimeCreated,
+                           orderAttribute,
+                           reserveDatetime,
+                           isCnyEve,
+                           customerName,
+                           orderNumber,
                            customerPhone,
                            isLocalPhone,
                            round,
@@ -8345,7 +8573,7 @@ def rtn_create_order(rtn_constants_dict, other_controls, google_auth, fernet_key
                            remark,
                            orderStatus
                           ]
-        
+
         order_columns = str(rtn_constants_dict["order_columns"]).strip().split(",")
 
         new_order = {}
@@ -8373,7 +8601,7 @@ def rtn_select_order(order_concat, rtn_constants_dict):
     if order_concat.empty:
         print("无订单。")
         choose_order_input = None
-    
+
     else:
         options = option_num(["按订单号搜索", "按电话搜索", "按轮数搜索", "按订单状态搜索", "按备注内容搜索", "按照规则重新排列所有订单搜索", "按姓名搜索", "退出订单选取"])
         time.sleep(0.25)
@@ -8383,7 +8611,7 @@ def rtn_select_order(order_concat, rtn_constants_dict):
             order_copy["订单号"] = order_copy["订单号"].astype(str)
             orderNumber = rtn_input_validation(rule="orderNumber", title="订单号", space_removal=True, rtn_constants_dict=rtn_constants_dict)
             order_copy = order_copy[order_copy["订单号"].str.contains(str(orderNumber))]
-        
+
         elif userInput == 1:
             order_copy["电话"] = order_copy["电话"].astype(str)
             phone = rtn_input_validation(rule="searchString", title="电话号码", space_removal=True, rtn_constants_dict=rtn_constants_dict)
@@ -8398,7 +8626,7 @@ def rtn_select_order(order_concat, rtn_constants_dict):
             roundSelect = option_limit(uniqueChoicesNum, input("在这里输入>>>: "))
 
             order_copy = order_copy[order_copy["轮数"] == uniqueChoices[roundSelect]]
-        
+
         elif userInput == 3:
             order_copy["订单状态"] = order_copy["订单状态"].astype(str)
             uniqueChoices = np.unique(order_copy["订单状态"].values)
@@ -8412,7 +8640,7 @@ def rtn_select_order(order_concat, rtn_constants_dict):
             order_copy["备注"] = order_copy["备注"].astype(str)
             text_search = rtn_input_validation(rule="searchString", title="一些备注内容", space_removal=True, rtn_constants_dict=rtn_constants_dict)
             order_copy = order_copy[order_copy["备注"].str.contains(text_search)]
-        
+
         elif userInput == 5:
             filterOptions = option_num([
                 "按订单创建时间从小到大排列",
@@ -8459,7 +8687,7 @@ def rtn_select_order(order_concat, rtn_constants_dict):
         elif userInput == 7:
             print("好的, 已退出订单选取。")
             choose_order_input = None
-        
+
         if userInput != 7:
             if order_copy.empty:
                 print("未找到任何匹配的订单。")
@@ -8471,7 +8699,7 @@ def rtn_select_order(order_concat, rtn_constants_dict):
                 order_list = []
                 for index in range(len(order_copy)):
                     order_list += ["'订单号: {}, {}({}人)预订在{}, 电话: {}'".format(order_copy.iloc[index, 7], order_copy.iloc[index, 6], order_copy.iloc[index, 14], order_copy.iloc[index, 4].strftime("%Y-%m-%d %H:%M"), order_copy.iloc[index, 8])]
-                
+
                 choose_order_options = option_num(order_list)
                 time.sleep(0.25)
                 choose_order_input = option_limit(choose_order_options, input("在这里输入>>>: "))
@@ -8532,7 +8760,7 @@ def rtn_order_filter(google_auth, fernet_key, rtn_database_url, rtn_constants_di
         sm_bd = None
         payment = None
 
-    return rtn_db, food_db, sm_bd, payment    
+    return rtn_db, food_db, sm_bd, payment
 
 def rtn_point_zero_five_round(x):
     return normal_round(normal_round(x / 0.05) * 0.05, -int(np.floor(np.log10(0.05))))
@@ -8557,14 +8785,14 @@ def rtn_food_order_parser(food_db, sm_bd, payment, other_controls):
                     foodNames += [str(acm[acm["菜品ID"] == str(food_db.iloc[i, 3])]["菜名"].values[0])]
                 else:
                     foodNames += [str(sm[sm["菜品ID"] == str(food_db.iloc[i, 3])]["套餐名"].values[0])]
-            
+
         display_food_db["菜名/套餐名"] = foodNames
 
         display_food_db = display_food_db[["点餐ID", "订单ID", "菜品ID", "菜名/套餐名", "点餐INDEX", "套餐?", "换菜?", "菜品属性", "数量", "±价", "折扣", "税前价格", "服务费", "GST", "税后价格", "备注"]]
 
     if not sm_bd.empty:
         display_sm_bd = sm_bd.copy()
-        
+
         sm_bd_df = pd.DataFrame(columns=["点餐ID", "套餐名", "菜肴Index", "菜肴名", "备注"])
         for i in range(len(display_sm_bd)):
             foodOrderId = str(display_sm_bd.iloc[i, 1])
@@ -8581,7 +8809,7 @@ def rtn_food_order_parser(food_db, sm_bd, payment, other_controls):
                 remark = foodRemarks[item]
                 foodIndex = item+1
 
-                sm_bd_reconstruct.update({ 
+                sm_bd_reconstruct.update({
                     "点餐ID" : [foodOrderId],
                     "数量" : [foodQty],
                     "套餐名" : [foodName],
@@ -8589,16 +8817,16 @@ def rtn_food_order_parser(food_db, sm_bd, payment, other_controls):
                     "菜肴名" : [itemName],
                     "备注": [remark]
                     })
-                
+
                 sm_bd_reconstruct = pd.DataFrame(sm_bd_reconstruct)
 
                 sm_bd_df = pd.concat([sm_bd_df, sm_bd_reconstruct], ignore_index=True)
-        
+
         sm_bd_df.sort_values(by=["点餐ID", "菜肴Index"], ascending=True, inplace=True, ignore_index=True)
 
     else:
         sm_bd_df = -404
-    
+
     if isinstance(display_food_db, pd.DataFrame):
         display_food_db["税后价格"] = display_food_db["税后价格"].astype(float)
         display_food_db["服务费"] = display_food_db["服务费"].astype(float)
@@ -8638,7 +8866,7 @@ def rtn_food_order_parser(food_db, sm_bd, payment, other_controls):
             "已付金额" : already_paid,
             "需付金额" : 0.00,
         }
-    
+
     return display_food_db, food_db, sm_bd_df, sm_bd, payment_info
 
 def rtn_edit_food_change_remark(rtn_constants_dict, food_items, foodItemRemark=""):
@@ -8653,11 +8881,11 @@ def rtn_edit_food_change_remark(rtn_constants_dict, food_items, foodItemRemark="
             foodRemark += [""]
     else:
         foodRemark = foodItemRemark.split(",")
-    
+
     options = []
     for item in range(len(foodItem)):
         options += ["编辑{}".format(foodItem[item])]
-    
+
     options += ["我已完成编辑菜肴备注"]
 
     userSelect = 0
@@ -8675,7 +8903,7 @@ def rtn_edit_food_change_remark(rtn_constants_dict, food_items, foodItemRemark="
                 remark = rtn_input_validation(rule="remark", title="备注", space_removal=False, rtn_constants_dict=rtn_constants_dict)
                 print("你确定吗? ")
                 print("你确定{}的备注内容是'{}'吗?".format(foodItem[userSelect], remark))
-                
+
                 confirm_remark = rtn_confirm_input("该备注")
             else:
                 foodRemark[userSelect] = remark
@@ -8687,7 +8915,7 @@ def rtn_edit_food_change_remark(rtn_constants_dict, food_items, foodItemRemark="
                 return_foodRemark += "{},".format(foodRemark[index])
             else:
                 return_foodRemark += "{}".format(foodRemark[index])
-        
+
         return return_foodRemark
 
 def rtn_food_change_handler(foodName, rtn_constants_dict, fi):
@@ -8698,33 +8926,33 @@ def rtn_food_change_handler(foodName, rtn_constants_dict, fi):
         except:
             food_items = fi
 
-        
+
         if food_items == -404:
             food_items_list = fi.split(",")
         else:
             food_items_list = food_items.split(",")
-        
+
         try:
             food_remark = food_remark
             food_remark_list = food_remark.split(",")
         except:
             food_remark_list = np.repeat("", len(food_items_list)).tolist()
-        
+
         for index in range(len(food_items_list)):
             print("{} : {}".format(food_items_list[index], food_remark_list[index]))
-        
+
         print()
         print()
         options = option_num(["编辑其菜肴", "编辑其备注", "我已完成编辑菜肴和备注"])
         time.sleep(0.25)
         userInput = option_limit(options, input("在这里输入>>>: "))
-        
+
         if userInput == 0:
             try:
                 food_items = food_items
             except:
                 food_items = fi
-            
+
             if food_items == -404:
                 food_items = fi
             else:
@@ -8742,7 +8970,7 @@ def rtn_food_change_handler(foodName, rtn_constants_dict, fi):
                 food_items = food_items
             except:
                 food_items = fi
-            
+
             if food_items == -404:
                 food_items = fi
             else:
@@ -8755,11 +8983,11 @@ def rtn_food_change_handler(foodName, rtn_constants_dict, fi):
                 food_items = food_items
             except:
                 food_items = -404
-            
+
             if isinstance(food_items, int):
                 if food_items == -404:
                     print("你选择了有换菜, 请编辑其菜肴后再选择此项。")
-                
+
             else:
                 userInput = 3
     else:
@@ -8778,7 +9006,7 @@ def rtn_food_change_handler(foodName, rtn_constants_dict, fi):
                     return_foodRemark += "{}".format(food_remark[index])
 
             food_remark = return_foodRemark
-        
+
         else:
             if isinstance(food_remark, int):
                 return_foodRemark = ""
@@ -8788,7 +9016,7 @@ def rtn_food_change_handler(foodName, rtn_constants_dict, fi):
                         return_foodRemark += ","
                     else:
                         return_foodRemark += ""
-                
+
                 food_remark = return_foodRemark
             else:
                 pass
@@ -8800,15 +9028,15 @@ def rtn_select_foodOrderId(display_food_db):
         print()
         print("目前点餐详情: ")
         display_food_db.sort_values(by="点餐INDEX", ascending=True, inplace=True, ignore_index=True)
-        
+
         prtdf(display_food_db.drop(["点餐ID", "订单ID", "菜品ID"], axis=1))
-        
+
         options = []
         for i in range(len(display_food_db)):
             foodIndex = display_food_db.iloc[i, 4]
             foodName = display_food_db.iloc[i, 3]
             options += ["选择第{}样菜'{}'".format(foodIndex, foodName)]
-        
+
         options += ["退出菜品选取"]
 
         option = option_num(options)
@@ -8817,7 +9045,7 @@ def rtn_select_foodOrderId(display_food_db):
 
         if userSelect != len(option)-1:
             foodOrderId = str(display_food_db.iloc[userSelect, 0])
-        
+
         else:
             print("好的,已退出选择菜品。")
             foodOrderId = None
@@ -8846,12 +9074,12 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
             slice_food_db = slice_food_db
         except:
             slice_food_db = -404
-        
+
         try:
             slice_sm_bd = slice_sm_bd
         except:
             slice_sm_bd = -404
-        
+
         if isinstance(slice_food_db, pd.DataFrame):
             option = ["保存并退出订餐操作"]
         else:
@@ -8872,7 +9100,7 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
                         slice_food_db = slice_food_db
                     except:
                         slice_food_db = food_db
-                    
+
                     try:
                         slice_sm_bd = slice_sm_bd
                     except:
@@ -8880,12 +9108,12 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
 
                     if not isinstance(slice_food_db, pd.DataFrame):
                         slice_food_db = food_db
-                    
+
                     if not isinstance(slice_sm_bd, pd.DataFrame):
                         slice_sm_bd = sm_bd
 
                     display_food_db, food_db, sm_bd_df, sm_bd, payment_info = rtn_food_order_parser(food_db=slice_food_db, sm_bd=slice_sm_bd, payment=payment, other_controls=other_controls)
-                    
+
                     if isinstance(display_food_db, pd.DataFrame):
                         display_food_db["点餐ID"] = display_food_db["点餐ID"].astype(str)
                         display_food_db["菜品ID"] = display_food_db["菜品ID"].astype(str)
@@ -8898,11 +9126,11 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
                         for index in range(len(rtn_db)):
                             for column in range(len(rtn_db.columns)):
                                 print("{}: {}".format(rtn_db.columns[column], rtn_db.iloc[index, column]))
-                        
+
                         print()
                         print("系统备注: 「预订除夕?」和「本地号码?」列, 1表是, 0表不是。")
                         print()
-                        
+
                         if isinstance(display_food_db, pd.DataFrame):
                             print()
                             print("目前点餐详情: ")
@@ -8911,19 +9139,19 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
                         else:
                             print()
                             print("目前未点餐。")
-                        
+
                         if isinstance(sm_bd_df, pd.DataFrame):
                             print()
                             print("套餐内菜肴详情: ")
                             prtdf(sm_bd_df.drop(["点餐ID"], axis=1))
                         else:
                             print()
-                        
+
                         print()
                         print("财务详情: ")
                         for key, value in payment_info.items():
                             print("{} : {}".format(key, format(float(value), ".2f")))
-                            
+
                         print()
 
                         second_options = option_num(["加餐", "编辑餐品", "返回上一菜单"])
@@ -8950,12 +9178,12 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
                                         food_change_options = option_num(food_change_option)
                                         time.sleep(0.25)
                                         food_change_select = option_limit(food_change_options, input("在这里输入>>>: "))
-                                        
+
                                         if food_change_select == 0:
                                             hasFoodChange = 1
                                         else:
                                             hasFoodChange = 0
-                                        
+
                                         print("你确定吗? ")
                                         confirm_food_change = rtn_confirm_input(food_change_option[food_change_select])
 
@@ -8970,7 +9198,7 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
                                             foodName = str(sm[sm["菜品ID"] == foodId]["套餐名"].values[0])
 
                                             food_item, food_remark = rtn_food_change_handler(foodName=foodName, rtn_constants_dict=rtn_constants_dict, fi=originalFoodItems)
-                                        
+
                                         else:
                                             food_item = str(sm[sm["菜品ID"] == foodId]["菜肴"].values[0])
                                             foodName = str(sm[sm["菜品ID"] == foodId]["套餐名"].values[0])
@@ -8983,7 +9211,7 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
 
                                     if isSet == 0:
                                         base_price = float(format(float(acm[acm["菜品ID"] == str(foodId)]["价格"].values[0]), ".2f"))
-                                    
+
                                     else:
                                         base_price = float(format(float(sm[sm["菜品ID"] == str(foodId)]["价格"].values[0]), ".2f"))
 
@@ -9004,12 +9232,12 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
 
                                             print("你确定吗? ")
                                             confirm_foodOrderAttribute = rtn_confirm_input(foodOrderAttr_option[foodOrderAttr_select])
-                                        
+
                                         else:
                                             print("菜品属性为'{}'。".format(foodOrderAtrribute))
                                     else:
                                         foodOrderAtrribute = "打包"
-                                    
+
                                     confirm_food_add_on = False
                                     while not confirm_food_add_on:
                                         foodAddOnOption = ["有加减价", "无加减价"]
@@ -9049,7 +9277,7 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
 
                                         print("确定这个数量吗? ")
                                         confirm_foodQty = rtn_confirm_input(foodQty)
-                                    
+
                                     confirm_food_discount = False
                                     while not confirm_food_discount:
                                         food_discount_options = option_num(["有折扣", "无折扣"])
@@ -9092,7 +9320,7 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
                                             confirm_food_discount = rtn_confirm_input("无折扣")
                                     else:
                                         print("折扣为: {}".format(food_discount))
-                                    
+
                                     total_subtotal = (base_price+foodAddOn)*foodQty-food_discount
                                     total_subtotal = float(format(total_subtotal, ".4f"))
 
@@ -9102,7 +9330,7 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
 
                                     else:
                                         total_svc = 0.00
-                                    
+
                                     gst_charge = gst_rate - 1
                                     total_gst = float(format((total_subtotal+total_svc)*gst_charge, ".4f"))
 
@@ -9121,12 +9349,12 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
                                                 remark = "-"
 
                                             confirm_remark = rtn_confirm_input("该备注")
-                                        
+
                                         else:
                                             print("无备注将用'-'呈现。")
                                             remark = "-"
                                             confirm_remark = True
-                                    
+
                                     foodOrderIndex = len(food_db)+1
 
                                     food_db_sequence = [
@@ -9149,9 +9377,9 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
                                     new_food_db = {}
                                     for index in range(len(food_db_columns)):
                                         new_food_db.update({ food_db_columns[index] : [food_db_sequence[index]] })
-                                    
+
                                     new_food_db = pd.DataFrame(new_food_db)
-                                    
+
                                     food_db_concat = pd.concat([food_db, new_food_db], ignore_index=True)
                                     food_db_concat.sort_values(by="点餐INDEX", ascending=True, inplace=True, ignore_index=True)
 
@@ -9163,22 +9391,22 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
                                             food_remark
                                         ]
 
-                                        new_sm_bd = {}  
+                                        new_sm_bd = {}
                                         for index in range(len(sm_bd_columns)):
                                             new_sm_bd.update({ sm_bd_columns[index] : [sm_bd_sequence[index]] })
-                                        
+
                                         new_sm_bd = pd.DataFrame(new_sm_bd)
 
                                         sm_bd_concat = pd.concat([sm_bd, new_sm_bd], ignore_index=True)
                                         sm_bd_concat.sort_values(by="点餐ID", ascending=True, inplace=True, ignore_index=True)
-                                    
+
                                     try:
                                         sm_bd_concat = sm_bd_concat
                                     except:
                                         sm_bd_concat = sm_bd
-                                    
+
                                     unconf_display_food_db, food_db_concat, unconf_sm_bd_df, sm_bd_concat, unconf_payment_info = rtn_food_order_parser(food_db=food_db_concat, sm_bd=sm_bd_concat, payment=payment, other_controls=other_controls)
-                                    
+
                                     print()
                                     print()
                                     print()
@@ -9210,7 +9438,7 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
                                     print("更新后的财务详情: ")
                                     for key, value in unconf_payment_info.items():
                                         print("{} : {}".format(key, format(float(value), ".2f")))
-                                    
+
                                     print()
                                     print()
                                     confirm_save, end_record_loop = rtn_confirm_save("此记录")
@@ -9226,10 +9454,10 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
                                     payment_info = unconf_payment_info
 
                                     display_food_db["点餐ID"] = display_food_db["点餐ID"].astype(str)
-                                
+
                                 else:
                                     print("记录未保存。")
-        
+
                         elif second_select == 1:
                             print("选择要编辑的菜品。")
                             foodOrderId = rtn_select_foodOrderId(display_food_db=display_food_db)
@@ -9241,7 +9469,7 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
                                     try:
                                         if display_food_db[display_food_db["点餐ID"] == foodOrderId].empty:
                                             fourth_select = 5
-                                        
+
                                         else:
                                             print()
                                             print()
@@ -9250,7 +9478,7 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
                                             print()
 
                                             foodId = str(display_food_db[display_food_db["点餐ID"] == foodOrderId]["菜品ID"].values[0])
-                                            
+
                                             fourth_options = option_num(["换个菜品", "删除菜品", "修改数量/加减价/折扣", "修改菜品属性", "编辑备注", "返回上一菜单"])
                                             time.sleep(0.25)
                                             fourth_select = option_limit(fourth_options, input("在这里输入>>>: "))
@@ -9276,22 +9504,22 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
                                                             food_change_options = option_num(food_change_option)
                                                             time.sleep(0.25)
                                                             food_change_select = option_limit(food_change_options, input("在这里输入>>>: "))
-                                                            
+
                                                             if food_change_select == 0:
                                                                 hasFoodChange = 1
                                                             else:
                                                                 hasFoodChange = 0
-                                                            
+
                                                             print("你确定吗? ")
                                                             confirm_food_change = rtn_confirm_input(food_change_option[food_change_select])
-                                                        
+
                                                         new_foodId = rtn_select_food(ala_carte=False, rtn_constants_dict=rtn_constants_dict, other_controls=other_controls)
 
                                                     if acm[acm["菜品ID"] == foodId].empty:
                                                         old_foodName = str(sm[sm["菜品ID"] == foodId]["套餐名"].values[0])
                                                     else:
                                                         old_foodName = str(acm[acm["菜品ID"] == foodId]["菜名"].values[0])
-                                                        
+
                                                     if isSet == 1:
                                                         new_foodName = str(sm[sm["菜品ID"] == new_foodId]["套餐名"].values[0])
                                                     else:
@@ -9303,7 +9531,7 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
                                                             foodName = str(sm[sm["菜品ID"] == new_foodId]["套餐名"].values[0])
 
                                                             food_item, food_remark = rtn_food_change_handler(foodName=foodName, rtn_constants_dict=rtn_constants_dict, fi=originalFoodItems)
-                                                        
+
                                                         else:
                                                             food_item = str(sm[sm["菜品ID"] == new_foodId]["菜肴"].values[0])
                                                             foodName = str(sm[sm["菜品ID"] == new_foodId]["套餐名"].values[0])
@@ -9315,17 +9543,17 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
                                                                 confirm_foodItemRemark = rtn_confirm_input("这些备注")
                                                     else:
                                                         pass
-                                                
+
                                                     if isSet == 0:
                                                         base_price = float(acm[acm["菜品ID"] == str(new_foodId)]["价格"].values[0])
                                                         base_price = format(base_price, ".2f")
                                                         base_price = float(base_price)
-                                                
+
                                                     else:
                                                         base_price = float(sm[sm["菜品ID"] == str(new_foodId)]["价格"].values[0])
                                                         base_price = format(base_price, ".2f")
                                                         base_price = float(base_price)
-                                                
+
                                                     foodOrderAtrribute = str(display_food_db[display_food_db["点餐ID"] == foodOrderId]["菜品属性"].values[0])
                                                     foodAddOn = float(display_food_db[display_food_db["点餐ID"] == foodOrderId]["±价"].values[0])
                                                     foodAddOn = format(foodAddOn, ".2f")
@@ -9349,7 +9577,7 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
                                                                 print("影响后的基础价格: {}".format(format(base_price+foodAddOn, ".2f")))
                                                                 print()
                                                                 confirm_food_add_on = rtn_confirm_input(foodAddOn)
-                                                    
+
                                                     foodQty = int(display_food_db[display_food_db["点餐ID"] == foodOrderId]["数量"].values[0])
                                                     food_discount = float(display_food_db[display_food_db["点餐ID"] == foodOrderId]["折扣"].values[0])
 
@@ -9388,7 +9616,7 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
                                                                 print()
                                                                 confirm_food_discount = rtn_confirm_input("{}%".format(food_discount_percentage*100))
 
-                                                    total_subtotal = (base_price+foodAddOn)*foodQty-food_discount  
+                                                    total_subtotal = (base_price+foodAddOn)*foodQty-food_discount
                                                     total_subtotal = float(format(total_subtotal, ".4f"))
 
                                                     if foodOrderAtrribute == "堂食":
@@ -9396,7 +9624,7 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
                                                         total_svc = float(format(total_subtotal*svc_charge, ".4f"))
 
                                                     else:
-                                                        total_svc = 0.00  
+                                                        total_svc = 0.00
 
                                                     gst_charge = gst_rate - 1
                                                     total_gst = float(format((total_subtotal+total_svc)*gst_charge, ".4f"))
@@ -9405,7 +9633,7 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
 
                                                     remark = str(display_food_db[display_food_db["点餐ID"] == foodOrderId]["备注"].values[0])
                                                     foodOrderIndex = int(display_food_db[display_food_db["点餐ID"] == foodOrderId]["点餐INDEX"].values[0])
-                                                    
+
                                                     print()
                                                     print("修改详情: ")
                                                     print("点餐ID: {}".format(foodOrderId))
@@ -9425,14 +9653,14 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
                                                     print("税后价格: {}".format(total_payment))
                                                     print("备注: {}".format(remark))
                                                     print()
-                                                    
+
                                                     if isSet:
                                                         print("套餐内菜肴修改详情: ")
                                                         food_items = food_item.split(",")
                                                         food_remarks = food_remark.split(",")
                                                         for i in range(len(food_items)):
                                                             print("{} : {}".format(food_items[i], food_remarks[i]))
-                                                    
+
                                                     print("你确定把'{}'改成'{}'吗? ".format(old_foodName, new_foodName))
                                                     confirm_save, end_record_loop = rtn_confirm_save("此修改")
                                                 else:
@@ -9457,7 +9685,7 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
                                                         new_food_db = {}
                                                         for index in range(len(food_db_columns)):
                                                             new_food_db.update({ food_db_columns[index] : [food_db_sequence[index]] })
-                                                        
+
                                                         new_food_db = pd.DataFrame(new_food_db)
 
                                                         food_db = food_db[food_db["点餐ID"] != foodOrderId]
@@ -9476,13 +9704,13 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
                                                             new_sm_bd = {}
                                                             for index in range(len(sm_bd_columns)):
                                                                 new_sm_bd.update({ sm_bd_columns[index] : [sm_bd_sequence[index]] })
-                                                            
+
                                                             new_sm_bd = pd.DataFrame(new_sm_bd)
                                                             sm_bd = sm_bd[sm_bd["点餐ID"] != foodOrderId]
                                                             sm_bd_concat = pd.concat([sm_bd, new_sm_bd], ignore_index=True)
                                                             sm_bd_concat.sort_values(by="点餐ID", ascending=True, inplace=True, ignore_index=True)
                                                             sm_bd = sm_bd_concat
-                                                        
+
                                                         display_food_db, food_db, sm_bd_df, sm_bd, payment_info = rtn_food_order_parser(food_db=food_db, sm_bd=sm_bd, payment=payment, other_controls=other_controls)
 
                                                         print("修改成功, '{}'已成功改成'{}'".format(old_foodName, new_foodName))
@@ -9495,7 +9723,7 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
 
                                                 print("确定删除'{}'吗? ".format(foodName))
                                                 confirm_del = rtn_confirm_input(foodName)
-                                                
+
                                                 if confirm_del:
                                                     food_db = food_db[food_db["点餐ID"] != foodOrderId]
                                                     food_db["点餐INDEX"] = food_db["点餐INDEX"].astype(int)
@@ -9505,10 +9733,10 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
 
                                                     if isSet == 1:
                                                         sm_bd = sm_bd[sm_bd["点餐ID"] != foodOrderId]
-                                                    
+
                                                     display_food_db, food_db, sm_bd_df, sm_bd, payment_info = rtn_food_order_parser(food_db=food_db, sm_bd=sm_bd, payment=payment, other_controls=other_controls)
                                                     print("'{}'删除成功! ".format(foodName))
-                                                
+
                                                 else:
                                                     print("'{}'未删除! ".format(foodName))
 
@@ -9524,7 +9752,7 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
 
                                                     if isSet == 0:
                                                         base_price = float(format(float(acm[acm["菜品ID"] == str(foodId)]["价格"].values[0]), ".2f"))
-                                                    
+
                                                     else:
                                                         base_price = float(format(float(sm[sm["菜品ID"] == str(foodId)]["价格"].values[0]), ".2f"))
 
@@ -9569,7 +9797,7 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
 
                                                         print("确定这个数量吗? ")
                                                         confirm_foodQty = rtn_confirm_input(foodQty)
-                                                    
+
                                                     confirm_food_discount = False
 
                                                     while not confirm_food_discount:
@@ -9613,7 +9841,7 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
                                                             confirm_food_discount = rtn_confirm_input("无折扣")
                                                     else:
                                                         print("折扣为: {}".format(food_discount))
-                                                    
+
                                                     total_subtotal = (base_price+foodAddOn)*foodQty-food_discount
                                                     total_subtotal = float(format(total_subtotal, ".2f"))
 
@@ -9623,7 +9851,7 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
 
                                                     else:
                                                         total_svc = 0.00
-                                                    
+
                                                     gst_charge = gst_rate - 1
                                                     total_gst = float(format((total_subtotal+total_svc)*gst_charge, ".4f"))
 
@@ -9660,7 +9888,7 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
                                                             total_gst,
                                                             total_payment,
                                                             remark]
-                                                        
+
                                                         modify_food_db = {}
                                                         for index in range(len(food_db_columns)):
                                                             modify_food_db.update({ food_db_columns[index] : [ food_db_sequence[index] ] })
@@ -9671,13 +9899,13 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
                                                         food_db_concat.sort_values(by="点餐INDEX", ascending=True, inplace=True, ignore_index=True)
 
                                                         food_db = food_db_concat
-                                                    
+
                                                         display_food_db, food_db, sm_bd_df, sm_bd, payment_info = rtn_food_order_parser(food_db=food_db, sm_bd=sm_bd, payment=payment, other_controls=other_controls)
 
                                                         print("修改成功! ")
                                                     else:
                                                         print("未修改! ")
-                                            
+
                                             elif fourth_select == 3:
                                                 orderAttribute = str(rtn_db[rtn_db["订单ID"] == orderId]["订单属性"].values[0])
                                                 original_foodOrderAttribute = str(display_food_db[display_food_db["点餐ID"] == foodOrderId]["菜品属性"].values[0])
@@ -9698,10 +9926,10 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
                                                             foodOrderAttribute = "打包"
                                                         else:
                                                             foodOrderAttribute = "堂食"
-                                                        
+
                                                         print("你确定吗? ")
                                                         confirm_foodOrderAttribute = rtn_confirm_input(foodOrderAttribute)
-                                                
+
                                                 foodName = str(display_food_db[display_food_db["点餐ID"] == foodOrderId]["菜名/套餐名"].values[0])
                                                 isSet = int(display_food_db[display_food_db["点餐ID"] == foodOrderId]["套餐?"].values[0])
                                                 foodOrderIndex = int(display_food_db[display_food_db["点餐ID"] == foodOrderId]["点餐INDEX"].values[0])
@@ -9713,7 +9941,7 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
 
                                                 if isSet == 0:
                                                         base_price = float(format(float(acm[acm["菜品ID"] == str(foodId)]["价格"].values[0]), ".2f"))
-                                                    
+
                                                 else:
                                                     base_price = float(format(float(sm[sm["菜品ID"] == str(foodId)]["价格"].values[0]), ".2f"))
 
@@ -9726,12 +9954,12 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
 
                                                 else:
                                                     total_svc = 0.00
-                                                
+
                                                 gst_charge = gst_rate - 1
                                                 total_gst = float(format((total_subtotal+total_svc)*gst_charge, ".4f"))
 
                                                 total_payment = float(format(total_subtotal+total_svc+total_gst, ".4f"))
-                                            
+
                                                 print("修改详情: ")
                                                 print("菜名/套餐名: {}".format(foodName))
                                                 print("菜品属性: {}".format(foodOrderAttribute))
@@ -9778,7 +10006,7 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
                                                     option = ["改该套餐内菜肴备注", "改该菜品备注", "完成并退出修改备注"]
                                                 else:
                                                     option = ["改该菜品备注", "完成并退出修改备注"]
-                                                
+
                                                 sixth_select = 0
                                                 while sixth_select != len(option)-1:
                                                     options = option_num(option)
@@ -9811,30 +10039,30 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
                                                         saving_food_remark = True
                                                     except:
                                                         saving_food_remark = False
-                                                    
+
                                                     try:
                                                         to_save_remark = to_save_remark
                                                         saving_remark = True
                                                     except:
                                                         saving_remark = False
-                                                    
+
                                                     if saving_food_remark:
                                                         sequence = [
                                                             orderId,
                                                             foodOrderId,
                                                             food_item,
                                                             to_save_food_remark]
-                                                        
+
                                                         new_sm_bd = {}
                                                         for index in range(len(sm_bd_columns)):
                                                             new_sm_bd.update({ sm_bd_columns[index] : [ sequence[index] ] })
-                                                        
+
                                                         new_sm_bd = pd.DataFrame(new_sm_bd)
                                                         sm_bd = sm_bd[sm_bd["点餐ID"] != foodOrderId]
                                                         sm_bd_concat = pd.concat([sm_bd, new_sm_bd], ignore_index=True)
                                                         sm_bd_concat.sort_values(by="点餐ID", ascending=True, inplace=True, ignore_index=True)
                                                         sm_bd = sm_bd_concat
-                                                    
+
                                                     if saving_remark:
                                                         foodOrderIndex = int(display_food_db[display_food_db["点餐ID"] == foodOrderId]["点餐INDEX"].values[0])
                                                         isSet = int(display_food_db[display_food_db["点餐ID"] == foodOrderId]["套餐?"].values[0])
@@ -9847,7 +10075,7 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
                                                         total_svc = float(display_food_db[display_food_db["点餐ID"] == foodOrderId]["服务费"].values[0])
                                                         total_gst = float(display_food_db[display_food_db["点餐ID"] == foodOrderId]["GST"].values[0])
                                                         total_payment = float(display_food_db[display_food_db["点餐ID"] == foodOrderId]["税后价格"].values[0])
-                                                        
+
                                                         sequence = [
                                                             foodOrderId,
                                                             orderId,
@@ -9868,13 +10096,13 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
                                                         modify_food_db = {}
                                                         for index in range(len(food_db_columns)):
                                                             modify_food_db.update({ food_db_columns[index] : [ sequence[index]] })
-                                                        
+
                                                         modify_food_db = pd.DataFrame(modify_food_db)
                                                         food_db = food_db[food_db["点餐ID"] != foodOrderId]
                                                         food_db_concat = pd.concat([food_db, modify_food_db], ignore_index=True)
                                                         food_db_concat.sort_values(by="点餐INDEX", ascending=True, inplace=True, ignore_index=True)
                                                         food_db = food_db_concat
-                                                    
+
                                                     display_food_db, food_db, sm_bd_df, sm_bd, payment_info = rtn_food_order_parser(food_db=food_db, sm_bd=sm_bd, payment=payment, other_controls=other_controls)
                                                     print("备注类操作完成。")
                                     except Exception as e:
@@ -9890,7 +10118,7 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
                     else:
                         slice_food_db = food_db
                         slice_sm_bd = sm_bd
-                
+
                 else:
                     slice_food_db = -404
                     slice_sm_bd = -404
@@ -9902,19 +10130,19 @@ def rtn_edit_food_order(google_auth, fernet_key, rtn_database_url, order_concat,
             slice_food_db = slice_food_db
         except:
             slice_food_db = -404
-        
+
         try:
             slice_sm_bd = slice_sm_bd
         except:
             slice_sm_bd = -404
-        
+
         try:
             orderId = orderId
         except:
             orderId = None
 
-        return slice_food_db, slice_sm_bd, orderId                               
-                                        
+        return slice_food_db, slice_sm_bd, orderId
+
 def rtn_edit_finance(google_auth, fernet_key, rtn_database_url, order_concat, rtn_constants_dict, other_controls):
     payment_method = str(rtn_constants_dict["payment_selections"]).split(",")
     payment_include_others = eval(str(rtn_constants_dict["payment_selections_include_others"]).strip().capitalize())
@@ -9932,7 +10160,7 @@ def rtn_edit_finance(google_auth, fernet_key, rtn_database_url, order_concat, rt
             payment_update = payment_update
         except:
             payment_update = -404
-        
+
         if isinstance(payment_update, pd.DataFrame):
             option = ["保存并退出财务操作"]
         else:
@@ -9969,7 +10197,7 @@ def rtn_edit_finance(google_auth, fernet_key, rtn_database_url, order_concat, rt
                         for index in range(len(rtn_db)):
                             for column in range(len(rtn_db.columns)):
                                 print("{}: {}".format(rtn_db.columns[column], rtn_db.iloc[index, column]))
-                        
+
                         print()
                         print("系统备注: 「预订除夕?」和「本地号码?」列, 1表是, 0表不是。")
                         print()
@@ -9984,7 +10212,7 @@ def rtn_edit_finance(google_auth, fernet_key, rtn_database_url, order_concat, rt
                         else:
                             print()
                             print("目前未点餐。")
-                        
+
                         if isinstance(sm_bd_df, pd.DataFrame):
                             print()
                             print("套餐内菜肴详情: ")
@@ -9992,7 +10220,7 @@ def rtn_edit_finance(google_auth, fernet_key, rtn_database_url, order_concat, rt
                             print()
                         else:
                             print()
-                        
+
                         print("财务详情: ")
                         print()
                         if payment_update.empty:
@@ -10003,7 +10231,7 @@ def rtn_edit_finance(google_auth, fernet_key, rtn_database_url, order_concat, rt
 
                         for key, value in payment_info.items():
                             print("{} : {}".format(key, format(float(value), ".2f")))
-                            
+
                         print()
                         print()
 
@@ -10014,7 +10242,7 @@ def rtn_edit_finance(google_auth, fernet_key, rtn_database_url, order_concat, rt
                         if second_select == 0:
                             end_record_loop = False
                             while not end_record_loop:
-                                
+
                                 confirm_payment_mode = False
                                 while not confirm_payment_mode:
                                     payment_methods = option_num(payment_method)
@@ -10027,7 +10255,7 @@ def rtn_edit_finance(google_auth, fernet_key, rtn_database_url, order_concat, rt
                                         payment_mode = rtn_input_validation(rule="searchString", title="付款方式", space_removal=False, rtn_constants_dict=rtn_constants_dict)
 
                                     confirm_payment_mode = rtn_confirm_input(payment_mode)
-                                
+
                                 confirm_pay_value = False
                                 while not confirm_pay_value:
                                     pay_value = rtn_input_validation(rule="foodPrice", title="付款金额", rtn_constants_dict=rtn_constants_dict)
@@ -10043,11 +10271,11 @@ def rtn_edit_finance(google_auth, fernet_key, rtn_database_url, order_concat, rt
                                     pay_time,
                                     payment_mode,
                                     float(format(float(pay_value), ".2f"))]
-                                
+
                                 new_pay = {}
                                 for index in range(len(payment_columns)):
                                     new_pay.update({ payment_columns[index] : [ sequence[index] ] })
-                                
+
                                 new_pay = pd.DataFrame(new_pay)
                                 payment_concat = pd.concat([payment_update, new_pay], ignore_index=True)
                                 payment_concat["付款时间"] = pd.to_datetime(payment_concat["付款时间"])
@@ -10062,7 +10290,7 @@ def rtn_edit_finance(google_auth, fernet_key, rtn_database_url, order_concat, rt
                                 print()
                                 for key, value in uncof_payment_info.items():
                                     print("{} : {} ".format(key, format(float(value), ".2f")))
-                                
+
                                 print()
                                 print()
                                 confirm_save, end_record_loop = rtn_confirm_save("此记录" )
@@ -10086,7 +10314,7 @@ def rtn_edit_finance(google_auth, fernet_key, rtn_database_url, order_concat, rt
                                     for index in range(len(payment_update)):
                                         del_option += ["删除'金额: {}, 方式: {}'".format(payment_update.iloc[index, 4], payment_update.iloc[index, 3])]
                                         paymentIdList += ["{}".format(payment_update.iloc[index, 0])]
-                                    
+
                                     del_options = option_num(del_option)
                                     time.sleep(0.25)
                                     del_select = option_limit(del_options, input("在这里输入>>>: "))
@@ -10116,7 +10344,7 @@ def rtn_edit_finance(google_auth, fernet_key, rtn_database_url, order_concat, rt
                 else:
                     payment_update = -404
                     payment_info_update = -404
-        
+
         else:
             if fin_select == 0:
                 fin_select = 1
@@ -10125,7 +10353,7 @@ def rtn_edit_finance(google_auth, fernet_key, rtn_database_url, order_concat, rt
             payment_update = payment_update
         except:
             payment_update = -404
-        
+
         try:
             orderId = orderId
         except:
@@ -10159,7 +10387,7 @@ def rtn_edit_order(rtn_constants_dict, other_controls, google_auth, fernet_key, 
             slice_rtn_db = slice_rtn_db
         except:
             slice_rtn_db = -404
-        
+
         try:
             delete_orderId = delete_orderId
         except:
@@ -10169,7 +10397,7 @@ def rtn_edit_order(rtn_constants_dict, other_controls, google_auth, fernet_key, 
             option = ["保存并退出编辑订单操作"]
         else:
             option = ["查看订单", "退出编辑订单操作"]
-        
+
         first_options = option_num(option)
         time.sleep(0.25)
         eo_select = option_limit(first_options, input("在这里输入>>>: "))
@@ -10262,7 +10490,7 @@ def rtn_edit_order(rtn_constants_dict, other_controls, google_auth, fernet_key, 
                                         modify = {}
                                         for index in range(len(order_columns)):
                                             modify.update({ order_columns[index] : [sequence[index]] })
-                                        
+
                                         modify = pd.DataFrame(modify)
 
                                         slice_rtn_db = modify
@@ -10305,12 +10533,12 @@ def rtn_edit_order(rtn_constants_dict, other_controls, google_auth, fernet_key, 
                                         if str(orderNumber) in rtn_db["订单号"].values.tolist():
                                             print("订单号重复! 请重新输入订单号! ")
                                             end_record_loop = False
-                                    
+
                                     print()
                                     print()
                                     print("你确定把订单号从'{}'改成'{}'吗? ".format(current_order_number, orderNumber))
                                     confirm_save, end_record_loop = rtn_confirm_save(orderNumber)
-                                
+
                                 else:
                                     if confirm_save:
                                         outletCode = str(slice_rtn_db[slice_rtn_db["订单ID"] == orderId]["门店代号"].values[0])
@@ -10353,7 +10581,7 @@ def rtn_edit_order(rtn_constants_dict, other_controls, google_auth, fernet_key, 
                                         modify = {}
                                         for index in range(len(order_columns)):
                                             modify.update({ order_columns[index] : [sequence[index]] })
-                                        
+
                                         modify = pd.DataFrame(modify)
 
                                         slice_rtn_db = modify
@@ -10389,7 +10617,7 @@ def rtn_edit_order(rtn_constants_dict, other_controls, google_auth, fernet_key, 
 
                                     if phoneOptionSelect == 0:
                                         customerPhone = rtn_input_validation(rule="localPhone", title="本地号码")
-                                    
+
                                     elif phoneOptionSelect == 1:
                                         print("外国号码请添加国际代码,但无需'+'号。")
                                         customerPhone = rtn_input_validation(rule="searchString", title="外国号码", remove_spaces=True, rtn_constants_dict=rtn_constants_dict)
@@ -10397,8 +10625,8 @@ def rtn_edit_order(rtn_constants_dict, other_controls, google_auth, fernet_key, 
                                         if "+" in customerPhone:
                                             customerPhone = customerPhone.replace("+", "")
                                             print("'+'已自动移除, 无需添加'+'号。")
-                                        
-                                    
+
+
                                     else:
                                         print("无预留电话将以'-'呈现。")
                                         customerPhone = "-"
@@ -10407,12 +10635,12 @@ def rtn_edit_order(rtn_constants_dict, other_controls, google_auth, fernet_key, 
                                         isLocalPhone = 1
                                     else:
                                         isLocalPhone = 0
-                                    
+
                                     print()
                                     print()
                                     print("你确定把电话号码从'{}'换成'{}'吗? ".format(currPhone, customerPhone))
                                     confirm_save, end_record_loop = rtn_confirm_save(customerPhone)
-                                
+
                                 else:
                                     if confirm_save:
                                         outletCode = str(slice_rtn_db[slice_rtn_db["订单ID"] == orderId]["门店代号"].values[0])
@@ -10455,7 +10683,7 @@ def rtn_edit_order(rtn_constants_dict, other_controls, google_auth, fernet_key, 
                                         modify = {}
                                         for index in range(len(order_columns)):
                                             modify.update({ order_columns[index] : [sequence[index]] })
-                                        
+
                                         modify = pd.DataFrame(modify)
 
                                         slice_rtn_db = modify
@@ -10470,8 +10698,8 @@ def rtn_edit_order(rtn_constants_dict, other_controls, google_auth, fernet_key, 
                                 time.sleep(0.25)
                                 input("按回车键继续>>>: ")
                                 print()
-                                print()   
-                        
+                                print()
+
                         elif second_select == 3:
                             try:
                                 delete_orderId = delete_orderId
@@ -10487,7 +10715,7 @@ def rtn_edit_order(rtn_constants_dict, other_controls, google_auth, fernet_key, 
                                 end_record_loop = False
                                 while not end_record_loop:
                                     reserveTime = rtn_edit_datetime()
-                                
+
                                     reserveDate = dt.datetime(year=reserveTime.year, month=reserveTime.month, day=reserveTime.day)
 
                                     if CnyEveDate == reserveDate:
@@ -10496,18 +10724,18 @@ def rtn_edit_order(rtn_constants_dict, other_controls, google_auth, fernet_key, 
                                         isCnyEve = 0
 
                                     round_time_param = str(rtn_constants_dict["cny_eve_round_time_param"]).split(",")
-                
+
                                     round_time_dt_bind = {}
                                     for t in range(len(round_time_param)):
                                         dt_format = dt.datetime.strptime(round_time_param[t], "%Y-%m-%d %H:%M")
                                         round_sequence = "第{}轮".format(t+1)
                                         round_time_dt_bind.update({ dt_format : round_sequence  })
-                                    
+
                                     if reserveTime in list(round_time_dt_bind.keys()):
                                         round = round_time_dt_bind[reserveTime]
                                     else:
                                         round = "无效"
-                                    
+
                                     print()
                                     print()
                                     print("影响后的对象: ")
@@ -10520,17 +10748,17 @@ def rtn_edit_order(rtn_constants_dict, other_controls, google_auth, fernet_key, 
                                     confirm_save, end_record_loop = rtn_confirm_save(reserveTime.strftime("%Y-%m-%d %H:%M"))
                                 else:
                                     if confirm_save:
-                                        orderAttribute = str(slice_rtn_db[slice_rtn_db["订单ID"] == orderId]["订单属性"].values[0]) 
+                                        orderAttribute = str(slice_rtn_db[slice_rtn_db["订单ID"] == orderId]["订单属性"].values[0])
                                         print("修改预订时间/轮数后, 以下对象将重置: ")
                                         if orderAttribute == "堂食":
                                             tableAssign = "未排位"
                                         else:
                                             tableAssign = "无效"
-                                        
+
                                         print("桌台重置为'{}'。".format(tableAssign))
 
                                         outletCode = str(slice_rtn_db[slice_rtn_db["订单ID"] == orderId]["门店代号"].values[0])
-                                        orderCreatedTime = pd.to_datetime(str(slice_rtn_db[slice_rtn_db["订单ID"] == orderId]["订单创建时间"].values[0]))                
+                                        orderCreatedTime = pd.to_datetime(str(slice_rtn_db[slice_rtn_db["订单ID"] == orderId]["订单创建时间"].values[0]))
                                         customerName = str(slice_rtn_db[slice_rtn_db["订单ID"] == orderId]["姓名"].values[0])
                                         orderNumber = str(slice_rtn_db[slice_rtn_db["订单ID"] == orderId]["订单号"].values[0])
                                         phone = str(slice_rtn_db[slice_rtn_db["订单ID"] == orderId]["电话"].values[0])
@@ -10565,7 +10793,7 @@ def rtn_edit_order(rtn_constants_dict, other_controls, google_auth, fernet_key, 
                                         modify = {}
                                         for index in range(len(order_columns)):
                                             modify.update({ order_columns[index] : [sequence[index]] })
-                                        
+
                                         modify = pd.DataFrame(modify)
 
                                         slice_rtn_db = modify
@@ -10587,7 +10815,7 @@ def rtn_edit_order(rtn_constants_dict, other_controls, google_auth, fernet_key, 
                                 delete_orderId = delete_orderId
                             except:
                                 delete_orderId = -404
-                            
+
                             if isinstance(delete_orderId, int):
                                 orderAttribute = str(slice_rtn_db[slice_rtn_db["订单ID"] == orderId]["订单属性"].values[0])
 
@@ -10619,7 +10847,7 @@ def rtn_edit_order(rtn_constants_dict, other_controls, google_auth, fernet_key, 
                                                 confirm_totalPax = False
                                             else:
                                                 confirm_totalPax = True
-                                        
+
                                         print()
                                         print()
                                         print("更改后详情: ")
@@ -10635,9 +10863,9 @@ def rtn_edit_order(rtn_constants_dict, other_controls, google_auth, fernet_key, 
                                         if confirm_save:
                                             outletCode = str(slice_rtn_db[slice_rtn_db["订单ID"] == orderId]["门店代号"].values[0])
                                             orderCreatedTime = pd.to_datetime(str(slice_rtn_db[slice_rtn_db["订单ID"] == orderId]["订单创建时间"].values[0]))
-                                            orderAttribute = str(slice_rtn_db[slice_rtn_db["订单ID"] == orderId]["订单属性"].values[0]) 
+                                            orderAttribute = str(slice_rtn_db[slice_rtn_db["订单ID"] == orderId]["订单属性"].values[0])
                                             reserveTime = pd.to_datetime(str(slice_rtn_db[slice_rtn_db["订单ID"] == orderId]["预订时间"].values[0]))
-                                            isCnyEve = int(slice_rtn_db[slice_rtn_db["订单ID"] == orderId]["预订除夕?"].values[0])                               
+                                            isCnyEve = int(slice_rtn_db[slice_rtn_db["订单ID"] == orderId]["预订除夕?"].values[0])
                                             customerName = str(slice_rtn_db[slice_rtn_db["订单ID"] == orderId]["姓名"].values[0])
                                             orderNumber = str(slice_rtn_db[slice_rtn_db["订单ID"] == orderId]["订单号"].values[0])
                                             phone = str(slice_rtn_db[slice_rtn_db["订单ID"] == orderId]["电话"].values[0])
@@ -10670,7 +10898,7 @@ def rtn_edit_order(rtn_constants_dict, other_controls, google_auth, fernet_key, 
                                             modify = {}
                                             for index in range(len(order_columns)):
                                                 modify.update({ order_columns[index] : [sequence[index]] })
-                                            
+
                                             modify = pd.DataFrame(modify)
 
                                             slice_rtn_db = modify
@@ -10689,7 +10917,7 @@ def rtn_edit_order(rtn_constants_dict, other_controls, google_auth, fernet_key, 
                                     orderCreatedTime = pd.to_datetime(str(slice_rtn_db[slice_rtn_db["订单ID"] == orderId]["订单创建时间"].values[0]))
                                     orderAttribute = str(slice_rtn_db[slice_rtn_db["订单ID"] == orderId]["订单属性"].values[0])
                                     isCnyEve = int(slice_rtn_db[slice_rtn_db["订单ID"] == orderId]["预订除夕?"].values[0])
-                                    reserveTime = pd.to_datetime(str(slice_rtn_db[slice_rtn_db["订单ID"] == orderId]["预订时间"].values[0]))                               
+                                    reserveTime = pd.to_datetime(str(slice_rtn_db[slice_rtn_db["订单ID"] == orderId]["预订时间"].values[0]))
                                     customerName = str(slice_rtn_db[slice_rtn_db["订单ID"] == orderId]["姓名"].values[0])
                                     orderNumber = str(slice_rtn_db[slice_rtn_db["订单ID"] == orderId]["订单号"].values[0])
                                     phone = str(slice_rtn_db[slice_rtn_db["订单ID"] == orderId]["电话"].values[0])
@@ -10722,7 +10950,7 @@ def rtn_edit_order(rtn_constants_dict, other_controls, google_auth, fernet_key, 
                                     modify = {}
                                     for index in range(len(order_columns)):
                                         modify.update({ order_columns[index] : [sequence[index]] })
-                                    
+
                                     modify = pd.DataFrame(modify)
 
                                     slice_rtn_db = modify
@@ -10741,7 +10969,7 @@ def rtn_edit_order(rtn_constants_dict, other_controls, google_auth, fernet_key, 
                                 delete_orderId = delete_orderId
                             except:
                                 delete_orderId = -404
-                            
+
                             if isinstance(delete_orderId, int):
                                 orderAttribute = str(slice_rtn_db[slice_rtn_db["订单ID"] == orderId]["订单属性"].values[0])
                                 reserveTime = pd.to_datetime(str(slice_rtn_db[slice_rtn_db["订单ID"] == orderId]["预订时间"].values[0]))
@@ -10769,7 +10997,7 @@ def rtn_edit_order(rtn_constants_dict, other_controls, google_auth, fernet_key, 
                                             if tableAssignSelect == 0:
                                                 tableAssign = "未排位"
                                                 confirm_table_assign = True
-                                            
+
                                             elif tableAssignSelect == 1:
                                                 table_occupancy, unassigned_df = rtn_table_occupancy(rtn_db=rtn_db, round=round, reserveTime=reserveTime, other_controls=other_controls)
                                                 table_occupancy["桌名"] = table_occupancy["桌名"].astype(str)
@@ -10803,7 +11031,7 @@ def rtn_edit_order(rtn_constants_dict, other_controls, google_auth, fernet_key, 
                                                         print("排位失败, 该桌台太小了! ")
                                                         print("请重新选择! ")
                                                         confirm_table_assign = False
-                                            
+
                                         tableAssign = tableName
                                         print()
                                         print()
@@ -10851,7 +11079,7 @@ def rtn_edit_order(rtn_constants_dict, other_controls, google_auth, fernet_key, 
                                         modify = {}
                                         for index in range(len(order_columns)):
                                             modify.update({ order_columns[index] : [sequence[index]] })
-                                        
+
                                         modify = pd.DataFrame(modify)
 
                                         slice_rtn_db = modify
@@ -10893,7 +11121,7 @@ def rtn_edit_order(rtn_constants_dict, other_controls, google_auth, fernet_key, 
                                     else:
                                         print("无备注将用'-'呈现。")
                                         remark = "-"
-                                    
+
                                     print("你确定把替换为这些备注内容吗? ")
                                     print("原来的备注: ")
                                     print(currRemark)
@@ -10947,7 +11175,7 @@ def rtn_edit_order(rtn_constants_dict, other_controls, google_auth, fernet_key, 
                                         modify = {}
                                         for index in range(len(order_columns)):
                                             modify.update({ order_columns[index] : [sequence[index]] })
-                                        
+
                                         modify = pd.DataFrame(modify)
 
                                         slice_rtn_db = modify
@@ -10969,7 +11197,7 @@ def rtn_edit_order(rtn_constants_dict, other_controls, google_auth, fernet_key, 
                                 delete_orderId = delete_orderId
                             except:
                                 delete_orderId  = -404
-                            
+
                             if isinstance(delete_orderId, int):
                                 display_food_db, food_db, sm_bd_df, sm_bd, payment_info = rtn_food_order_parser(food_db=food_db, sm_bd=sm_bd, payment=payment, other_controls=other_controls)
 
@@ -10986,17 +11214,17 @@ def rtn_edit_order(rtn_constants_dict, other_controls, google_auth, fernet_key, 
                                     else:
                                         print("未付全款的订单无法完结。")
                                         option.remove("完结")
-                                    
+
                                     options = option_num(option)
                                     time.sleep(0.25)
                                     option_select = option_limit(options, input("在这里输入>>>: "))
-                                
+
                                     orderStatus = option[option_select]
                                     print()
                                     print()
                                     print("你确定把该订单的状态从'{}'改成'{}'吗? ".format(currOrderStatus, orderStatus))
                                     confirm_save, end_record_loop = rtn_confirm_save("'{}'".format(orderStatus))
-                                
+
                                 else:
                                     if confirm_save:
                                         outletCode = str(slice_rtn_db[slice_rtn_db["订单ID"] == orderId]["门店代号"].values[0])
@@ -11039,7 +11267,7 @@ def rtn_edit_order(rtn_constants_dict, other_controls, google_auth, fernet_key, 
                                         modify = {}
                                         for index in range(len(order_columns)):
                                             modify.update({ order_columns[index] : [sequence[index]] })
-                                        
+
                                         modify = pd.DataFrame(modify)
 
                                         slice_rtn_db = modify
@@ -11061,14 +11289,14 @@ def rtn_edit_order(rtn_constants_dict, other_controls, google_auth, fernet_key, 
                                 delete_orderId = delete_orderId
                             except:
                                 delete_orderId  = -404
-                            
+
                             if isinstance(delete_orderId, int):
                                 display_food_db, food_db, sm_bd_df, sm_bd, payment_info = rtn_food_order_parser(food_db=food_db, sm_bd=sm_bd, payment=payment, other_controls=other_controls)
 
                                 food_db["订单ID"] = food_db["订单ID"].astype(str)
                                 food_db["菜品属性"] = food_db["菜品属性"].astype(str)
                                 food_db = food_db[food_db["订单ID"] == orderId]
-                                
+
                                 orderAttribute = str(slice_rtn_db[slice_rtn_db["订单ID"] == orderId]["订单属性"].values[0])
 
                                 if orderAttribute == "堂食":
@@ -11082,7 +11310,7 @@ def rtn_edit_order(rtn_constants_dict, other_controls, google_auth, fernet_key, 
                                         canChangeAttri = True
                                 else:
                                     canChangeAttri = True
-                                
+
                                 if canChangeAttri:
                                     end_record_loop = False
                                     while not end_record_loop:
@@ -11115,7 +11343,7 @@ def rtn_edit_order(rtn_constants_dict, other_controls, google_auth, fernet_key, 
                                             else:
                                                 tableAssign = "无效"
                                                 print("桌台重置为'无效'。")
-                                            
+
                                             outletCode = str(slice_rtn_db[slice_rtn_db["订单ID"] == orderId]["门店代号"].values[0])
                                             orderCreatedTime = pd.to_datetime(str(slice_rtn_db[slice_rtn_db["订单ID"] == orderId]["订单创建时间"].values[0]))
                                             reserveTime = pd.to_datetime(str(slice_rtn_db[slice_rtn_db["订单ID"] == orderId]["预订时间"].values[0]))
@@ -11155,7 +11383,7 @@ def rtn_edit_order(rtn_constants_dict, other_controls, google_auth, fernet_key, 
                                             modify = {}
                                             for index in range(len(order_columns)):
                                                 modify.update({ order_columns[index] : [sequence[index]] })
-                                            
+
                                             modify = pd.DataFrame(modify)
 
                                             slice_rtn_db = modify
@@ -11196,18 +11424,18 @@ def rtn_edit_order(rtn_constants_dict, other_controls, google_auth, fernet_key, 
                             slice_rtn_db = slice_rtn_db
                         except:
                             slice_rtn_db = -404
-                        
+
                         try:
                             delete_orderId = delete_orderId
                         except:
                             delete_orderId = -404
-                
+
             else:
                 try:
                     slice_rtn_db = slice_rtn_db
                 except:
                     slice_rtn_db = -404
-                
+
                 try:
                     delete_orderId = delete_orderId
                 except:
@@ -11220,13 +11448,13 @@ def rtn_edit_order(rtn_constants_dict, other_controls, google_auth, fernet_key, 
             slice_rtn_db = slice_rtn_db
         except:
             slice_rtn_db = -404
-        
+
         try:
             delete_orderId = delete_orderId
         except:
             delete_orderId = -404
 
-        return slice_rtn_db, delete_orderId        
+        return slice_rtn_db, delete_orderId
 
 def rtn_table_occupancy(rtn_db, round, reserveTime, other_controls):
     tc = other_controls["tc"]
@@ -11260,7 +11488,7 @@ def rtn_table_occupancy(rtn_db, round, reserveTime, other_controls):
 
         tableNameArr += [tableName]
         tableOccupancy += ["{}-{}人".format(tableMin, tableMax)]
-        
+
         if rtn_db[filter].empty:
             tableOccupyByOrderNumber += [" "]
             OrderTotalPax += [" "]
@@ -11270,7 +11498,7 @@ def rtn_table_occupancy(rtn_db, round, reserveTime, other_controls):
 
             totalPax = int(rtn_db[filter]["载客量"].values[0])
             OrderTotalPax += [totalPax]
-    
+
     return_df = pd.DataFrame({
         "桌名" : tableNameArr,
         "桌台载客量" : tableOccupancy,
@@ -11291,7 +11519,7 @@ def rtn_upload_database(df, db_sheetname, google_auth, rtn_database_url, fernet_
         try:
             db_sheet = google_auth.open_by_url(rtn_database_url)
             sheetname_index = db_sheet.worksheet(property="title", value=sheetname).index
-            
+
             if slice:
                 db_df = db_sheet[sheetname_index].get_as_df()
                 upload_df = pd.concat([db_df, df], ignore_index=True)
@@ -11312,14 +11540,14 @@ def rtn_upload_database(df, db_sheetname, google_auth, rtn_database_url, fernet_
 
             elif db_sheetname == "payment":
                 upload_df.sort_values(by="订单ID", ascending=False, inplace=True, ignore_index=True)
-            
+
             upload_df = rtn_datetime_strftime(upload_df)
 
             db_sheet[sheetname_index].set_dataframe(upload_df, start="A1", nan="")
 
             upload_success = True
             print("上传成功")
-        
+
         except Exception as e:
             print("上传失败, 错误描述如下: ")
             print(e)
@@ -11340,14 +11568,14 @@ def rtn_upload_database(df, db_sheetname, google_auth, rtn_database_url, fernet_
 
             df.sort_values(by="创建时间", ascending=False, inplace=True, ignore_index=True)
 
-            
+
             df = rtn_datetime_strftime(df)
-            
+
             control_sheet[sheetname_index].set_dataframe(df, start="A1", nan="")
 
             upload_success = True
             print("上传成功")
-        
+
         except Exception as e:
             print("上传失败, 错误描述如下: ")
             print(e)
@@ -11396,7 +11624,7 @@ def rtn_order_chit(rtn_constants_dict, other_controls, orderId, db, songTi, logo
         reserveDatetime = reserveDatetime_dt.strftime("%d/%m/%Y %H:%M")
         orderAttribute = str(rtn_db["订单属性"].values[0])
         orderRound = str(rtn_db["轮数"].values[0])
-        pax = "{}大{}小{}幼".format(int(rtn_db["成人人数"].values[0]), int(rtn_db["儿童人数"].values[0]), int(rtn_db["幼儿人数"].values[0])) 
+        pax = "{}大{}小{}幼".format(int(rtn_db["成人人数"].values[0]), int(rtn_db["儿童人数"].values[0]), int(rtn_db["幼儿人数"].values[0]))
         orderRemark = str(rtn_db["备注"].values[0])
 
         svc_multiplier = float(rtn_constants_dict["service_charge_multiplier"])
@@ -11436,7 +11664,7 @@ def rtn_order_chit(rtn_constants_dict, other_controls, orderId, db, songTi, logo
                 orderNumber,
                 "姓名Name:",
                 customerName,
-                
+
                 "创建时间Order Placed:",
                 orderDateCreated,
                 "预订时间Reserved On:",
@@ -11446,7 +11674,7 @@ def rtn_order_chit(rtn_constants_dict, other_controls, orderId, db, songTi, logo
                 customerPhone,
                 "属性Eat-in/To-go:",
                 orderAttribute,
-                
+
                 "轮数Round:",
                 orderRound,
                 "人数Pax:",
@@ -11459,12 +11687,12 @@ def rtn_order_chit(rtn_constants_dict, other_controls, orderId, db, songTi, logo
                 orderNumber,
                 "姓名Name:",
                 customerName,
-                
+
                 "创建时间Order Placed:",
-                orderDateCreated,        
+                orderDateCreated,
                 "预订时间Reserved On:",
                 reserveDatetime,
-                
+
                 "电话Phone:",
                 customerPhone,
                 "属性Eat-in/To-go:",
@@ -11475,7 +11703,7 @@ def rtn_order_chit(rtn_constants_dict, other_controls, orderId, db, songTi, logo
                 table1.add(borb_Paragraph(str(sequence1[i]), font=songTi, horizontal_alignment=borb_align.RIGHT))
             else:
                 table1.add(borb_Paragraph(str(sequence1[i]), font=songTi, horizontal_alignment=borb_align.CENTERED))
-                    
+
         table1.set_padding_on_all_cells(Decimal(1), Decimal(1), Decimal(1), Decimal(1))
         table1.no_borders()
         layout.add(table1)
@@ -11500,7 +11728,7 @@ def rtn_order_chit(rtn_constants_dict, other_controls, orderId, db, songTi, logo
         if isinstance(display_food_db, pd.DataFrame):
             display_food_db["点餐INDEX"] = display_food_db["点餐INDEX"].astype(int)
             display_food_db.sort_values(by="点餐INDEX", ascending=True, inplace=True, ignore_index=True)
-            
+
             display_food_db.drop(["点餐ID", "订单ID","菜品ID", "套餐?", "换菜?", "点餐INDEX", "服务费", "GST", "税后价格"], axis=1, inplace=True)
             display_food_db = display_food_db[["数量", "菜名/套餐名", "菜品属性", "±价", "折扣", "税前价格", "备注"]]
 
@@ -11518,7 +11746,7 @@ def rtn_order_chit(rtn_constants_dict, other_controls, orderId, db, songTi, logo
             table3.set_padding_on_all_cells(Decimal(1.5), Decimal(1.5), Decimal(1.5), Decimal(1.5))
             layout.add(borb_Paragraph("订餐详情 Food Details:", font=songTi, horizontal_alignment=borb_align.CENTERED))
             layout.add(table3)
-            
+
         else:
             pass
         pbar.update(12)
@@ -11530,7 +11758,7 @@ def rtn_order_chit(rtn_constants_dict, other_controls, orderId, db, songTi, logo
                 sm_bd_df.drop(["点餐ID"], axis=1, inplace=True)
                 sm_bd_df["数量"] = sm_bd_df["数量"].astype(int)
                 sm_bd_df = sm_bd_df[["数量", "套餐名", "菜肴Index", "菜肴名", "备注"]]
-                
+
                 table4_columns = ["量QTY", "套SET", "#", "食FOOD", "注RE"]
 
                 table4 = borb_Table(number_of_rows=len(sm_bd_df)+1, number_of_columns=len(table4_columns))
@@ -11583,14 +11811,14 @@ def rtn_order_chit(rtn_constants_dict, other_controls, orderId, db, songTi, logo
 
         if len(sequence5) == 1:
             table5.add(borb_Paragraph(sequence5[0], font=songTi, horizontal_alignment=borb_align.CENTERED))
-        
+
         else:
             for i in range(len(sequence5)):
                 if i % 2 == 0:
                     table5.add(borb_Paragraph(sequence5[i], font=songTi, horizontal_alignment=borb_align.RIGHT))
                 else:
                     table5.add(borb_Paragraph(sequence5[i], font=songTi, horizontal_alignment=borb_align.CENTERED))
-                
+
         table5.set_padding_on_all_cells(Decimal(1.5), Decimal(1.5), Decimal(1.5), Decimal(1.5))
         table5.no_borders()
         layout.add(borb_Paragraph("付款详情(新加坡元) Payment Details(Singapore Dollars):", font=songTi, horizontal_alignment=borb_align.CENTERED))
@@ -11604,13 +11832,13 @@ def rtn_order_chit(rtn_constants_dict, other_controls, orderId, db, songTi, logo
         layout.add(borb_Paragraph("{} {} {}".format(outlet_address, outlet_phone, website), font=songTi, horizontal_alignment=borb_align.CENTERED))
         pbar.update(4)
 
-        fileName = "{}_{}_{}.pdf".format(orderNumber, orderRound, reserveDatetime_dt.strftime("%Y_%m_%d_%H_%M"))  
+        fileName = "{}_{}_{}.pdf".format(orderNumber, orderRound, reserveDatetime_dt.strftime("%Y_%m_%d_%H_%M"))
         orderChit_subFolderName = str(rtn_constants_dict["orderChit_subFolderName"])
         export_folderName = str(rtn_constants_dict["export_folderName"])
 
         with open("{}/{}/{}/{}".format(os.getcwd(), export_folderName, orderChit_subFolderName, fileName), "wb") as pdf_file_handle:
-            borb_PDF.dumps(pdf_file_handle, Document)  
-        
+            borb_PDF.dumps(pdf_file_handle, Document)
+
 
         pbar.set_description("任务完成")
         print("生成完成, 文件路径在'{}'。".format("{}/{}/{}/{}".format(os.getcwd(), export_folderName, orderChit_subFolderName, fileName)))
@@ -11646,14 +11874,14 @@ def rtn_trio_list(rtn_constants_dict, other_controls, orderId, db, songTi, selec
         food_db = food_db[food_db["订单ID"] == orderId]
         sm_bd = sm_bd[sm_bd["订单ID"] == orderId]
         payment = payment[payment["订单ID"] == orderId]
-        
+
         orderNumber = str(rtn_db["订单号"].values[0])
         customerName = str(rtn_db["姓名"].values[0])
         customerPhone = str(rtn_db["电话"].values[0])
         orderRound = str(rtn_db["轮数"].values[0])
         orderAttribute = str(rtn_db["订单属性"].values[0])
         tableAssign = str(rtn_db["桌台"].values[0])
-        pax = "{}大{}小{}幼".format(int(rtn_db["成人人数"].values[0]), int(rtn_db["儿童人数"].values[0]), int(rtn_db["幼儿人数"].values[0])) 
+        pax = "{}大{}小{}幼".format(int(rtn_db["成人人数"].values[0]), int(rtn_db["儿童人数"].values[0]), int(rtn_db["幼儿人数"].values[0]))
 
         display_food_db, food_db, sm_bd_df, sm_bd, payment_info = rtn_food_order_parser(food_db=food_db, sm_bd=sm_bd, payment=payment, other_controls=other_controls)
 
@@ -11666,7 +11894,7 @@ def rtn_trio_list(rtn_constants_dict, other_controls, orderId, db, songTi, selec
                 payment_status = "未付"
             else:
                 payment_status = "未付清"
-        
+
         pbar.update(20)
         pbar.set_description("PDF任务开始...")
 
@@ -11681,13 +11909,13 @@ def rtn_trio_list(rtn_constants_dict, other_controls, orderId, db, songTi, selec
             table1 = borb_Table(number_of_rows=4 , number_of_columns=2)
             sequence1 = ["{}(单号)".format(orderNumber),
                         "{}(桌)".format(tableAssign),
-                        
+
                         "{}(名)".format(customerName),
                         "{}(号)".format(customerPhone),
 
                         "{}(轮)".format(orderRound),
                         "{}(人)".format(pax),
-                        
+
                         "支${}({})".format(format(payment_info["已付金额"], ".2f"), payment_status),
                         "桌单",]
             table1_rows = 4
@@ -11700,7 +11928,7 @@ def rtn_trio_list(rtn_constants_dict, other_controls, orderId, db, songTi, selec
 
                         "{}(号)".format(customerPhone),
                         "支${}({})".format(format(payment_info["已付金额"], ".2f"), payment_status),
-                        
+
                         "桌单",
                         "",]
 
@@ -11752,10 +11980,10 @@ def rtn_trio_list(rtn_constants_dict, other_controls, orderId, db, songTi, selec
                     foodRemark = str(selected_food[selected_food["点餐ID"] == selected_foodOrderId]["备注"].values[0])
 
                     sm_bd_df = None
-                            
+
         else:
             sm_bd_df = None
-            slice_dfd = None 
+            slice_dfd = None
 
         t2_number_of_rows = 0
         if isinstance(selectedIsSet, int):
@@ -11771,7 +11999,7 @@ def rtn_trio_list(rtn_constants_dict, other_controls, orderId, db, songTi, selec
                 pass
             else:
                 t2_number_of_rows += len(slice_dfd)*2
-            
+
         if t2_number_of_rows > 0:
             if t2_number_of_rows < r_left:
                 t2_number_of_rows = r_left
@@ -11792,7 +12020,7 @@ def rtn_trio_list(rtn_constants_dict, other_controls, orderId, db, songTi, selec
                             r_left -= 1
                         else:
                             pass
-                        
+
                         if r_left > 0:
                             if len(str(sm_bd_df.iloc[index, 2])) > 0:
                                 if str(sm_bd_df.iloc[index, 2]) == "-":
@@ -11801,7 +12029,7 @@ def rtn_trio_list(rtn_constants_dict, other_controls, orderId, db, songTi, selec
                                     table2.add(borb_Paragraph("{}".format(sm_bd_df.iloc[index, 2]), font=songTi, horizontal_alignment=borb_align.LEFT))
                             else:
                                 table2.add(borb_Paragraph(" ", font=songTi, horizontal_alignment=borb_align.LEFT))
-                            
+
                             r_left -= 1
                         else:
                             pass
@@ -11818,7 +12046,7 @@ def rtn_trio_list(rtn_constants_dict, other_controls, orderId, db, songTi, selec
                         table2.add(borb_Paragraph("{}".format(foodRemark), font=songTi, horizontal_alignment=borb_align.LEFT))
                 else:
                     table2.add(borb_Paragraph(" ", font=songTi, horizontal_alignment=borb_align.LEFT))
-                
+
                 r_left -= 1
 
             if slice_dfd.empty:
@@ -11831,7 +12059,7 @@ def rtn_trio_list(rtn_constants_dict, other_controls, orderId, db, songTi, selec
                         r_left -= 1
                     else:
                         pass
-                    
+
                     if r_left > 0:
                         if len(str(slice_dfd.iloc[index, 2])) > 0:
                             if str(slice_dfd.iloc[index, 2]) == "-":
@@ -11840,7 +12068,7 @@ def rtn_trio_list(rtn_constants_dict, other_controls, orderId, db, songTi, selec
                                 table2.add(borb_Paragraph("{}".format(slice_dfd.iloc[index, 2]), font=songTi, horizontal_alignment=borb_align.LEFT))
                         else:
                             table2.add(borb_Paragraph(" ", font=songTi, horizontal_alignment=borb_align.LEFT))
-                        
+
                         r_left -= 1
                     else:
                         pass
@@ -11859,13 +12087,13 @@ def rtn_trio_list(rtn_constants_dict, other_controls, orderId, db, songTi, selec
             table1 = borb_Table(number_of_rows=4 , number_of_columns=2)
             sequence1 = ["{}(单号)".format(orderNumber),
                         "{}(桌)".format(tableAssign),
-                        
+
                         "{}(名)".format(customerName),
                         "{}(号)".format(customerPhone),
 
                         "{}(轮)".format(orderRound),
                         "{}(人)".format(pax),
-                        
+
                         "支${}({})".format(format(payment_info["已付金额"], ".2f"), payment_status),
                         "收银",]
 
@@ -11876,7 +12104,7 @@ def rtn_trio_list(rtn_constants_dict, other_controls, orderId, db, songTi, selec
 
                         "{}(号)".format(customerPhone),
                         "支${}({})".format(format(payment_info["已付金额"], ".2f"), payment_status),
-                        
+
                         "收银",
                         "",]
 
@@ -11893,13 +12121,13 @@ def rtn_trio_list(rtn_constants_dict, other_controls, orderId, db, songTi, selec
             table1 = borb_Table(number_of_rows=4 , number_of_columns=2)
             sequence1 = ["{}(单号)".format(orderNumber),
                         "{}(桌)".format(tableAssign),
-                        
+
                         "{}(名)".format(customerName),
                         "{}(号)".format(customerPhone),
 
                         "{}(轮)".format(orderRound),
                         "{}(人)".format(pax),
-                        
+
                         "支${}({})".format(format(payment_info["已付金额"], ".2f"), payment_status),
                         "厨房",]
 
@@ -11910,7 +12138,7 @@ def rtn_trio_list(rtn_constants_dict, other_controls, orderId, db, songTi, selec
 
                         "{}(号)".format(customerPhone),
                         "支${}({})".format(format(payment_info["已付金额"], ".2f"), payment_status),
-                        
+
                         "厨房",
                         "",]
 
@@ -11923,7 +12151,7 @@ def rtn_trio_list(rtn_constants_dict, other_controls, orderId, db, songTi, selec
         layout.add(table2)
         pbar.update(15)
 
-        fileName = "{}_{}_{}.pdf".format(orderNumber, orderRound, tableAssign)  
+        fileName = "{}_{}_{}.pdf".format(orderNumber, orderRound, tableAssign)
         trioList_subFolderName = str(rtn_constants_dict["trioList_subFolderName"])
         export_folderName = str(rtn_constants_dict["export_folderName"])
 
@@ -11997,7 +12225,7 @@ def rtn_whatsapp_sender(startDate, endDate, db, outlet):
             url = "https://web.whatsapp.com/send?phone=65" + number + "&text=" + text
         else:
             url = "https://web.whatsapp.com/send?phone=" + number + "&text" + text
-        
+
         driver.get(url)
 
         whatsapp_options = option_num(["发送成功, 发送下一个", "发送失败, 重试一次", "发送失败, 跳过, 发送下一个"])
@@ -12007,7 +12235,7 @@ def rtn_whatsapp_sender(startDate, endDate, db, outlet):
         if whatsapp_select == 0:
             print("{}发送成功! ".format(number))
             continue
-        
+
         elif whatsapp_select == 1:
             print("{}发送失败, 将重试一次。".format(number))
             for _ in range(1):
@@ -12016,15 +12244,15 @@ def rtn_whatsapp_sender(startDate, endDate, db, outlet):
                     url = "https://web.whatsapp.com/send?phone=65" + number + "&text=" + text
                 else:
                     url = "https://web.whatsapp.com/send?phone=" + number + "&text" + text
-                
+
                 driver.get(url)
                 input("按回车键继续>>>: ")
                 continue
-        
+
         elif whatsapp_select == 2:
             print("{}发送失败, 已跳过。".format(number))
             continue
-    
+
     print("任务完成")
     driver.quit()
     return rtn_db
@@ -12042,7 +12270,7 @@ def rtn_summary_telegram(outlet, rtn_constants_dict, google_auth, fernet_key, rt
 
     rtn_db = db["rtn_db"].copy()
     food_db = db["food_db"].copy()
-    
+
     sm = other_controls["sm"]
     acm = other_controls["acm"]
 
@@ -12079,12 +12307,12 @@ def rtn_summary_telegram(outlet, rtn_constants_dict, google_auth, fernet_key, rt
         df = df[cnyEve_filter]
         df = df[df["订单状态"] != "取消"]
         df_dict.update({ df_names[index] : df })
-    
+
     df_ids_dict = {}
     for name in df_names:
         df_ids_dict.update({ name : df_dict[name]["订单ID"].values.astype(str).tolist() })
 
-    
+
     food_df_dict = {}
     for name in df_names:
         food_df = food_db.copy()
@@ -12107,22 +12335,22 @@ def rtn_summary_telegram(outlet, rtn_constants_dict, google_auth, fernet_key, rt
                 else:
                     if int(food_df.iloc[index, 4]) == 0:
                         fn = str(acm[acm["菜品ID"] == str(food_df.iloc[index, 3])]["菜名"].values[0])
-                    
+
                     else:
                         fn = str(sm[sm["菜品ID"] == str(food_df.iloc[index, 3])]["套餐名"].values[0])
-                
+
                 foodName += [fn]
 
             food_df["foodName"] = foodName
         else:
             pass
-            
+
         food_df_dict.update({ name : food_df })
-    
-    msg_list = ["{}至{}".format(rtn_db["订单创建时间"].min().strftime("%Y年%m月%d日"), dt.datetime.now().strftime("%Y年%m月%d日")), 
+
+    msg_list = ["{}至{}".format(rtn_db["订单创建时间"].min().strftime("%Y年%m月%d日"), dt.datetime.now().strftime("%Y年%m月%d日")),
                 "{}除夕预订状况".format(outlet.strip().capitalize()),
                 " ",]
-    
+
     for name in df_names:
         fdf = food_df_dict[name]
         if not fdf.empty:
@@ -12140,7 +12368,7 @@ def rtn_summary_telegram(outlet, rtn_constants_dict, google_auth, fernet_key, rt
                         msg_list += ["{}: {}".format(fdf_summary.iloc[index, 0], fdf_summary.iloc[index, 1])]
                 else:
                     msg_list += ["{}: {}".format(fdf_summary.iloc[index, 0], fdf_summary.iloc[index, 1])]
-            
+
             if name == "除夕堂食":
                 msg_list += [" "]
                 msg_list += ["累计套餐: {}".format(int(fdf_summary[fdf_summary["foodName"].str.contains("套餐")]["数量"].sum()))]
@@ -12148,18 +12376,18 @@ def rtn_summary_telegram(outlet, rtn_constants_dict, google_auth, fernet_key, rt
                 msg_list += [" "]
             else:
                 pass
-            
+
             msg_list += [" "]
 
         else:
             pass
-    
+
     for m in msg_list:
         print(m)
-    
+
     print()
     print()
-                
+
     sending_telegram(is_pr=True, message=msg_list, api=telegram_api, receiver=receiver, wifi=True)
     print()
     print()
@@ -12177,12 +12405,12 @@ def rtn_main(google_auth, rtn_control_url, rtn_database_url, constants_sheetname
         print("没有网络连接。")
         print("预订程序需全程连接网络来使用。")
 
-    else:       
+    else:
         fernet_key = get_key()
 
         if fernet_key == 0:
             print("安全密钥错误! ")
-        
+
         else:
             res = pyfiglet.figlet_format("Reservation")
             print(res)
@@ -12203,7 +12431,7 @@ def rtn_main(google_auth, rtn_control_url, rtn_database_url, constants_sheetname
 
                 if not os.path.exists("{}/{}/{}".format(os.getcwd(), exportFolderName, exportSubFolderName)):
                     os.makedirs("{}/{}/{}".format(os.getcwd(),exportFolderName, exportSubFolderName))
-                
+
                 if not os.path.exists("{}/{}/{}".format(os.getcwd(), exportFolderName, summary_subFolderName)):
                     os.makedirs("{}/{}/{}".format(os.getcwd(), exportFolderName, summary_subFolderName))
 
@@ -12248,7 +12476,7 @@ def rtn_main(google_auth, rtn_control_url, rtn_database_url, constants_sheetname
                                 edit_order_select = option_limit(edit_order_menu, input("在这里输入>>>: "))
 
                                 if edit_order_select == 0:
-                                    
+
                                     slice_rtn_db, delete_orderId = rtn_edit_order(rtn_constants_dict=rtn_constants_dict, other_controls=other_controls, google_auth=google_auth, fernet_key=fernet_key, rtn_database_url=rtn_database_url)
 
                                     if isinstance(slice_rtn_db, pd.DataFrame):
@@ -12271,7 +12499,7 @@ def rtn_main(google_auth, rtn_control_url, rtn_database_url, constants_sheetname
                                             sm_bd = db["sm_bd"].copy()
                                             payment = db["payment"].copy()
 
-                                        
+
                                             rtn_db["订单ID"] = rtn_db["订单ID"].astype(str)
                                             food_db["订单ID"] = food_db["订单ID"].astype(str)
                                             sm_bd["订单ID"] = sm_bd["订单ID"].astype(str)
@@ -12306,7 +12534,7 @@ def rtn_main(google_auth, rtn_control_url, rtn_database_url, constants_sheetname
 
                                     else:
                                         pass
-                                        
+
                                     if isinstance(slice_sm_bd, pd.DataFrame):
                                         sm_bd = db["sm_bd"].copy()
                                         sm_bd["订单ID"] = sm_bd["订单ID"].astype(str)
@@ -12330,16 +12558,16 @@ def rtn_main(google_auth, rtn_control_url, rtn_database_url, constants_sheetname
                                                 orderId = None
                                         else:
                                             orderId = str(payment_update["订单ID"].values[0])
-                                        
+
                                         if isinstance(orderId, str):
                                             payment = db["payment"].copy()
 
                                             payment["订单ID"] = payment["订单ID"].astype(str)
                                             payment["付款时间"] = pd.to_datetime(payment["付款时间"])
 
-                                            
+
                                             payment = payment[payment["订单ID"] != orderId]
-                                            
+
                                             if not payment_update.empty:
                                                 payment = pd.concat([payment, payment_update], ignore_index=True)
 
@@ -12349,14 +12577,14 @@ def rtn_main(google_auth, rtn_control_url, rtn_database_url, constants_sheetname
                                             pass
                                     else:
                                         pass
-                                    
+
                                 else:
                                     pass
-                                    
+
                             elif reservation_menu_select == 2:
                                 print("读取中...请稍等...")
                                 db = rtn_fetch_database(google_auth=google_auth, fernet_key=fernet_key, rtn_database_url=rtn_database_url, rtn_constants_dict=rtn_constants_dict)
-                                
+
                                 rtn_db = db["rtn_db"].copy()
                                 food_db = db["food_db"].copy()
                                 sm_bd = db["sm_bd"].copy()
@@ -12381,34 +12609,34 @@ def rtn_main(google_auth, rtn_control_url, rtn_database_url, constants_sheetname
                                     print()
                                     print()
                                     print("选择筛查方式: ")
-                                    filter_option = ["按「订单号」升序排列", 
-                                                     "按「订单号」降序排列", 
-                                                     "按「订单创建时间」升序排列", 
-                                                     "按「订单创建时间」降序排列", 
-                                                     "按不同「订单属性」筛滤", 
-                                                     "按「预订时间」升序排列", 
-                                                     "按「预订时间」降序排列", 
-                                                     "按是否是「预订除夕?」筛滤", 
-                                                     "按不同「轮数」筛滤", 
-                                                     "按「成人人数」升序排列", 
-                                                     "按「成人人数」降序排列", 
-                                                     "按「儿童人数」升序排列", 
-                                                     "按「儿童人数」降序排列", 
-                                                     "按「幼儿人数」升序排列", 
-                                                     "按「幼儿人数」降序排列", 
-                                                     "按「载客量」升序排列", 
-                                                     "按「载客量」降序排列", 
-                                                     "按是否排位「桌台」筛滤", 
-                                                     "按含有的「备注」内容筛滤", 
-                                                     "按不含有的「备注」内容筛滤", 
-                                                     "按不同「订单状态」筛滤", 
-                                                     "筛滤已经点餐的订单", 
-                                                     "筛滤未点餐的订单", 
-                                                     "筛滤已经全额付款的订单", 
-                                                     "筛滤还没付全款的订单", 
-                                                     "筛滤完全没付款的订单", 
-                                                     "按特定「预订时间」筛滤", 
-                                                     "按特定「订单创建时间」筛滤", 
+                                    filter_option = ["按「订单号」升序排列",
+                                                     "按「订单号」降序排列",
+                                                     "按「订单创建时间」升序排列",
+                                                     "按「订单创建时间」降序排列",
+                                                     "按不同「订单属性」筛滤",
+                                                     "按「预订时间」升序排列",
+                                                     "按「预订时间」降序排列",
+                                                     "按是否是「预订除夕?」筛滤",
+                                                     "按不同「轮数」筛滤",
+                                                     "按「成人人数」升序排列",
+                                                     "按「成人人数」降序排列",
+                                                     "按「儿童人数」升序排列",
+                                                     "按「儿童人数」降序排列",
+                                                     "按「幼儿人数」升序排列",
+                                                     "按「幼儿人数」降序排列",
+                                                     "按「载客量」升序排列",
+                                                     "按「载客量」降序排列",
+                                                     "按是否排位「桌台」筛滤",
+                                                     "按含有的「备注」内容筛滤",
+                                                     "按不含有的「备注」内容筛滤",
+                                                     "按不同「订单状态」筛滤",
+                                                     "筛滤已经点餐的订单",
+                                                     "筛滤未点餐的订单",
+                                                     "筛滤已经全额付款的订单",
+                                                     "筛滤还没付全款的订单",
+                                                     "筛滤完全没付款的订单",
+                                                     "按特定「预订时间」筛滤",
+                                                     "按特定「订单创建时间」筛滤",
                                                      "查看有换菜的订单",
                                                      "返回上一菜单",]
 
@@ -12434,7 +12662,7 @@ def rtn_main(google_auth, rtn_control_url, rtn_database_url, constants_sheetname
                                                     isAscending = True
                                                 else:
                                                     isAscending = False
-                                            
+
                                             else:
                                                 isUnique = True
 
@@ -12445,7 +12673,7 @@ def rtn_main(google_auth, rtn_control_url, rtn_database_url, constants_sheetname
 
                                         else:
                                             isSpecial = True
-                                        
+
                                         if isSpecial:
                                             if filter_select in [18, 19]:
                                                 remark = rtn_input_validation(rule="remark", title="一些备注内容", space_removal=False, rtn_constants_dict=rtn_constants_dict)
@@ -12463,7 +12691,7 @@ def rtn_main(google_auth, rtn_control_url, rtn_database_url, constants_sheetname
                                                         IDnotInFoodDb += [str(rtn_db.iloc[i, 1])]
                                                     else:
                                                         pass
-                                                
+
                                                 if filter_select == 22:
                                                     slice_rtn_db = rtn_db[rtn_db["订单ID"].isin(IDnotInFoodDb)]
                                                 else:
@@ -12481,7 +12709,7 @@ def rtn_main(google_auth, rtn_control_url, rtn_database_url, constants_sheetname
                                                     slice_food_db = food_db[food_db["订单ID"] == orderId]
                                                     slice_sm_bd = sm_bd[sm_bd["订单ID"] == orderId]
                                                     slice_payment = payment[payment["订单ID"] == orderId]
-                                                    
+
                                                     a,b,c,d, slice_payment_info = rtn_food_order_parser(food_db=slice_food_db, sm_bd=slice_sm_bd, payment=slice_payment, other_controls=other_controls)
 
                                                     if slice_payment_info["总税后价格"] != 0:
@@ -12494,13 +12722,13 @@ def rtn_main(google_auth, rtn_control_url, rtn_database_url, constants_sheetname
                                                                 incomplete_payment += [orderId]
                                                     else:
                                                         complete_payment += [orderId]
-                                                
+
                                                 if filter_select == 23:
                                                     slice_rtn_db = rtn_db[rtn_db["订单ID"].isin(complete_payment)]
-                                                
+
                                                 elif filter_select == 24:
                                                     slice_rtn_db = rtn_db[rtn_db["订单ID"].isin(incomplete_payment)]
-                                                
+
                                                 else:
                                                     slice_rtn_db = rtn_db[rtn_db["订单ID"].isin(no_payment)]
 
@@ -12514,7 +12742,7 @@ def rtn_main(google_auth, rtn_control_url, rtn_database_url, constants_sheetname
                                                 filter = (slice_rtn_db["预订日期"] >= start_date) & (slice_rtn_db["预订日期"] <= end_date)
                                                 slice_rtn_db = slice_rtn_db[filter]
                                                 slice_rtn_db.drop("预订日期", axis=1, inplace=True)
-                                            
+
                                             elif filter_select == 27:
                                                 slice_rtn_db = rtn_db.copy()
                                                 slice_rtn_db["订单创建时间"] = pd.to_datetime(slice_rtn_db["订单创建时间"])
@@ -12550,7 +12778,7 @@ def rtn_main(google_auth, rtn_control_url, rtn_database_url, constants_sheetname
                                                     slice_rtn_db = rtn_db[rtn_db[columnName] == int(slice_rtn_db_unique[unique_option_select])]
                                                 else:
                                                     slice_rtn_db = rtn_db[rtn_db[columnName] == slice_rtn_db_unique[unique_option_select]]
-                                            
+
                                             else:
                                                 slice_rtn_db = rtn_db.sort_values(by=columnName, ascending=isAscending, ignore_index=True)
 
@@ -12626,7 +12854,7 @@ def rtn_main(google_auth, rtn_control_url, rtn_database_url, constants_sheetname
                     elif main_menu_select == 1:
                         print("读取中...请稍等...")
                         db = rtn_fetch_database(google_auth=google_auth, fernet_key=fernet_key, rtn_database_url=rtn_database_url, rtn_constants_dict=rtn_constants_dict)
-                        
+
                         rtn_db = db["rtn_db"].copy()
                         food_db = db["food_db"].copy()
                         sm_bd = db["sm_bd"].copy()
@@ -12658,7 +12886,7 @@ def rtn_main(google_auth, rtn_control_url, rtn_database_url, constants_sheetname
 
                         groupby_select = 0
                         while groupby_select != 5:
-                            
+
 
                             groupby_option = ["按「预订时间」汇总", "按「轮数」汇总", "按「订单属性」汇总", "按「订单创建时间」汇总", "高级汇总", "返回上一菜单"]
                             groupby_options = option_num(groupby_option)
@@ -12670,7 +12898,7 @@ def rtn_main(google_auth, rtn_control_url, rtn_database_url, constants_sheetname
                                 if groupby_select in [0, 3]:
                                     isSpecial = False
                                     filterByDateRange = True
-                                
+
                                 elif groupby_select in [1,2]:
                                     isSpecial = False
                                     filterByDateRange = False
@@ -12678,7 +12906,7 @@ def rtn_main(google_auth, rtn_control_url, rtn_database_url, constants_sheetname
                                 elif groupby_select == 4:
                                     isSpecial = True
                                     filterByDateRange = False
-                                
+
                                 if isSpecial:
                                     print("使用高级汇总可以筛选多列的特定条件来进行汇总。")
                                     dateRangeFilterDict = {"预订时间" : True,
@@ -12686,7 +12914,7 @@ def rtn_main(google_auth, rtn_control_url, rtn_database_url, constants_sheetname
                                                         "订单属性" : False,
                                                         "订单创建时间": True,
                                                         "订单状态" : False,}
-                                    
+
                                     gb_adv_option = ["预订时间", "轮数", "订单属性", "订单创建时间", "订单状态", "退出高级汇总"]
                                     options = option_num(gb_adv_option)
                                     time.sleep(0.25)
@@ -12697,12 +12925,12 @@ def rtn_main(google_auth, rtn_control_url, rtn_database_url, constants_sheetname
                                         end_filter = False
                                         while not end_filter:
                                             filterByDateRange = dateRangeFilterDict[gb_adv_option[gb_adv_select]]
-                                            
+
                                             try:
                                                 slice_rtn_db = slice_rtn_db
                                             except:
                                                 slice_rtn_db = rtn_db.copy()
-                                            
+
                                             if filterByDateRange:
                                                 if gb_adv_option[gb_adv_select] == "预订时间":
                                                     slice_rtn_db["DATE"] = slice_rtn_db["预订时间"].apply(lambda x : pd.to_datetime(dt.datetime(year = x.year, month=x.month, day=x.day)))
@@ -12714,7 +12942,7 @@ def rtn_main(google_auth, rtn_control_url, rtn_database_url, constants_sheetname
                                                 date_filter = (slice_rtn_db["DATE"] >= startDate) & (slice_rtn_db["DATE"] <= endDate)
                                                 slice_rtn_db = slice_rtn_db[date_filter]
                                                 slice_rtn_db.drop(["DATE"], axis=1, inplace=True)
-                                            
+
                                             else:
                                                 columnName = gb_adv_option[gb_adv_select]
                                                 unique_option = np.unique(slice_rtn_db[columnName].values).astype(str).tolist()
@@ -12724,7 +12952,7 @@ def rtn_main(google_auth, rtn_control_url, rtn_database_url, constants_sheetname
 
                                                 unique_value = unique_option[unique_select]
                                                 slice_rtn_db = slice_rtn_db[slice_rtn_db[columnName] == unique_value]
-                                            
+
                                             print()
                                             print()
                                             print("筛选后, 目前有{}个匹配订单。".format(len(slice_rtn_db)))
@@ -12734,7 +12962,7 @@ def rtn_main(google_auth, rtn_control_url, rtn_database_url, constants_sheetname
                                             gb_adv_option.remove(gb_adv_option[gb_adv_select])
                                             if "退出高级汇总" in gb_adv_option:
                                                 gb_adv_option.remove("退出高级汇总")
-                                            
+
                                             if "终止继续选择筛选列" not in gb_adv_option:
                                                 gb_adv_option += ["终止继续选择筛选列"]
 
@@ -12767,7 +12995,7 @@ def rtn_main(google_auth, rtn_control_url, rtn_database_url, constants_sheetname
                                         date_filter = (slice_rtn_db["DATE"] >= startDate) & (slice_rtn_db["DATE"] <= endDate)
                                         slice_rtn_db = slice_rtn_db[date_filter]
                                         slice_rtn_db.drop(["DATE"], axis=1, inplace=True)
-                                    
+
                                     else:
                                         unique_option = np.unique(slice_rtn_db[columnName].values).astype(str).tolist()
                                         unique_options = option_num(unique_option)
@@ -12822,7 +13050,7 @@ def rtn_main(google_auth, rtn_control_url, rtn_database_url, constants_sheetname
                                     else:
                                         print("暂无菜品汇总。")
                                         food_summary = -404
-                                        
+
                                     print()
                                     print()
                                     if isinstance(slice_sm_bd_df, pd.DataFrame):
@@ -12839,7 +13067,7 @@ def rtn_main(google_auth, rtn_control_url, rtn_database_url, constants_sheetname
                                     else:
                                         print("暂无套餐内菜肴汇总。")
                                         set_menu_summary = -404
-                                    
+
                                     if isinstance(food_summary, pd.DataFrame):
                                         print("财务详情汇总: ")
                                         for key, value in slice_payment_info.items():
@@ -12859,7 +13087,7 @@ def rtn_main(google_auth, rtn_control_url, rtn_database_url, constants_sheetname
                                                 save_set_menu = True
                                             else:
                                                 save_set_menu = False
-                                            
+
                                             timeNow = pd.to_datetime(dt.datetime.now()).strftime("%Y_%m_%d_%H_%M_%S")
                                             fileName = "{}.xlsx".format(timeNow)
 
@@ -12872,7 +13100,7 @@ def rtn_main(google_auth, rtn_control_url, rtn_database_url, constants_sheetname
                                                     set_menu_summary.to_excel(writer, sheet_name="set_menu_summary", index=False, header=True)
                                             else:
                                                 food_summary.to_excel("{}/{}/{}/{}".format(os.getcwd(), export_folderName, summary_subFolderName, fileName), sheet_name="food_summary", index=False, header=True)
-                                            
+
                                             print("导出成功, 文件在'{}/{}/{}/{}'。".format(os.getcwd(), export_folderName, summary_subFolderName, fileName))
                                         else:
                                             pass
@@ -12881,7 +13109,7 @@ def rtn_main(google_auth, rtn_control_url, rtn_database_url, constants_sheetname
 
                     elif main_menu_select == 2:
                         rtn_summary_telegram(outlet=outlet, rtn_constants_dict=rtn_constants_dict, google_auth=google_auth, fernet_key=fernet_key, rtn_database_url=rtn_database_url, other_controls=other_controls)
-                    
+
                     elif main_menu_select == 3:
                         setting_menu_select = 0
                         while setting_menu_select != 2:
@@ -12908,7 +13136,7 @@ def rtn_main(google_auth, rtn_control_url, rtn_database_url, constants_sheetname
                                         print()
                                         print()
                                         print()
-                                    
+
                                     elif foodMenu_menu_select == 1:
                                         print()
                                         print()
@@ -12926,11 +13154,11 @@ def rtn_main(google_auth, rtn_control_url, rtn_database_url, constants_sheetname
 
                                                 for i in range(len(food_items)):
                                                     print("第{}道菜: {}".format(i+1, food_items[i]))
-                                                
+
                                                 print()
                                         print()
                                         print()
-                                    
+
                                     elif foodMenu_menu_select == 2:
                                         acm, sm, other_controls = rtn_edit_menu(rtn_constants_dict=rtn_constants_dict, other_controls=other_controls)
 
@@ -12939,7 +13167,7 @@ def rtn_main(google_auth, rtn_control_url, rtn_database_url, constants_sheetname
                                         print()
                                         print()
                                         print()
-                            
+
                             elif setting_menu_select == 1:
                                 tableControl_menu_select = 0
                                 while tableControl_menu_select != 2:
@@ -12959,7 +13187,7 @@ def rtn_main(google_auth, rtn_control_url, rtn_database_url, constants_sheetname
                                         print()
                                         print()
                                         print()
-                                    
+
                                     elif tableControl_menu_select == 1:
                                         tc, other_controls = rtn_edit_tables(rtn_constants_dict=rtn_constants_dict, other_controls=other_controls)
                                         isUploadSuccess = rtn_upload_database(df=tc, db_sheetname="table_control_sheetname", google_auth=google_auth, rtn_database_url=rtn_database_url, fernet_key=fernet_key, rtn_constants_dict=rtn_constants_dict, slice=False, rtn_control_url=rtn_control_url, isDb=False)
@@ -13198,7 +13426,7 @@ def main(database_url, db_setting_url, serialized_rule_filename, service_filenam
     rtn_database_url = rtn_database_url
 
     if do_not_show_menu:
-        night_audit_main(database_url, db_setting_url, serialized_rule_filename, service_filename, constants_sheetname, google_auth, box_num, drink_num, promo_num, lun_sales, lun_gc, tb_sales, tb_gc, lun_fwc, lun_kwc, tb_fwc, tb_kwc, night_fwc, night_kwc, script_backup_filename, script, wifi, backup_foldername,cashier_on_duty, drink_on_duty, box_on_duty, payslip_on_duty)
+        night_audit_main(database_url, db_setting_url, serialized_rule_filename, service_filename, constants_sheetname, google_auth, box_num, drink_num, promo_num, lun_sales, lun_gc, tb_sales, tb_gc, lun_fwc, lun_kwc, tb_fwc, tb_kwc, night_fwc, night_kwc, script_backup_filename, script, wifi, backup_foldername,cashier_on_duty, drink_on_duty, box_on_duty, payslip_on_duty, manager_on_duty)
 
     else:
         if int(np.random.randint(1,7,size=1)[0]) % 2 == 0:
@@ -13209,7 +13437,7 @@ def main(database_url, db_setting_url, serialized_rule_filename, service_filenam
         res = pyfiglet.figlet_format("San Ren Xing Super App")
         print(res)
         time.sleep(0.15)
-        
+
         SRX_take_input = 0
         while SRX_take_input != 7:
             print()
@@ -13219,7 +13447,7 @@ def main(database_url, db_setting_url, serialized_rule_filename, service_filenam
             SRX_take_input = option_limit(options, input("在这里输入>>>: "))
 
             if SRX_take_input == 0:
-                night_audit_main(database_url, db_setting_url, serialized_rule_filename, service_filename, constants_sheetname, google_auth, box_num, drink_num, promo_num, lun_sales, lun_gc, tb_sales, tb_gc, lun_fwc, lun_kwc, tb_fwc, tb_kwc, night_fwc, night_kwc, script_backup_filename, script, wifi, backup_foldername,cashier_on_duty, drink_on_duty, box_on_duty, payslip_on_duty)
+                night_audit_main(database_url, db_setting_url, serialized_rule_filename, service_filename, constants_sheetname, google_auth, box_num, drink_num, promo_num, lun_sales, lun_gc, tb_sales, tb_gc, lun_fwc, lun_kwc, tb_fwc, tb_kwc, night_fwc, night_kwc, script_backup_filename, script, wifi, backup_foldername,cashier_on_duty, drink_on_duty, box_on_duty, payslip_on_duty, manager_on_duty)
 
             elif SRX_take_input == 1:
                 inventory_main(google_auth, db_setting_url, constants_sheetname, serialized_rule_filename, backup_foldername, database_url, box_num, drink_num)
