@@ -1643,20 +1643,28 @@ def parse_print_rule(value_dict, rule_df_dict, write_finance_db, write_promo_db,
 
     return print_result
 
-def feedback_reset(k_dict):
+def feedback_reset(k_dict, reset_remarks):
     food_default = str(k_dict["food_feedback_default_text"])
     service_default = str(k_dict["service_feedback_default_text"])
 
     food_filename = str(k_dict["food_feedback_filename"])
     service_filename = str(k_dict["service_feedback_filename"])
 
-    auto_hour = 20
-    auto_min = 55
+    if reset_remarks:
+        with open(service_filename, "w") as file_handler:
+            file_handler.write(service_default)
 
-    NOW = dt.datetime.now()
-    AUTO_TIME = dt.datetime(NOW.year, NOW.month, NOW.day, auto_hour, auto_min)
+        print("服务反馈已自动取代为默认文本。")
+        print()
 
-    if NOW < AUTO_TIME:
+        with open(food_filename, "w") as file_handler:
+            file_handler.write(food_default)
+
+        print("菜肴反馈已自动取代为默认文本。")
+        print()
+
+    else:
+        print()
         print("是否重置服务反馈为默认文本?")
         print()
         action_req = option_num(["是", "否"])
@@ -1672,13 +1680,6 @@ def feedback_reset(k_dict):
         else:
             print("好的，服务反馈没有被重置。")
 
-    else:
-        with open(service_filename, "w") as file_handler:
-            file_handler.write(service_default)
-
-        print("服务反馈已自动取代为默认文本。")
-
-    if NOW < AUTO_TIME:
         print("是否重置菜肴反馈为默认文本?")
         print()
         action_req = option_num(["是", "否"])
@@ -1693,12 +1694,6 @@ def feedback_reset(k_dict):
 
         else:
             print("好的，菜肴反馈没有被重置。")
-
-    else:
-        with open(food_filename, "w") as file_handler:
-            file_handler.write(food_default)
-
-        print("菜肴反馈已自动取代为默认文本。")
 
 def drink_remarks(drink_out, drink_inv_function):
     if drink_inv_function:
@@ -2482,6 +2477,7 @@ def parse_sending(payslip_on_duty, drink_on_duty, box_on_duty, cashier_on_duty, 
     box_stock_alert = eval(k_dict["box_stock_alert"].strip().capitalize())
     night_audit_alert = eval(k_dict["night_audit_alert"].strip().capitalize())
     payslip_end_month_alert = eval(k_dict["payslip_end_month_alert"].strip().capitalize())
+    send_to_manager = eval(k_dict["send_to_manager"].strip().capitalize())
 
     send_drink_msg = send_dict["send_drink_msg"]
     send_tabox_msg = send_dict["send_tabox_msg"]
@@ -2506,6 +2502,13 @@ def parse_sending(payslip_on_duty, drink_on_duty, box_on_duty, cashier_on_duty, 
     outlet = str(outlet).strip().capitalize()
 
     rcv_telegram, rcv_email = get_rcv(fernet_key, k_dict, google_auth, backup_foldername, local_database_filename, False)
+
+    print()
+    print("警告: 哪怕接下来你已经收到了信息, 请确保该程序完全运行完成。")
+    print("如果你已知晓，请按回车键继续运行程序。")
+    input("在这里输入>>>:")
+    print()
+    print()
 
     if drink_stock_alert:
 
@@ -2616,25 +2619,30 @@ def parse_sending(payslip_on_duty, drink_on_duty, box_on_duty, cashier_on_duty, 
                                          receiver=receivers,
                                          wifi=wifi)
 
-                    print()
-                    print()
-                    print("请查看Telegram, 信息可以直接发给经理吗? ")
-                    time.sleep(0.25)
-                    send_mgr_options = option_num(["信息准确无误,可以直接发给经理", "还有要修改的地方,我会自行发给经理"])
-                    send_mgr_input = option_limit(send_mgr_options, input("在这里输入>>>: "))
-
-                    if send_mgr_input == 0:
-                        managers = manager_on_duty.split(",")
-                        for m in managers:
-                            receivers = rcv_telegram[m]
-                            sending_telegram(is_pr=True,
-                                              message=print_result,
-                                              api = night_audit_telegram_bot_api,
-                                              receiver=receivers,
-                                              wifi=wifi)
-                    else:
+                    if send_to_manager:
                         print()
-                        print("好的, 没有发给经理。")
+                        print()
+                        print("请查看Telegram, 信息可以直接发给经理吗? ")
+                        time.sleep(0.25)
+                        send_mgr_options = option_num(["信息准确无误,可以直接发给经理", "还有要修改的地方,我会自行发给经理"])
+                        send_mgr_input = option_limit(send_mgr_options, input("在这里输入>>>: "))
+
+                        if send_mgr_input == 0:
+                            managers = manager_on_duty.split(",")
+                            for m in managers:
+                                receivers = rcv_telegram[m]
+                                sending_telegram(is_pr=True,
+                                                message=print_result,
+                                                api = night_audit_telegram_bot_api,
+                                                receiver=receivers,
+                                                wifi=wifi)
+                            
+                            reset_remarks = True
+
+                        else:
+                            print()
+                            print("好的, 没有发给经理。")
+                            reset_remarks = False
 
 
                 elif night_audit_send_channel.strip().capitalize() == "Email":
@@ -2653,29 +2661,33 @@ def parse_sending(payslip_on_duty, drink_on_duty, box_on_duty, cashier_on_duty, 
                                       message_string = print_result,
                                       wifi = wifi)
 
-
-                    print()
-                    print()
-                    print("请查看电邮, 信息可以直接发给经理吗? ")
-                    time.sleep(0.25)
-                    send_mgr_options = option_num(["信息准确无误,可以直接发给经理", "还有要修改的地方,我会自行发给经理"])
-                    send_mgr_input = option_limit(send_mgr_options, input("在这里输入>>>: "))
-
-                    if send_mgr_input == 0:
-                        managers = manager_on_duty.split(",")
-                        for m in managers:
-                            receivers = rcv_email[m]
-                            sending_email(is_pr=True,
-                                          mail_server=night_audit_email_server,
-                                          mail_sender=night_audit_email_sender,
-                                          mail_sender_password=night_audit_sender_password,
-                                          mail_receivers=receivers,
-                                          mail_subject="{}的报表信息{}".format(outlet, date),
-                                          message_string = print_result,
-                                          wifi = wifi)
-                    else:
+                    if send_to_manager:
                         print()
-                        print("好的, 没有发给经理。")
+                        print()
+                        print("请查看电邮, 信息可以直接发给经理吗? ")
+                        time.sleep(0.25)
+                        send_mgr_options = option_num(["信息准确无误,可以直接发给经理", "还有要修改的地方,我会自行发给经理"])
+                        send_mgr_input = option_limit(send_mgr_options, input("在这里输入>>>: "))
+
+                        if send_mgr_input == 0:
+                            managers = manager_on_duty.split(",")
+                            for m in managers:
+                                receivers = rcv_email[m]
+                                sending_email(is_pr=True,
+                                            mail_server=night_audit_email_server,
+                                            mail_sender=night_audit_email_sender,
+                                            mail_sender_password=night_audit_sender_password,
+                                            mail_receivers=receivers,
+                                            mail_subject="{}的报表信息{}".format(outlet, date),
+                                            message_string = print_result,
+                                            wifi = wifi)
+
+                            reset_remarks = True
+
+                        else:
+                            print()
+                            print("好的, 没有发给经理。")
+                            reset_remarks = False
                 else:
                     print("Night audit alert sending channel is not defined correctly")
         else:
@@ -2705,25 +2717,29 @@ def parse_sending(payslip_on_duty, drink_on_duty, box_on_duty, cashier_on_duty, 
                                                      receiver=receivers,
                                                      wifi=wifi)
 
-                                print()
-                                print()
-                                print("请查看Telegram, 信息重新发给经理吗? ")
-                                time.sleep(0.25)
-                                send_mgr_options = option_num(["重新发送", "不重新发送"])
-                                send_mgr_input = option_limit(send_mgr_options, input("在这里输入>>>: "))
-
-                                if send_mgr_input == 0:
-                                    managers = manager_on_duty.split(",")
-                                    for m in managers:
-                                        receivers = rcv_telegram[m]
-                                        sending_telegram(is_pr=True,
-                                                          message=print_result,
-                                                          api = night_audit_telegram_bot_api,
-                                                          receiver=receivers,
-                                                          wifi=wifi)
-                                else:
+                                if send_to_manager:
                                     print()
-                                    print("好的, 没有重新发给经理。")
+                                    print()
+                                    print("请查看Telegram, 信息重新发给经理吗? ")
+                                    time.sleep(0.25)
+                                    send_mgr_options = option_num(["重新发送", "不重新发送"])
+                                    send_mgr_input = option_limit(send_mgr_options, input("在这里输入>>>: "))
+
+                                    if send_mgr_input == 0:
+                                        managers = manager_on_duty.split(",")
+                                        for m in managers:
+                                            receivers = rcv_telegram[m]
+                                            sending_telegram(is_pr=True,
+                                                            message=print_result,
+                                                            api = night_audit_telegram_bot_api,
+                                                            receiver=receivers,
+                                                            wifi=wifi)
+                                            
+                                        reset_remarks = False
+                                    else:
+                                        print()
+                                        print("好的, 没有重新发给经理。")
+                                        reset_remarks = False
 
 
                             elif night_audit_send_channel.strip().capitalize() == "Email":
@@ -2744,31 +2760,38 @@ def parse_sending(payslip_on_duty, drink_on_duty, box_on_duty, cashier_on_duty, 
                                                   message_string = print_result,
                                                   wifi = wifi)
 
-                                print()
-                                print()
-                                print("请查看电邮, 信息重新发给经理吗? ")
-                                time.sleep(0.25)
-                                send_mgr_options = option_num(["重新发送", "不重新发送"])
-                                send_mgr_input = option_limit(send_mgr_options, input("在这里输入>>>: "))
-
-                                if send_mgr_input == 0:
-                                    managers = manager_on_duty.split(",")
-                                    for m in managers:
-                                        receivers = rcv_email[m]
-                                        sending_email(is_pr=True,
-                                                      mail_server=night_audit_email_server,
-                                                      mail_sender=night_audit_email_sender,
-                                                      mail_sender_password=night_audit_sender_password,
-                                                      mail_receivers=receivers,
-                                                      mail_subject="{}的报表信息{}".format(outlet, date),
-                                                      message_string = print_result,
-                                                      wifi = wifi)
-                                else:
+                                if send_to_manager:
                                     print()
-                                    print("好的, 没有重新发给经理。")
+                                    print()
+                                    print("请查看电邮, 信息重新发给经理吗? ")
+                                    time.sleep(0.25)
+                                    send_mgr_options = option_num(["重新发送", "不重新发送"])
+                                    send_mgr_input = option_limit(send_mgr_options, input("在这里输入>>>: "))
+
+                                    if send_mgr_input == 0:
+                                        managers = manager_on_duty.split(",")
+                                        for m in managers:
+                                            receivers = rcv_email[m]
+                                            sending_email(is_pr=True,
+                                                        mail_server=night_audit_email_server,
+                                                        mail_sender=night_audit_email_sender,
+                                                        mail_sender_password=night_audit_sender_password,
+                                                        mail_receivers=receivers,
+                                                        mail_subject="{}的报表信息{}".format(outlet, date),
+                                                        message_string = print_result,
+                                                        wifi = wifi)
+
+                                        reset_remarks = False
+                                    else:
+                                        print()
+                                        print("好的, 没有重新发给经理。")
+                                        reset_remarks = False
 
                             else:
                                 print("Night audit alert sending channel is not defined correctly")
+
+        feedback_reset(k_dict, reset_remarks)
+
     else:
         pass
 
@@ -3258,9 +3281,6 @@ def night_audit_main(database_url, db_setting_url, serialized_rule_filename, ser
                 pbar.set_description("上传数据库")
                 upload_db(database_url, take_databases, k_dict, fernet_key, google_auth, box_num, drink_num, wifi, backup_foldername)
                 pbar.update(5)
-
-                pbar.set_description("重置反馈信息")
-                feedback_reset(k_dict)
 
                 pbar.set_description("发信息")
                 parse_sending(payslip_on_duty, drink_on_duty, box_on_duty, cashier_on_duty, google_auth, outlet, send_dict, drink_message_string, tabox_message_string, print_result, k_dict, fernet_key, wifi, date_dict, value_dict, db_writables, backup_foldername, database_url, manager_on_duty)
