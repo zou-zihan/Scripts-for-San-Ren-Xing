@@ -2506,6 +2506,7 @@ def parse_sending(payslip_on_duty, drink_on_duty, box_on_duty, cashier_on_duty, 
     print()
     print("警告: 哪怕接下来你已经收到了信息, 请确保该程序完全运行完成。")
     print("如果你已知晓，请按回车键继续运行程序。")
+    time.sleep(0.25)
     input("在这里输入>>>:")
     print()
     print()
