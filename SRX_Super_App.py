@@ -2644,6 +2644,8 @@ def parse_sending(payslip_on_duty, drink_on_duty, box_on_duty, cashier_on_duty, 
                             print("好的, 没有发给经理。")
                             reset_remarks = False
 
+                    else:
+                        reset_remarks = True
 
                 elif night_audit_send_channel.strip().capitalize() == "Email":
                     print_result += ["——————————————", "服务费: ${}".format(svc),
@@ -2688,12 +2690,20 @@ def parse_sending(payslip_on_duty, drink_on_duty, box_on_duty, cashier_on_duty, 
                             print()
                             print("好的, 没有发给经理。")
                             reset_remarks = False
+
+                    else:
+                        reset_remarks = True 
+                
                 else:
                     print("Night audit alert sending channel is not defined correctly")
+                    reset_remarks = False
         else:
             if wifi:
                 if write_finance_db:
                     if len(print_result) > 0:
+                        
+                        reset_remarks = False
+
                         print("是否重新发送关帐报表? ")
                         action_req = option_num(["重新发送", "不发送"])
                         time.sleep(0.25)
