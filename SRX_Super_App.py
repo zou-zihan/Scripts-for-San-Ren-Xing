@@ -1235,8 +1235,6 @@ def sum_rule(dfSlice, take, is_money):
 
         dfsc = np.arange(0, len(dfSlice.columns)).astype(str)
         dfSlice.columns = dfsc
-
-        display(dfSlice)
         
         if int(take) == 1:
             value = float(dfSlice['1'].values[0])
