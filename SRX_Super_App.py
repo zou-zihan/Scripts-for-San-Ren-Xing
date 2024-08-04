@@ -433,6 +433,10 @@ def get_book_dfs(k_dict, outlet):
             print("If you did pasting on a Mac, you have to Select 'Paste Special' -> 'Paste Special...'")
             print("'Source:' is 'paste', 'As:' is 'Unicode Text', then click 'ok' to paste the texts into an excel file.")
             print()
+            print()
+            print("Please remove detail payment breakdown.")
+            print("It is between the last payment method and immediately before '**OPENING CASH BALANCE'.")
+            print()
 
             try:
                 tsbt_index = int(read[read["0"] == 'Total Sales Before Tax & Srv Chg'].index[0])
@@ -1235,7 +1239,7 @@ def sum_rule(dfSlice, take, is_money):
 
         dfsc = np.arange(0, len(dfSlice.columns)).astype(str)
         dfSlice.columns = dfsc
-        
+
         if int(take) == 1:
             value = float(dfSlice['1'].values[0])
 
@@ -2637,7 +2641,7 @@ def parse_sending(payslip_on_duty, drink_on_duty, box_on_duty, cashier_on_duty, 
                                                 api = night_audit_telegram_bot_api,
                                                 receiver=receivers,
                                                 wifi=wifi)
-                            
+
                             reset_remarks = True
 
                         else:
@@ -2693,8 +2697,8 @@ def parse_sending(payslip_on_duty, drink_on_duty, box_on_duty, cashier_on_duty, 
                             reset_remarks = False
 
                     else:
-                        reset_remarks = True 
-                
+                        reset_remarks = True
+
                 else:
                     print("Night audit alert sending channel is not defined correctly")
                     reset_remarks = False
@@ -2702,7 +2706,7 @@ def parse_sending(payslip_on_duty, drink_on_duty, box_on_duty, cashier_on_duty, 
             if wifi:
                 if write_finance_db:
                     if len(print_result) > 0:
-                        
+
                         reset_remarks = False
 
                         print("是否重新发送关帐报表? ")
@@ -2745,7 +2749,7 @@ def parse_sending(payslip_on_duty, drink_on_duty, box_on_duty, cashier_on_duty, 
                                                             api = night_audit_telegram_bot_api,
                                                             receiver=receivers,
                                                             wifi=wifi)
-                                            
+
                                         reset_remarks = False
                                     else:
                                         print()
