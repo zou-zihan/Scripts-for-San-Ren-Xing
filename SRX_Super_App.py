@@ -442,7 +442,7 @@ def get_book_dfs(k_dict, outlet):
 
             read.iloc[tsbt_index, 0] = 'Total Sales Before Tax & Srv Charge'
 
-            gst_index = int(read[read["0"] == "GST 8%"].index[0])
+            gst_index = int(read[read["0"] == "GST 9%"].index[0])
             read.iloc[int(gst_index), 0] = "GST"
 
             svc_index = int(read[read["0"] == "SCV CHG 10%"].index[0])
