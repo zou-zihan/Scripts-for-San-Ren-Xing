@@ -4,7 +4,7 @@ The San Ren Xing Super App is all you need for doing paper works while working i
 
 This comes a long way, the very first version of this script only have no more than 900 lines of code, doing the most basic task, as time progresses, and I got better at Python programming, it now has more than 6000 lines of code, capable of doing a lot more tasks.
 
-I am a typical restaurant manager who loves programming, and hope to pass boring paper works for machines to finish with less time and greater accuracy.
+I hope to pass boring paper works for machines to finish with less time and greater accuracy.
 
 We are a small restaurant branch in Singapore, offering mainly Hokkien cuisines, Dim Sum and a little Sichuan food. Currently we have three branches in Singapore at Thomson Plaza, Bugis Junction, and Bedok Mall. I am in-charge of Bugis Junction.
 
