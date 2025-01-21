@@ -3486,7 +3486,7 @@ def get_inv_df(formURL, df_name):
         df.columns = column_list_dict[df_name]
         df["日期(年年年年-月月-日日)"] = df["日期(年年年年-月月-日日)"].astype(str)
         df["日期(年年年年-月月-日日)"] = df["日期(年年年年-月月-日日)"].apply(lambda x: dt.datetime.strptime(x, "%m/%d/%Y").strftime("%Y-%m-%d"))
-        df["日期(年年年年-月月-日日)"] = pd.to_datetime(df["日期(年年年年-月月-日日)"])
+        df["日期(年年年年-月月-日日)"] = pd.to_datetime(df["日期(年年年年-月月-日日)"], format="%Y-%m-%d")
 
         df.reset_index(inplace=True)
         df.drop("index", axis=1, inplace=True)
@@ -3504,7 +3504,7 @@ def get_inv_df(formURL, df_name):
         df.columns = column_list_dict[df_name]
         df["进货日期(年年年年-月月-日日)"] = df["进货日期(年年年年-月月-日日)"].astype(str)
         df["进货日期(年年年年-月月-日日)"] = df["进货日期(年年年年-月月-日日)"].apply(lambda x: dt.datetime.strptime(x, "%m/%d/%Y").strftime("%Y-%m-%d"))
-        df["进货日期(年年年年-月月-日日)"] = pd.to_datetime(df["进货日期(年年年年-月月-日日)"])
+        df["进货日期(年年年年-月月-日日)"] = pd.to_datetime(df["进货日期(年年年年-月月-日日)"], format="%Y-%m-%d")
 
         df.reset_index(inplace=True)
         df.drop("index", axis=1, inplace=True)
@@ -3540,7 +3540,7 @@ def get_inv_df(formURL, df_name):
         df.drop(deleteTitleColumns, axis=1, inplace=True)
         df["盘点日期"] = df["盘点日期"].astype(str)
         df["盘点日期"] = df["盘点日期"].apply(lambda x: dt.datetime.strptime(x, "%m/%d/%Y").strftime("%Y-%m-%d"))
-        df["盘点日期"] = pd.to_datetime(df["盘点日期"])
+        df["盘点日期"] = pd.to_datetime(df["盘点日期"], format="%Y-%m-%d")
         df.sort_values(by=["盘点日期"], ascending=True, ignore_index=True, inplace=True)
 
     elif df_name in ["pageOneUnitPrice", "pageTwoUnitPrice", "pageThreeUnitPrice"]:
