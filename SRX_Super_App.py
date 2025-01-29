@@ -6977,11 +6977,14 @@ def inline_rsv_whatsapp_sender():
         df["message"] = "Hi "+df["Patron Name"]+", we noticed that you have a reservation with us on "+df["RSV Time"]+" for "+df["TOTAL PAX"]+", is it confirmed that y'all are coming? 😁"
         prtdf(df)
         print()
-        print("样本: ")
-        for line in range(len(df.iloc[-1,:])):
-            print("{}: {}".format(df.columns[line], df.iloc[-1,:][line]))
-        print()
-        print()
+        if len(df) <= 0:
+            pass
+        else:
+            print("样本: ")
+            for line in range(len(df.iloc[-1,:])):
+                print("{}: {}".format(df.columns[line], df.iloc[-1,:][line]))
+            print()
+            print()
         input("按回车键继续>>>: ")
         
         options = sel_Options()
