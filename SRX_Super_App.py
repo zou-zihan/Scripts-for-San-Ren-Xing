@@ -6829,11 +6829,16 @@ def rtn_whatsapp_sender(time_slots, google_auth):
 
     df["WhatsApp"] = "尊敬的"+df["姓名"]+"您好! 这里是三人行("+str(outlet).strip().upper()+")中餐馆,温馨通知您在除夕的订位是"+df["轮数"]+"("+df["时间"]+"),您的桌号是"+df["桌号"]+"。谢谢! 祝您新年快乐! Greetings, This is San Ren Xing("+str(outlet).strip().upper()+"), I'd like to inform you that your time slot for CNY eve is " + df["时间"] + ". Your table number is/are " + df["桌号"] + ". Thank you, wishing you a happy Chinese New Year! "
 
+    print()
+    print()
     prtdf(df)
     print()
-    print("样本: ")
-    for line in range(len(df.iloc[-1, :])):
-        print("{}: {}".format(df.columns[line], df.iloc[-1,:][line]))
+    if len(df) <= 0:
+        pass
+    else:
+        print("样本: ")
+        for line in range(len(df.iloc[-1, :])):
+            print("{}: {}".format(df.columns[line], df.iloc[-1,:][line]))
     
     print()
     print()
@@ -6917,6 +6922,8 @@ def inline_rsv_whatsapp_sender():
     from selenium.webdriver.chrome.service import Service as sel_service
 
     print("请选择Inline订位文件")
+    print()
+    print()
     fileShown = os.listdir()
     fileToShow = []
 
@@ -6937,7 +6944,7 @@ def inline_rsv_whatsapp_sender():
     if userInputEight == len(fileToShow)-1:
         pass
     else:
-        fileName = selectFileToViewOptions[userInputEight]
+        fileName = fileToShow[userInputEight]
         df = pd.read_excel(fileName)
         
         drop_index = []
