@@ -6839,7 +6839,7 @@ def rtn_whatsapp_sender(time_slots, google_auth):
         print("样本: ")
         for line in range(len(df.iloc[-1, :])):
             print("{}: {}".format(df.columns[line], df.iloc[-1,:][line]))
-    
+
     print()
     print()
     input("按回车键继续>>>: ")
@@ -6942,23 +6942,23 @@ def inline_rsv_whatsapp_sender():
     userInputEight = option_limit(selectFileToViewOptions, input("在这里输入>>>: "))
 
     if userInputEight == len(fileToShow)-1:
-        pass
+        return 2
     else:
         fileName = fileToShow[userInputEight]
         df = pd.read_excel(fileName)
-        
+
         drop_index = []
         for index in range(len(df)):
             text = str(df.iloc[index, 13])
             status = str(df.iloc[index, 16])
-            
+
             if len(text) == 0:
                 pass
             else:
                 for char in text:
                     if char == "甭":
                         drop_index += [index]
-            
+
             if "Canceled" in status:
                 drop_index += [index]
 
@@ -6986,7 +6986,7 @@ def inline_rsv_whatsapp_sender():
             print()
             print()
         input("按回车键继续>>>: ")
-        
+
         options = sel_Options()
 
         if sel_platform == "win32":
@@ -7014,7 +7014,7 @@ def inline_rsv_whatsapp_sender():
             text = str(df["message"].values[index])
 
             url = "https://web.whatsapp.com/send?phone=" + number + "&text=" + text
-                
+
             driver.get(url)
 
             whatsapp_options = option_num(["发送成功, 发送下一个", "发送失败, 重试一次", "发送失败, 跳过, 发送下一个"])
@@ -7032,7 +7032,7 @@ def inline_rsv_whatsapp_sender():
                     url = "https://web.whatsapp.com/send?phone=" + number + "&text=" + text
 
                     driver.get(url)
-                    
+
                     input("按回车键继续>>>: ")
                     continue
 
@@ -7042,7 +7042,7 @@ def inline_rsv_whatsapp_sender():
 
         print("任务完成")
         driver.quit()
-        
+
 def uniform_main(google_auth, db_setting_url, constants_sheetname, serialized_rule_filename, backup_foldername):
 
     res = pyfiglet.figlet_format("Uniform")
@@ -7168,18 +7168,18 @@ def main(database_url, db_setting_url, serialized_rule_filename, service_filenam
                 send_whatsapp_options = option_num(["发预订WhatsApp", "发确认定位WhatsApp", "返回上一菜单"])
                 time.sleep(0.25)
                 wa_take_input = option_limit(send_whatsapp_options, input("在这里输入>>>: "))
-                
+
                 while wa_take_input != 2:
                     if wa_take_input == 0:
                         #edit the time slots over here
                         time_slots = {"第1轮": "17:00-18:20",
                                       "第2轮": "18:30-20:00",
                                       "第3轮": "20:10-22:00"}
-                        
-                        rtn_whatsapp_sender(time_slots, google_auth)        
+
+                        rtn_whatsapp_sender(time_slots, google_auth)
 
                     elif wa_take_input == 1:
-                        inline_rsv_whatsapp_sender()    
+                        wa_take_input = inline_rsv_whatsapp_sender()
                 else:
                     pass
 
