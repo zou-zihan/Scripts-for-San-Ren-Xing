@@ -3289,7 +3289,17 @@ def night_audit_main(database_url, db_setting_url, serialized_rule_filename, ser
                 pbar.update(5)
 
                 pbar.set_description("发信息")
-                parse_sending(payslip_on_duty, drink_on_duty, box_on_duty, cashier_on_duty, google_auth, outlet, send_dict, drink_message_string, tabox_message_string, print_result, k_dict, fernet_key, wifi, date_dict, value_dict, db_writables, backup_foldername, database_url, manager_on_duty)
+
+                try:
+                    parse_sending(payslip_on_duty, drink_on_duty, box_on_duty, cashier_on_duty, google_auth, outlet, send_dict, drink_message_string, tabox_message_string, print_result, k_dict, fernet_key, wifi, date_dict, value_dict, db_writables, backup_foldername, database_url, manager_on_duty)
+
+                except Exception as e:
+                    print("发送信息失败，错误描述如下: ")
+                    print(e)
+                    print()
+                    print("已跳过发送信息")
+                    print()
+                    print()
 
                 pbar.update(5)
 
