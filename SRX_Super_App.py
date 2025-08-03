@@ -5584,6 +5584,7 @@ def work_schedule_main(google_auth, db_setting_url, constants_sheetname, seriali
                         #shift_df = df[0]
                         #parseGoogleHTMLSheet(shift_df)
                         shift_df = df[0].get_as_df()
+                        shift_df = shift_df[shift_df.iloc[:,0].astype(str).str.len() > 0]
                         shift_df["DATE"] = pd.to_datetime(shift_df["DATE"])
                         shift_df["SHIFT"] = shift_df["SHIFT"].astype(str)
                         shift_df["ID"] = shift_df["ID"].astype(int)
@@ -5594,6 +5595,7 @@ def work_schedule_main(google_auth, db_setting_url, constants_sheetname, seriali
                         #employee_info = df[2]
                         #parseGoogleHTMLSheet(employee_info)
                         employee_info = df[2].get_as_df()
+                        employee_inf = employee_inf[employee_inf.iloc[:,0].astype(str).str.len() > 0]
                         employee_info["ID"] = employee_info["ID"].astype(int)
                         employee_info["ID"] = employee_info["ID"].astype(str)
                         employee_info["FIRST DAY DATE"] = pd.to_datetime(employee_info["FIRST DAY DATE"])
@@ -5605,6 +5607,7 @@ def work_schedule_main(google_auth, db_setting_url, constants_sheetname, seriali
                         #ph_dates_df = df[3]
                         #parseGoogleHTMLSheet(ph_dates_df)
                         ph_dates_df = df[3].get_as_df()
+                        ph_dates_df = ph_dates_df[ph_dates_df.iloc[:,0].astype(str).str.len() > 0]
                         ph_dates_df["PH DATE"] = pd.to_datetime(ph_dates_df["PH DATE"])
                         pbar1.update(16)
 
@@ -5612,6 +5615,7 @@ def work_schedule_main(google_auth, db_setting_url, constants_sheetname, seriali
                         #leaves_manual_df = df[4]
                         #parseGoogleHTMLSheet(leaves_manual_df)
                         leaves_manual_df = df[4].get_as_df()
+                        leaves_manual_df = leaves_manual_df[leaves_manual_df.iloc[:,0].astype(str).str.len() > 0]
                         leaves_manual_df["DATE"] = pd.to_datetime(leaves_manual_df["DATE"])
                         leaves_manual_df["ID"] = leaves_manual_df["ID"].astype(int)
                         leaves_manual_df["ID"] = leaves_manual_df["ID"].astype(str)
