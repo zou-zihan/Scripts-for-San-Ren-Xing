@@ -855,32 +855,17 @@ def parse_tabox(k_dict, google_auth, fernet_key, box_num, rule_df_dict, take_dat
             print()
             print(e)
             print()
-            try:
-                tabox_url = fernet_decrypt(str(k_dict["box_drink_in_out_url"]), fernet_key).strip()
-                tabox_url += "htmlview"
 
-                tabox_df = pd.read_html(tabox_url, encoding="utf-8")[0]
-                parseGoogleHTMLSheet(tabox_df)
+            local_db_filename = str(k_dict["local_database_filename"])
+            tabox_sheet_name = str(k_dict["takeaway_box_sheetname"])
 
-                print("已通过仅读模式在网络获取打包盒出入库数据。")
-                print("注意在没有机器人的帮助下，所有的打包盒名字和出入库的数据不能自动重置。")
+            tabox_df = pd.read_excel("{}/{}/{}".format(os.getcwd(), backup_foldername, local_db_filename), sheet_name=tabox_sheet_name)
 
-            except Exception as e:
-                print()
-                print("通过仅读模式在网络获取打包盒出入库数据失败, 错误描述如下: ")
-                print(e)
-                print()
-
-                local_db_filename = str(k_dict["local_database_filename"])
-                tabox_sheet_name = str(k_dict["takeaway_box_sheetname"])
-
-                tabox_df = pd.read_excel("{}/{}/{}".format(os.getcwd(), backup_foldername, local_db_filename), sheet_name=tabox_sheet_name)
-
-                print("已采用本地备份的打包盒出入库数据。")
-                print("注意确保本地备份的打包盒名字和数据库里的是一模一样的，当天所有出入库的数据是正确的。")
-                print("如果需要更改本地备份数据，请先强制停止此程序，改好后重新运行。")
-                print("如果无需更改任何数据, 按回车键继续运行程序")
-                input("在这里输入>>>:")
+            print("已采用本地备份的打包盒出入库数据。")
+            print("注意确保本地备份的打包盒名字和数据库里的是一模一样的，当天所有出入库的数据是正确的。")
+            print("如果需要更改本地备份数据，请先强制停止此程序，改好后重新运行。")
+            print("如果无需更改任何数据, 按回车键继续运行程序")
+            input("在这里输入>>>:")
     else:
         local_db_filename = str(k_dict["local_database_filename"])
         tabox_sheet_name = str(k_dict["takeaway_box_sheetname"])
@@ -1737,30 +1722,16 @@ def parse_drink_stock(k_dict, fernet_key, google_auth, drink_num, value_dict, ta
             print("通过机器人从网络获取酒水出入库数据失败，错误描述如下: ")
             print(e)
             print()
-            try:
-                drink_url = fernet_decrypt(str(k_dict["box_drink_in_out_url"]), fernet_key).strip()
-                drink_url += "htmlview"
+            local_db_filename = str(k_dict["local_database_filename"])
+            drink_stock_sheetname = str(k_dict["drink_stock_sheetname"])
 
-                drink_df = pd.read_html(drink_url, encoding="utf-8")[1]
-                parseGoogleHTMLSheet(drink_df)
-                print("已通过仅读模式在网络获取酒水出入库数据。")
-                print("注意在没有机器人的帮助下，所有的酒水名字和出入库数据不能被自动重置。")
+            drink_df = pd.read_excel("{}/{}/{}".format(os.getcwd(), backup_foldername, local_db_filename), sheet_name=drink_stock_sheetname)
 
-            except Exception as e:
-                print()
-                print("网络仅读模式获取酒水出入库数据失败, 错误描述如下: ")
-                print(e)
-                print()
-                local_db_filename = str(k_dict["local_database_filename"])
-                drink_stock_sheetname = str(k_dict["drink_stock_sheetname"])
-
-                drink_df = pd.read_excel("{}/{}/{}".format(os.getcwd(), backup_foldername, local_db_filename), sheet_name=drink_stock_sheetname)
-
-                print("已采用本地备份的酒水出入库数据。")
-                print("注意确保本地备份的酒水名字和数据库里的是一模一样的，当天所有出入库的数据是正确的。")
-                print("如果需要更改本地备份数据，请先强制停止此程序，改好后重新运行。")
-                print("如果无需更改任何数据, 按回车键继续运行程序")
-                input("在这里输入>>>:")
+            print("已采用本地备份的酒水出入库数据。")
+            print("注意确保本地备份的酒水名字和数据库里的是一模一样的，当天所有出入库的数据是正确的。")
+            print("如果需要更改本地备份数据，请先强制停止此程序，改好后重新运行。")
+            print("如果无需更改任何数据, 按回车键继续运行程序")
+            input("在这里输入>>>:")
     else:
         local_db_filename = str(k_dict["local_database_filename"])
         drink_stock_sheetname = str(k_dict["drink_stock_sheetname"])
@@ -2817,8 +2788,9 @@ def parse_sending(payslip_on_duty, drink_on_duty, box_on_duty, cashier_on_duty, 
                 shiftURL = fernet_decrypt(k_dict["shift_url"], fernet_key)
 
                 #loading employee_info
-                df = pd.read_html(shiftURL+"htmlview", encoding="utf-8")[2]
-                parseGoogleHTMLSheet(df)
+                df = google_auth.open_by_url(shiftURL)
+                df = df[2].get_as_df()
+                df = df[df.iloc[:,0].astype(str).str.len() > 0]
                 df["ID"] = df["ID"].astype(int)
                 df["ID"] = df["ID"].astype(str)
                 df["FIRST DAY DATE"] = pd.to_datetime(df["FIRST DAY DATE"])
@@ -3013,12 +2985,7 @@ def parse_display_df(value_dict, rule_df_dict, k_dict, google_auth, db_writables
                 tabox_df = tabox_drink_sheet[tabox_sheetname_index].get_as_df()
 
             except:
-                try:
-                    tabox_url = box_drink_in_out_url + "htmlview"
-                    tabox_df = pd.read_html(tabox_url, encoding="utf-8")[0]
-                    parseGoogleHTMLSheet(tabox_df)
-                except:
-                    tabox_df = pd.read_excel("{}/{}/{}".format(os.getcwd(), backup_foldername, local_db_filename), sheet_name=tabox_sheetname)
+                tabox_df = pd.read_excel("{}/{}/{}".format(os.getcwd(), backup_foldername, local_db_filename), sheet_name=tabox_sheetname)
 
 
             try:
@@ -3074,12 +3041,7 @@ def parse_display_df(value_dict, rule_df_dict, k_dict, google_auth, db_writables
                 drink_df = tabox_drink_sheet[drink_sheetname_index].get_as_df()
 
             except:
-                try:
-                    drink_url = box_drink_in_out_url + "htmlview"
-                    drink_df = pd.read_html(drink_url, encoding="utf-8")[1]
-                    parseGoogleHTMLSheet(drink_df)
-                except:
-                    drink_df = pd.read_excel("{}/{}/{}".format(os.getcwd(), backup_foldername, local_db_filename), sheet_name=drink_stock_sheetname)
+                drink_df = pd.read_excel("{}/{}/{}".format(os.getcwd(), backup_foldername, local_db_filename), sheet_name=drink_stock_sheetname)
 
             try:
                 drink_db_sheet = google_auth.open_by_url(database_url)
@@ -3474,14 +3436,11 @@ def get_inv_df(formURL, df_name):
         "pageThreeUnitPrice": 4,
     }
 
-    formURL += "htmlview"
+    df = google_auth.open_by_url(formURL)
+    df = df[index_list_dict[df_name]].get_as_df()
+    df = df[df.iloc[:,0].astype(str).str.len() > 0]
 
     if df_name == "breakages_df":
-        df = pd.read_html(formURL, encoding="utf-8")[index_list_dict[df_name]]
-        df.drop("Unnamed: 0", axis=1, inplace=True)
-        df.columns = df.iloc[0,:]
-        df.drop(0, axis=0, inplace=True)
-
         df = df[df["选择操作"] == "录入破损物品"]
         df.drop(drop_list_dict[df_name], axis=1, inplace=True)
         df.columns = column_list_dict[df_name]
@@ -3489,17 +3448,7 @@ def get_inv_df(formURL, df_name):
         df["日期(年年年年-月月-日日)"] = df["日期(年年年年-月月-日日)"].apply(lambda x: dt.datetime.strptime(x, "%m/%d/%Y").strftime("%Y-%m-%d"))
         df["日期(年年年年-月月-日日)"] = pd.to_datetime(df["日期(年年年年-月月-日日)"], format="%Y-%m-%d")
 
-        df.reset_index(inplace=True)
-        df.drop("index", axis=1, inplace=True)
-
     elif df_name == "buyInStockDf":
-        df = pd.read_html(formURL, encoding="utf-8")[index_list_dict[df_name]]
-        df.drop("Unnamed: 0", axis=1, inplace=True)
-        df.columns = df.iloc[0,:]
-        df.drop(0, axis=0, inplace=True)
-        df.reset_index(inplace=True)
-        df.drop("index", axis=1, inplace=True)
-
         df = df[df["选择操作"]== "物品进货"]
         df.drop(drop_list_dict[df_name], axis=1, inplace=True)
         df.columns = column_list_dict[df_name]
@@ -3507,25 +3456,10 @@ def get_inv_df(formURL, df_name):
         df["进货日期(年年年年-月月-日日)"] = df["进货日期(年年年年-月月-日日)"].apply(lambda x: dt.datetime.strptime(x, "%m/%d/%Y").strftime("%Y-%m-%d"))
         df["进货日期(年年年年-月月-日日)"] = pd.to_datetime(df["进货日期(年年年年-月月-日日)"], format="%Y-%m-%d")
 
-        df.reset_index(inplace=True)
-        df.drop("index", axis=1, inplace=True)
-
     elif df_name == "lockInStockDf":
-        df = pd.read_html(formURL, encoding="utf-8")[index_list_dict[df_name]]
-        df.drop("Unnamed: 0", axis=1, inplace=True)
-        df.columns = df.iloc[0,:]
-        df.drop(0, axis=0, inplace=True)
-        df.reset_index(inplace=True)
-        df.drop("index", axis=1, inplace=True)
+        pass
 
     elif df_name == "stockCountDf":
-        df = pd.read_html(formURL, encoding="utf-8")[index_list_dict[df_name]]
-        df.drop("Unnamed: 0", axis=1, inplace=True)
-        df.columns = df.iloc[0,:]
-        df.drop(0, axis=0, inplace=True)
-        df.reset_index(inplace=True)
-        df.drop("index", axis=1, inplace=True)
-
         df = df[df["选择操作"] == "盘点"]
 
         deleteTitleColumns = []
@@ -3545,13 +3479,13 @@ def get_inv_df(formURL, df_name):
         df.sort_values(by=["盘点日期"], ascending=True, ignore_index=True, inplace=True)
 
     elif df_name in ["pageOneUnitPrice", "pageTwoUnitPrice", "pageThreeUnitPrice"]:
-        df = pd.read_html(formURL, encoding="utf-8")[index_list_dict[df_name]]
-        df.drop("Unnamed: 0", axis=1, inplace=True)
-        df.columns = df.iloc[0,:]
-        df.drop(0, axis=0, inplace=True)
-        df.reset_index(inplace=True)
-        df.drop("index", axis=1, inplace=True)
+        pass
 
+    else:
+        pass
+    
+    df.reset_index(inplace=True)
+    df.drop("index", axis=1, inplace=True)
 
     return df
 
@@ -4229,21 +4163,10 @@ def inventory_main(google_auth, db_setting_url, constants_sheetname, serialized_
                                             print("通过机器人从网络获取打包盒和酒水出入库失败，错误描述如下： ")
                                             print(e)
                                             print()
-                                            try:
-                                                box_drink_html_url = box_drink_in_out_url + "htmlview"
-                                                tabox_stock_df = pd.read_html(box_drink_html_url, encoding="utf-8")[0]
-                                                parseGoogleHTMLSheet(tabox_stock_df)
-
-                                                drink_stock_df = pd.read_html(box_drink_html_url, encoding="utf-8")[1]
-                                                parseGoogleHTMLSheet(drink_stock_df)
-                                                print("已通过网络仅读模式获取打包盒和酒水出入库信息")
-                                            except Exception as e:
-                                                print()
-                                                print("通过网络仅读模式获取打包盒和酒水出入库信息也失败了")
-                                                tabox_stock_df = pd.read_excel("{}/{}/{}".format(os.getcwd(), backup_foldername, local_db_filename), sheet_name=tabox_stock_sheetname)
-                                                drink_stock_df = pd.read_excel("{}/{}/{}".format(os.getcwd(), backup_foldername, local_db_filename), sheet_name=drink_stock_sheetname)
-                                                print()
-                                                print("已采用本地备份打包盒和酒水出入库信息")
+                                            tabox_stock_df = pd.read_excel("{}/{}/{}".format(os.getcwd(), backup_foldername, local_db_filename), sheet_name=tabox_stock_sheetname)
+                                            drink_stock_df = pd.read_excel("{}/{}/{}".format(os.getcwd(), backup_foldername, local_db_filename), sheet_name=drink_stock_sheetname)
+                                            print()
+                                            print("已采用本地备份打包盒和酒水出入库信息")
 
                                         if isinstance(drink_db, pd.DataFrame) and isinstance(tabox_db, pd.DataFrame):
 
@@ -7119,10 +7042,10 @@ def uniform_main(google_auth, db_setting_url, constants_sheetname, serialized_ru
             k_dict = get_k_dictionary(google_auth, db_setting_url, constants_sheetname, serialized_rule_filename, outlet, fernet_key, backup_foldername)
             uniformURL = fernet_decrypt(k_dict["uniform_sheet_url"], fernet_key)
 
-            df = pd.read_html(uniformURL+"htmlview", encoding="utf-8")
+            df = google_auth.open_by_url(uniformURL)
 
-            uniform_df = df[1]
-            parseGoogleHTMLSheet(uniform_df)
+            uniform_df = df[1].get_as_df()
+            uniform_df = uniform_df[uniform_df.iloc[:, 0].astype(str).str.len() > 0]
 
             print()
             print("报告生成时间: {}".format(dt.datetime.now().strftime("%Y年%m月%d日 %H:%M:%S")))
