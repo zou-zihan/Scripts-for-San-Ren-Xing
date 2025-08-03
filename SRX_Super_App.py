@@ -6204,8 +6204,8 @@ def generate_schedule_pdf(songTi, logoImagePath, outlet, shift_database, preview
         sunday = weekRange[-1].strftime("%Y-%m-%d")
         for key in keys:
             key_list = []
-            for index in range(len(workRange.iloc[:, 0])):
-                id = str(workRange.iloc[:, 0].values.astype(str)[index])
+            for index in range(len(workRange.iloc[3:17, 5])):
+                id = str(workRange.iloc[3:17, 5].values.astype(str)[index])
                 id_string = "{}${}".format(id, sunday)
                 if shift_database[shift_database["FOR VLOOKUP"] == id_string].empty:
                     key_list += [" "]
@@ -6221,8 +6221,8 @@ def generate_schedule_pdf(songTi, logoImagePath, outlet, shift_database, preview
             work_schedule_df.update( { key : value })
 
         work_schedule_df = pd.DataFrame(work_schedule_df)
-        work_schedule_df["SIGN"] = np.repeat(" ", len(workRange))
-        work_schedule_df["RE"] = workRange.iloc[:, 9]
+        work_schedule_df["SIGN"] = np.repeat(" ", len(workRange.iloc[3:17,5]))
+        work_schedule_df["RE"] = workRange.iloc[3:17,14].values
         work_schedule_df.drop("ID", axis=1, inplace=True)
 
         pbar.update(15)
