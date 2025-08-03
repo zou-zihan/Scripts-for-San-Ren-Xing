@@ -5576,12 +5576,14 @@ def work_schedule_main(google_auth, db_setting_url, constants_sheetname, seriali
                         pbar1.update(16)
 
                         pbar1.set_description("读取排班全记录")
-                        df = pd.read_html(shiftURL+"htmlview", encoding="utf-8")
+                        #df = pd.read_html(shiftURL+"htmlview", encoding="utf-8")
+                        df = google_auth.open_by_url(shiftURL)
                         pbar1.update(16)
 
                         pbar1.set_description("读取排班记录")
-                        shift_df = df[0]
-                        parseGoogleHTMLSheet(shift_df)
+                        #shift_df = df[0]
+                        #parseGoogleHTMLSheet(shift_df)
+                        shift_df = df[0].get_as_df()
                         shift_df["DATE"] = pd.to_datetime(shift_df["DATE"])
                         shift_df["SHIFT"] = shift_df["SHIFT"].astype(str)
                         shift_df["ID"] = shift_df["ID"].astype(int)
@@ -5589,8 +5591,9 @@ def work_schedule_main(google_auth, db_setting_url, constants_sheetname, seriali
                         pbar1.update(16)
 
                         pbar1.set_description("读取员工资料")
-                        employee_info = df[2]
-                        parseGoogleHTMLSheet(employee_info)
+                        #employee_info = df[2]
+                        #parseGoogleHTMLSheet(employee_info)
+                        employee_info = df[2].get_as_df()
                         employee_info["ID"] = employee_info["ID"].astype(int)
                         employee_info["ID"] = employee_info["ID"].astype(str)
                         employee_info["FIRST DAY DATE"] = pd.to_datetime(employee_info["FIRST DAY DATE"])
@@ -5599,22 +5602,26 @@ def work_schedule_main(google_auth, db_setting_url, constants_sheetname, seriali
                         pbar1.update(16)
 
                         pbar1.set_description("读取公共假期")
-                        ph_dates_df = df[3]
-                        parseGoogleHTMLSheet(ph_dates_df)
+                        #ph_dates_df = df[3]
+                        #parseGoogleHTMLSheet(ph_dates_df)
+                        ph_dates_df = df[3].get_as_df()
                         ph_dates_df["PH DATE"] = pd.to_datetime(ph_dates_df["PH DATE"])
                         pbar1.update(16)
 
                         pbar1.set_description("读取手动录入假期")
-                        leaves_manual_df = df[4]
-                        parseGoogleHTMLSheet(leaves_manual_df)
+                        #leaves_manual_df = df[4]
+                        #parseGoogleHTMLSheet(leaves_manual_df)
+                        leaves_manual_df = df[4].get_as_df()
                         leaves_manual_df["DATE"] = pd.to_datetime(leaves_manual_df["DATE"])
                         leaves_manual_df["ID"] = leaves_manual_df["ID"].astype(int)
                         leaves_manual_df["ID"] = leaves_manual_df["ID"].astype(str)
 
                         pbar1.set_description("读取排班预览")
-                        previewSchedule = df[1]
-                        previewSchedule.drop("Unnamed: 0", axis=1, inplace=True)
-                        previewSchedule = previewSchedule.iloc[:20, :]
+                        #previewSchedule = df[1]
+                        #previewSchedule.drop("Unnamed: 0", axis=1, inplace=True)
+                        #previewSchedule = previewSchedule.iloc[:20, :]
+
+                        previewSchedule = df[1].get_as_df()
 
                         pbar1.set_description("完成")
                         pbar1.update(20)
@@ -6053,7 +6060,8 @@ def work_schedule_main(google_auth, db_setting_url, constants_sheetname, seriali
                         print("手动录入的假期记录已清除完成")
 
                     elif userInputOne == 4:
-                        isMonday = eval(str(previewSchedule.iloc[1,3]).capitalize())
+                        #isMonday = eval(str(previewSchedule.iloc[1,3]).capitalize())
+                        isMonday = eval(str(previewSchedule.iloc[0,8]).capitalize())
 
                         if isMonday:
                             stock_count_foldername = "{}盘点文件".format(shiftOutlet.strip().capitalize())
@@ -6125,16 +6133,31 @@ def generate_schedule_pdf(songTi, logoImagePath, outlet, shift_database, preview
     with tqdm(total=100) as pbar:
         pbar.set_description("处理信息...")
 
-        monday = pd.to_datetime(str(previewSchedule.iloc[1,1]))
+        #monday = pd.to_datetime(str(previewSchedule.iloc[1,1]))
+        monday = pd.to_datetime(str(previewSchedule.iloc[0,6]))
 
-        employee_id_show = previewSchedule.iloc[4:18, 0].astype(str).tolist()
+        #employee_id_show = previewSchedule.iloc[4:18, 0].astype(str).tolist()
+        employee_id_show = previewSchedule.iloc[3:17,5].values.astype(str).tolist()
 
-        if "nan" in employee_id_show:
-            employee_id_show.remove("nan")
+        #if "nan" in employee_id_show:
+        #    employee_id_show.remove("nan")
+
+        counter = 0
+        for item in employee_id_show:
+            if item == "":
+                counter += 1
+        
+        if counter > 0:
+            for t in range(counter):
+                employee_id_show.remove("")
+        else:
+            pass
 
         if len(employee_id_show) < 14:
             for _ in range(14-len(employee_id_show)):
                 employee_id_show += [" "]
+        else:
+            pass
 
         weekRange = [monday]
         for num in np.arange(1,7):
@@ -6143,18 +6166,31 @@ def generate_schedule_pdf(songTi, logoImagePath, outlet, shift_database, preview
         pbar.update(15)
 
         workRange = previewSchedule.copy()
-        workRange = workRange.iloc[4:18, 0:10]
+        #workRange = workRange.iloc[4:18, 0:10]
 
-        work_schedule_df = {"序号" : np.arange(1, 15),
-                            "ID" : workRange.iloc[:, 0],
-                            "姓名" : workRange.iloc[:,1],
-                            "Mon" : workRange.iloc[:,2],
-                            "Tue" : workRange.iloc[:,3],
-                            "Wed" : workRange.iloc[:,4],
-                            "Thu" : workRange.iloc[:,5],
-                            "Fri" : workRange.iloc[:,6],
-                            "Sat" : workRange.iloc[:,7],
-                            "Sun" : workRange.iloc[:,8],}
+        work_schedule_df = { #"序号" : np.arange(1, 15),
+                            #"ID" : workRange.iloc[:, 0],
+                            #"姓名" : workRange.iloc[:,1],
+                            #"Mon" : workRange.iloc[:,2],
+                            #"Tue" : workRange.iloc[:,3],
+                            #"Wed" : workRange.iloc[:,4],
+                            #"Thu" : workRange.iloc[:,5],
+                            #"Fri" : workRange.iloc[:,6],
+                            #"Sat" : workRange.iloc[:,7],
+                            #"Sun" : workRange.iloc[:,8],
+                            
+                            "序号" : np.arange(1, 15),
+                            "ID" : workRange.iloc[3:17, 5],
+                            "姓名" : workRange.iloc[3:17,6],
+                            "Mon" : workRange.iloc[3:17,7],
+                            "Tue" : workRange.iloc[3:17,8],
+                            "Wed" : workRange.iloc[3:17,9],
+                            "Thu" : workRange.iloc[3:17,10],
+                            "Fri" : workRange.iloc[3:17,11],
+                            "Sat" : workRange.iloc[3:17,12],
+                            "Sun" : workRange.iloc[3:17,13],
+                            
+                            }
 
         work_schedule_df["ID"] = work_schedule_df["ID"].astype(str)
 
@@ -6188,14 +6224,16 @@ def generate_schedule_pdf(songTi, logoImagePath, outlet, shift_database, preview
         pbar.update(15)
 
         workerCountRange = previewSchedule.copy()
-        workerCountRange = workerCountRange.iloc[18:, :9]
+        #workerCountRange = workerCountRange.iloc[18:, :9]
+        workerCountRange = workerCountRange.iloc[17:19,5:14]
 
         for num in range(6):
             workerCountRange["{}".format(num+1)] = np.repeat(" ", len(workerCountRange))
 
         pbar.update(15)
 
-        weekRemark = str(previewSchedule.iloc[18,9])
+        #weekRemark = str(previewSchedule.iloc[18,9])
+        weekRemark = str(previewSchedule.iloc[17,15])
 
         Document = borb_Document()
         Page = borb_Page(width=Decimal(842), height=Decimal(595))
