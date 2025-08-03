@@ -5595,7 +5595,7 @@ def work_schedule_main(google_auth, db_setting_url, constants_sheetname, seriali
                         #employee_info = df[2]
                         #parseGoogleHTMLSheet(employee_info)
                         employee_info = df[2].get_as_df()
-                        employee_inf = employee_inf[employee_inf.iloc[:,0].astype(str).str.len() > 0]
+                        employee_info = employee_info[employee_info.iloc[:,0].astype(str).str.len() > 0]
                         employee_info["ID"] = employee_info["ID"].astype(int)
                         employee_info["ID"] = employee_info["ID"].astype(str)
                         employee_info["FIRST DAY DATE"] = pd.to_datetime(employee_info["FIRST DAY DATE"])
