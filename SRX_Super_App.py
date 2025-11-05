@@ -241,15 +241,19 @@ def need_integer(x, absolute=False):
         return int(x)
 
 def option_num(options_list):
-    options_list = np.array(options_list)
+    options_list = np.array(options_list).astype(str)
     rx = np.arange(len(options_list)).astype(str)
-    kou = np.repeat('扣', len(options_list))
-    options_list_kou = np.core.defchararray.add(options_list,kou)
-    options_list_kou_int = np.core.defchararray.add(options_list_kou, rx)
+    options_list_kou_int = []
+    for i in range(len(options_list)):
+        options_list_kou_int += [options_list[i]+"扣"+rx[i]]
+    
+    options_list_kou_int = np.array(options_list_kou_int)
+
     for item in options_list_kou_int:
         print(item)
+    
     return options_list_kou_int
-
+    
 def option_limit(options_list, user_input):
     if integer_check(user_input):
         user_input = int(user_input)
