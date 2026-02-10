@@ -6796,7 +6796,7 @@ def rtn_whatsapp_sender(time_slots, google_auth):
         options.add_argument("--incognito")
         driver = webdriver.Chrome(service=service, options=options)
 
-    elif broswer_select == 1:
+    elif browser_select == 1:
         from selenium.webdriver.firefox.service import Service as FirefoxService
         from webdriver_manager.firefox import GeckoDriverManager
 
