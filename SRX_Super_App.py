@@ -6809,7 +6809,7 @@ def rtn_whatsapp_sender(time_slots, google_auth):
     df["桌号"] = df["桌号"].astype(str)
     df["是否完成订单"] = df["是否完成订单"].astype(str)
 
-    df = df[df["是否完成订单"] == "FALSE"]
+    df = df[df["是否完成订单"] != "TRUE"]
     df = df[df["属性"] == "堂食"]
     df = df[df["轮数"] != "无效"]
 
