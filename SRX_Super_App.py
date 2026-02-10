@@ -6775,11 +6775,49 @@ def float_check(x):
         return False
 
 def rtn_whatsapp_sender(time_slots, google_auth):
-    from selenium import webdriver as sel_webdriver
-    from selenium.webdriver.chrome.options import Options as sel_Options
-    from webdriver_manager.chrome import ChromeDriverManager
+    from selenium import webdriver
     from sys import platform as sel_platform
-    from selenium.webdriver.chrome.service import Service as sel_service
+
+    print("Please select the browser you'd like to use")
+    print("请选择您偏爱使用的浏览器")
+    print()
+    time.sleep(0.15)
+    browser_options = option_num(["谷歌浏览器Chrome", "火狐浏览器Firefox", "微软浏览器Edge"])
+    time.sleep(0.25)
+    browser_select = option_limit(browser_options, input("在这里输入>>>: "))
+
+    if browser_select == 0:
+        from selenium.webdriver.chrome.service import Service as ChromeService
+        from webdriver_manager.chrome import ChromeDriverManager
+
+        service = ChromeService(ChromeDriverManager().install())
+        options = webdriver.ChromeOptions()
+
+        options.add_argument("--incognito")
+        driver = webdriver.Chrome(service=service, options=options)
+
+    elif broswer_select == 1:
+        from selenium.webdriver.firefox.service import Service as FirefoxService
+        from webdriver_manager.firefox import GeckoDriverManager
+
+        service = FirefoxService(GeckoDriverManager().install())
+        options = webdriver.FirefoxOptions()
+
+    
+        options.add_argument("-private")
+        driver = webdriver.Firefox(service=service, options=options)
+
+    elif browser_select == 2:
+        from selenium.webdriver.edge.service import Service as EdgeService
+        from webdriver_manager.microsoft import EdgeChromiumDriverManager
+
+        service = EdgeService(EdgeChromiumDriverManager().install())
+        options = webdriver.EdgeOptions()
+
+    
+        options.add_argument("--inprivate")
+        driver = webdriver.Edge(service=service, options=options)
+        
 
     print("Please provide reservation dataframe URL")
     print("请提供预订表格的网址")
@@ -6835,11 +6873,6 @@ def rtn_whatsapp_sender(time_slots, google_auth):
     phone = df["电话"].values.astype(str)
     texts = df["WhatsApp"].values.astype(str)
 
-    options = sel_Options()
-
-    if sel_platform == "win32":
-        options.binary_location = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
-
     total_numbers = len(phone)
     print("##########################################################")
     print('共找到{}个电话号码'.format(total_numbers))
@@ -6848,10 +6881,6 @@ def rtn_whatsapp_sender(time_slots, google_auth):
     print()
     print()
     print('确保你的电脑安装了谷歌浏览器和有网络连接')
-    service = sel_service()
-    options = sel_webdriver.ChromeOptions()
-    driver = sel_webdriver.Chrome(service=service, options=options)
-    #driver = sel_webdriver.Chrome(ChromeDriverManager().install())
     print('WhatsApp开启后, 请登录你的账号。')
     driver.get('https://web.whatsapp.com')
     print("当你看到你的聊天列表的时候再按回车键继续。")
