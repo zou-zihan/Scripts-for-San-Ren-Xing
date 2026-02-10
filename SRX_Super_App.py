@@ -6778,47 +6778,6 @@ def rtn_whatsapp_sender(time_slots, google_auth):
     from selenium import webdriver
     from sys import platform as sel_platform
 
-    print("Please select the browser you'd like to use")
-    print("请选择您偏爱使用的浏览器")
-    print()
-    time.sleep(0.15)
-    browser_options = option_num(["谷歌浏览器Chrome", "火狐浏览器Firefox", "微软浏览器Edge"])
-    time.sleep(0.25)
-    browser_select = option_limit(browser_options, input("在这里输入>>>: "))
-
-    if browser_select == 0:
-        from selenium.webdriver.chrome.service import Service as ChromeService
-        from webdriver_manager.chrome import ChromeDriverManager
-
-        service = ChromeService(ChromeDriverManager().install())
-        options = webdriver.ChromeOptions()
-
-        options.add_argument("--incognito")
-        driver = webdriver.Chrome(service=service, options=options)
-
-    elif browser_select == 1:
-        from selenium.webdriver.firefox.service import Service as FirefoxService
-        from webdriver_manager.firefox import GeckoDriverManager
-
-        service = FirefoxService(GeckoDriverManager().install())
-        options = webdriver.FirefoxOptions()
-
-    
-        options.add_argument("-private")
-        driver = webdriver.Firefox(service=service, options=options)
-
-    elif browser_select == 2:
-        from selenium.webdriver.edge.service import Service as EdgeService
-        from webdriver_manager.microsoft import EdgeChromiumDriverManager
-
-        service = EdgeService(EdgeChromiumDriverManager().install())
-        options = webdriver.EdgeOptions()
-
-    
-        options.add_argument("--inprivate")
-        driver = webdriver.Edge(service=service, options=options)
-        
-
     print("Please provide reservation dataframe URL")
     print("请提供预订表格的网址")
     time.sleep(0.15)
@@ -6880,55 +6839,100 @@ def rtn_whatsapp_sender(time_slots, google_auth):
     print()
     print()
     print()
-    print('确保你的电脑安装了谷歌浏览器和有网络连接')
-    print('WhatsApp开启后, 请登录你的账号。')
-    driver.get('https://web.whatsapp.com')
-    print("当你看到你的聊天列表的时候再按回车键继续。")
-    input("按回车键继续>>>: ")
-
-    for index in range(len(phone)):
-        if str(phone[index]).startswith("+"):
-            isLocalPhone = False
-        else:
-            isLocalPhone = True
-
-        number = str(phone[index])
-        text = str(texts[index])
-
-        if isLocalPhone:
-            url = "https://web.whatsapp.com/send?phone=65" + number + "&text=" + text
-        else:
-            url = "https://web.whatsapp.com/send?phone=" + number.replace("+", "") + "&text" + text
-
-        driver.get(url)
-
-        whatsapp_options = option_num(["发送成功, 发送下一个", "发送失败, 重试一次", "发送失败, 跳过, 发送下一个"])
+    if total_numbers > 0:
+        print('确保你的电脑安装了对应的浏览器和有网络连接')
+        print('WhatsApp开启后, 请登录你的账号。')
+    
+        print("Please select the browser you'd like to use")
+        print("请选择您偏爱使用的浏览器")
+        print()
+        time.sleep(0.15)
+        browser_options = option_num(["谷歌浏览器Chrome", "火狐浏览器Firefox", "微软浏览器Edge"])
         time.sleep(0.25)
-        whatsapp_select = option_limit(whatsapp_options, input("在这里输入>>>: "))
-
-        if whatsapp_select == 0:
-            print("{}发送成功! ".format(number))
-            continue
-
-        elif whatsapp_select == 1:
-            print("{}发送失败, 将重试一次。".format(number))
-            for _ in range(1):
-                print("重新发给{}。".format(number))
-                if isLocalPhone:
-                    url = "https://web.whatsapp.com/send?phone=65" + number + "&text=" + text
-                else:
-                    url = "https://web.whatsapp.com/send?phone=" + number.replace("+", "") + "&text" + text
-
-                driver.get(url)
-                input("按回车键继续>>>: ")
+        browser_select = option_limit(browser_options, input("在这里输入>>>: "))
+    
+        if browser_select == 0:
+            from selenium.webdriver.chrome.service import Service as ChromeService
+            from webdriver_manager.chrome import ChromeDriverManager
+    
+            service = ChromeService(ChromeDriverManager().install())
+            options = webdriver.ChromeOptions()
+    
+            options.add_argument("--incognito")
+            driver = webdriver.Chrome(service=service, options=options)
+    
+        elif browser_select == 1:
+            from selenium.webdriver.firefox.service import Service as FirefoxService
+            from webdriver_manager.firefox import GeckoDriverManager
+    
+            service = FirefoxService(GeckoDriverManager().install())
+            options = webdriver.FirefoxOptions()
+    
+        
+            options.add_argument("-private")
+            driver = webdriver.Firefox(service=service, options=options)
+    
+        elif browser_select == 2:
+            from selenium.webdriver.edge.service import Service as EdgeService
+            from webdriver_manager.microsoft import EdgeChromiumDriverManager
+    
+            service = EdgeService(EdgeChromiumDriverManager().install())
+            options = webdriver.EdgeOptions()
+    
+        
+            options.add_argument("--inprivate")
+            driver = webdriver.Edge(service=service, options=options)
+            
+        driver.get('https://web.whatsapp.com')
+        print("当你看到你的聊天列表的时候再按回车键继续。")
+        input("按回车键继续>>>: ")
+    
+        for index in range(len(phone)):
+            if str(phone[index]).startswith("+"):
+                isLocalPhone = False
+            else:
+                isLocalPhone = True
+    
+            number = str(phone[index])
+            text = str(texts[index])
+    
+            if isLocalPhone:
+                url = "https://web.whatsapp.com/send?phone=65" + number + "&text=" + text
+            else:
+                url = "https://web.whatsapp.com/send?phone=" + number.replace("+", "") + "&text" + text
+    
+            driver.get(url)
+    
+            whatsapp_options = option_num(["发送成功, 发送下一个", "发送失败, 重试一次", "发送失败, 跳过, 发送下一个"])
+            time.sleep(0.25)
+            whatsapp_select = option_limit(whatsapp_options, input("在这里输入>>>: "))
+    
+            if whatsapp_select == 0:
+                print("{}发送成功! ".format(number))
                 continue
-
-        elif whatsapp_select == 2:
-            print("{}发送失败, 已跳过。".format(number))
-            continue
-
-    print("任务完成")
-    driver.quit()
+    
+            elif whatsapp_select == 1:
+                print("{}发送失败, 将重试一次。".format(number))
+                for _ in range(1):
+                    print("重新发给{}。".format(number))
+                    if isLocalPhone:
+                        url = "https://web.whatsapp.com/send?phone=65" + number + "&text=" + text
+                    else:
+                        url = "https://web.whatsapp.com/send?phone=" + number.replace("+", "") + "&text" + text
+    
+                    driver.get(url)
+                    input("按回车键继续>>>: ")
+                    continue
+    
+            elif whatsapp_select == 2:
+                print("{}发送失败, 已跳过。".format(number))
+                continue
+    
+        print("任务完成")
+        driver.quit()
+    else:
+        pass
+    
     return df
 
 def inline_rsv_whatsapp_sender():
