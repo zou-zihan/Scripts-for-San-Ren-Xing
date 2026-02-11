@@ -6842,6 +6842,8 @@ def rtn_whatsapp_sender(time_slots, google_auth):
     if total_numbers > 0:
         print('确保你的电脑安装了对应的浏览器和有网络连接')
         print('WhatsApp开启后, 请登录你的账号。')
+        print()
+        print()
     
         print("Please select the browser you'd like to use")
         print("请选择您偏爱使用的浏览器")
@@ -6873,15 +6875,29 @@ def rtn_whatsapp_sender(time_slots, google_auth):
             driver = webdriver.Firefox(service=service, options=options)
     
         elif browser_select == 2:
-            from selenium.webdriver.edge.service import Service as EdgeService
-            from webdriver_manager.microsoft import EdgeChromiumDriverManager
-    
-            service = EdgeService(EdgeChromiumDriverManager().install())
-            options = webdriver.EdgeOptions()
-    
-        
-            options.add_argument("--inprivate")
-            driver = webdriver.Edge(service=service, options=options)
+            print("If you don't have msedgedriver installed,")
+            print("please download it at: https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver?form=MA13LH")
+            print("如果您没有安装msedgedriver驱动, 请访问上述链接来下载该驱动。")
+            print()
+            input("按回车键继续>>>: ")
+            print()
+            print("Please provide msedgedriver's absolute path on your computer: ")
+            print("请提供msedgedriver驱动的绝对路径: ")
+            msedgedriver_path = input("在这里输入>>>: ")
+            
+            from selenium import webdriver
+            from selenium.webdriver.edge.service import Service
+            from selenium.webdriver.edge.options import Options
+            
+            # Set up Edge options
+            edge_options = Options()
+            edge_options.use_chromium = True  # Ensure using Chromium-based Edge
+            
+            # Path to your msedgedriver executable
+            service = Service(msedgedriver_path.strip())
+            
+            # Initialize the Edge driver
+            driver = webdriver.Edge(service=service, options=edge_options)
             
         driver.get('https://web.whatsapp.com')
         print("当你看到你的聊天列表的时候再按回车键继续。")
