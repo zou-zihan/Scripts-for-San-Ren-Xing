@@ -6796,6 +6796,10 @@ def rtn_whatsapp_sender(time_slots, google_auth):
     print("您输入的门店是: {}".format(outlet))
     print()
     input("按回车键继续>>>: ")
+    print()
+    print("Fetching Data...Please Wait...")
+    print("提取数据中...请稍等...")
+    print()
 
     df = google_auth.open_by_url(url)[0]
     df = df.get_as_df()
