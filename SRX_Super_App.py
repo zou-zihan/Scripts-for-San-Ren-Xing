@@ -6854,15 +6854,32 @@ def rtn_whatsapp_sender(time_slots, google_auth):
         browser_select = option_limit(browser_options, input("在这里输入>>>: "))
     
         if browser_select == 0:
-            from selenium.webdriver.chrome.service import Service as ChromeService
-            from webdriver_manager.chrome import ChromeDriverManager
+            print("If you don't have chromedriver installed or had experienced outdated chromedriver error, ")
+            print("please download it at: https://developer.chrome.com/docs/chromedriver/downloads")
+            print("如果您没有安装chromedriver驱动或者驱动版本过老, 请访问上述链接来下载该驱动。")
+            print()
+            input("按回车键继续>>>: ")
+            print()
+            print("Please provide chromedriver's absolute path on your computer: ")
+            print("请提供chromedriver驱动的绝对路径: ")
+            chromedriver_path = input("在这里输入>>>: ")
+            
+            from selenium import webdriver
+            from selenium.webdriver.chrome.service import Service
+            from selenium.webdriver.chrome.options import Options
     
-            service = ChromeService(ChromeDriverManager().install())
-            options = webdriver.ChromeOptions()
-    
-            options.add_argument("--incognito")
-            driver = webdriver.Chrome(service=service, options=options)
-    
+            # Set up Chrome options
+            chrome_options = Options()
+            
+            # Optional: start Chrome in incognito mode
+            chrome_options.add_argument("--incognito")
+            
+            # Path to chromedriver (adjust for your system)
+            service = Service(chromedriver_path.strip())  
+            
+            # Initialize Chrome driver
+            driver = webdriver.Chrome(service=service, options=chrome_options)
+                
         elif browser_select == 1:
             from selenium.webdriver.firefox.service import Service as FirefoxService
             from webdriver_manager.firefox import GeckoDriverManager
