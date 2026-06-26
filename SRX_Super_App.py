@@ -4977,7 +4977,7 @@ def calculate_AL(employee_info_df, employee_id, date):
                 unpaid_months = float(str(employee_info_df[(criteria1)]["UNPAID MONTH(S) TAKEN WITHIN PERIOD OF AL CALCULATION"].values[0]))
 
                 cut_off_day = 1
-                cut_off_month = 9
+                cut_off_month = 7
 
                 first_day = pd.to_datetime(employee_info_df[(criteria1)]["FIRST DAY DATE"].values[0])
                 cut_off_date = pd.to_datetime(dt.datetime(first_day.year, cut_off_month, cut_off_day))
