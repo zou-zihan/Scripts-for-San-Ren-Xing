@@ -281,6 +281,634 @@ def option_limit(options_list, user_input):
                 while user_input in range(len(options_list)):
                     return user_input
 
+#AMFUTURE
+def find_dates_with_fuzzy_support(df):
+  found_dates = []
+
+  for r in range(len(df)):
+    for c, col in enumerate(df.columns):
+      val = df.iat[r, c]
+
+      if pd.notna(val):
+        val_str = str(val).strip()
+
+        # Must look somewhat like a date (have / or -)
+        if "/" in val_str or "-" in val_str:
+          try:
+            # fuzzy=True tells dateutil to ignore extra noise like '~'
+            dt = parser.parse(val_str, fuzzy=True)
+
+            date_info = {
+                "col_idx": c,
+                "row_idx": r,
+                "col_name": col,
+                "original": val,
+                "formatted": dt.strftime("%Y-%m-%d"),
+            }
+            found_dates.append(date_info)
+            #print(f"Successfully caught: {val} -> {date_info['formatted']}")
+
+            if len(found_dates) == 2:
+              return found_dates
+          except (ValueError, OverflowError):
+            # If dateutil can't parse it even with fuzzy, skip it
+            continue
+
+  return found_dates
+
+def make_space_insensitive_pattern(text):
+  # 1. Escape special regex characters (like '@')
+  # 2. Replace any literal spaces with '\s*' to ignore spacing
+  escaped = re.escape(text.strip())
+  pattern = r"^\s*" + escaped.replace(r"\ ", r"\s*")
+  return pattern
+
+def amfuture_get_entry(df, param):
+
+    global GLOBAL_OUTLET
+
+    pattern_dictionary = {
+        "date" : None,
+        "outlet" : "SAN REN XING@",
+        "total sales" : "营业金额净值",
+        "people count" : ["打包订单量", "堂食用餐人数", "外卖订单量"],
+        "foodpanda" : "- Foodpanda",
+        "grabfood" : "- Grab",
+        "getz" : "- Getz",
+        "oddle" : "- Oddle",
+        "chinatown" : "- 唐人街",
+        "lunch set" : "午市套餐",
+        "member discount" : "- 会员折扣",
+        "manual discount" : "- 人工折扣",
+        "mall voucher" : "ECapitaMall",
+        "srx voucher": "三人行礼券",
+        "top up amount" : "用户充值商业积分",
+        "free amount" : "用户赠送商业积分",
+        "used amount" : "商业积分支付",
+        "dine in sale total" : None,
+        "takeaway sale total": None,
+        "net sale" : None,
+        "GST" : "- 税金",
+        "svc charge" : "- 服务费",
+        
+    }
+
+    take_column_dictionary = {
+        "date" : None,
+        "outlet" : 0,
+        "total sales" : 1,
+        "people count" : None,
+        "foodpanda" : 2,
+        "grabfood" : 2,
+        "getz" : 2,
+        "oddle" : 2,
+        "chinatown" : 2,
+        "lunch set" : None,
+        "member discount" : 1,
+        "manual discount" : 1,
+        "mall voucher" : 1,
+        "srx voucher": 1,
+        "top up amount" : 1,
+        "free amount" : 1,
+        "used amount" : 1,
+        "dine in sale total" : 2,
+        "takeaway sale total": 1,
+        "net sale" : 1,
+        "GST" : 1,
+        "svc charge" : 1,
+    }
+
+    fallback_dictionary = {
+        "date" : pd.to_datetime("today"),
+        "outlet" : GLOBAL_OUTLET,
+        "total sales" : -1000000,
+        "people count" : 0,
+        "foodpanda" : 0,
+        "grabfood" : 0,
+        "getz" : 0,
+        "oddle" : 0,
+        "chinatown" : 0,
+        "lunch set" : 0,
+        "member discount" : 0,
+        "manual discount" : 0,
+        "mall voucher" : 0,
+        "srx voucher": 0,
+        "top up amount" : 0,
+        "free amount" : 0,
+        "used amount" : 0,
+        "dine in sale total" : -500000,
+        "takeaway sale total": -500000,
+        "net sale" : -1000000,
+        "GST" : -250000,
+        "svc charge" : 0,
+    }
+
+    list_1 = [
+        "outlet", 
+        "total sales", 
+        "foodpanda", 
+        "grabfood", 
+        "getz", 
+        "oddle", 
+        "chinatown", 
+        "member discount", 
+        "manual discount", 
+        "mall voucher", 
+        "srx voucher", 
+        "top up amount", 
+        "free amount",
+        "used amount",
+    ]
+
+    list_2 = ["GST", "svc charge"]
+    
+    fallback = fallback_dictionary[param]
+    take_column = take_column_dictionary[param]
+    keyword = pattern_dictionary[param]
+    
+    if param == "date":
+        found_dates = find_dates_with_fuzzy_support(df)
+
+        if len(found_dates) == 0:
+            print("报表上找不到日期信息。")
+            print("将采取今天的日期继续: {}年{}月{}日。".format(fallback.year, fallback.month, fallback.day))
+            result = [fallback]
+
+        elif len(found_dates) == 1:
+            the_date = pd.to_datetime(found_dates[0]["formatted"])
+            print("报表上只找到一个日期，可能不准确，请注意检查。")
+            result = [the_date]
+
+        else:
+            first_date = pd.to_datetime(found_dates[0]["formatted"])
+            second_date = pd.to_datetime(found_dates[1]["formatted"])
+            if first_date == second_date:
+                result = [first_date]
+            else:
+                result = [first_date, second_date]
+
+    elif param in list_1:
+        pattern = make_space_insensitive_pattern(keyword)
+    
+        find_in_df = df[df["column 1"].astype(str).str.contains(pattern, case=False, regex=True)]
+    
+        if len(find_in_df) == 0:
+            print("报表上找不到'{}'".format(keyword))
+            result = fallback
+    
+        else:
+            row_idx = int(find_in_df.index[0])
+    
+            if param == "outlet":
+                result = str(df.iloc[row_idx, take_column])
+    
+            else:
+                try:
+                    result = float(df.iloc[row_idx, take_column])
+                except Exception as e:
+                    print("处理'{}'时发生错误，错误如下:".format(keyword))
+                    print()
+                    print(e)
+                    print()
+                    print("将采用默认值: {}".format(fallback))
+                    result = fallback
+
+    elif param == "people count":
+        people_count = 0
+        for name in keyword:
+            pattern = make_space_insensitive_pattern[name]
+
+            find_in_df = df[df["column 1"].astype(str).str.contains(pattern, case=False, regex=True)]
+
+            if len(find_in_df) == 0:
+                print("报表上找不到'{}', 将采用默认值: {}。".format(name, fallback))
+                people_count += fallback
+
+            else:
+                row_idx = int(find_in_df.index[0])
+                people_count += int(df.iloc[row_idx, 1].split("/")[0].strip())
+
+        result = people_count
+
+    elif param == "lunch set":
+        pattern = make_space_insensitive_pattern(keyword)
+
+        find_in_df = df[df["column 1"].astype(str).str.contains(pattern, case=False, regex=True)]
+
+        if len(find_in_df) == 0:
+            result = fallback
+
+        else:
+            result = int(find_in_df["column 2"].astype(int).sum())
+
+    elif param == "dine in sale total":
+        pattern = make_space_insensitive_pattern("桌码订单")
+        result = 0
+        
+        find_in_df = df[df["column 1"].astype(str).str.contains(pattern, case=False, regex=True)]
+        
+        if len((find_in_df)) == 0:
+            print("报表上找不到'桌码订单', 将采用默认值：0。")
+            result = 0
+
+        else:
+            row_idx = int(find_in_df.index[0])
+
+            try:
+                result += float(df.iloc[row_idx, 2])
+            except Exception as e:
+                print("处理'桌码订单'金额时发生错误，错误如下:")
+                print()
+                print(e)
+                print()
+                print("将采用默认值: 0。")
+                result += 0
+
+        pattern = make_space_insensitive_pattern("- 堂食")
+
+        find_in_df = df[df["column 1"].astype(str).str.contains(pattern, case=False, regex=True)]
+
+        if len(find_in_df) == 0:
+            print("报表上找不到'-堂食', 将采用默认值：0。")
+            result += 0
+
+        else:
+            row_idx = int(find_in_df.index[0])
+
+            if df.iloc[row_idx - 1, 0] == "收银台订单":
+                result += float(df.iloc[row_idx, 2])
+
+            else:
+                print("'-堂食'金额很有可能不是从收银台订单的下方提取的, 请注意检查。")
+                print("提取到的数值是：'{}'。".format(float(df.iloc[row_idx, 2])))
+
+                try:
+                    result += float(df.iloc[row_idx, take_column])
+                except:
+                    print()
+                    print("获取堂食营业额时发生错误，将采用默认值: {}。".format(fallback))
+                    result = fallback
+
+    elif param == "takeaway sale total":
+        result = 0
+        pattern = make_space_insensitive_pattern("- 打包")
+
+        find_in_df = df[df["column 1"].astype(str).str.contains(pattern, case=False, regex=True)]
+
+        if len(find_in_df) == 0:
+            print("报表上找不到打包信息，默认值0。")
+            result += 0
+
+        else:
+            row_idx = int(find_in_df.index[0])
+            
+            if df.iloc[row_idx - 2, 0] == "收银台订单":
+                result += float(df.iloc[row_idx, 2])
+
+            else:
+                print("'-打包'金额很有可能不是从收银台订单的下方提取的, 请注意检查。")
+                print("提取到的数值是: '{}。'".format(float(df.iloc[row_idx, 2])))
+                result += float(df.iloc[row_idx, 2])
+
+        pattern = make_space_insensitive_pattern("外卖订单")
+
+        find_in_df = df[df["column 1"].astype(str).str.contains(pattern, case=False, regex=True)]
+
+        if len(find_in_df) == 0:
+            print("报表上找不到外卖订单信息，默认值0。")
+            result += 0
+
+        else:
+            row_idx = int(find_in_df.index[0])
+            if len(str(df.iloc[row_idx, 0])) == 4:
+                result += float(df.iloc[row_idx, 0])
+
+            else:
+                print("外卖订单金额很有可能不正确，请注意检查。")
+                print("'{}'".format(float(df.iloc[row_idx, 2])))
+                result += float(df.iloc[row_idx, 2])
+
+    elif param in list_2:
+        pattern = make_space_insensitive_pattern(keyword)
+        find_in_df = df[df["column 1"].astype(str).str.contains(pattern, case=False, regex=True)]
+
+        if len(find_in_df) == 0:
+            print("找不到'{}'，默认值{}。".format(keyword, fallback))
+            result = fallback
+
+        else:
+            row_idx = int(find_in_df.index[-1])
+
+            try:
+                result = float(df.iloc[row_idx, take_column])
+            except Exception as e:
+                print("处理'{}'时发生错误，错误如下:".format(keyword))
+                print()
+                print(e)
+                print()
+                print("将采用默认值: {}".format(fallback))
+                result = fallback
+
+    elif param == "net sale":
+        pattern = make_space_insensitive_pattern("营业金额总数")
+
+        find_in_df = df[df["column 1"].astype(str).str.contains(pattern, case=False, regex=True)]
+
+        for i in range(len(find_in_df)):
+            look_up_str = str(find_in_df.iloc[i, 0])
+
+            if len(look_up_str) == 6:
+                rowIndex = i
+                break
+
+            else:
+                rowIndex = -1
+
+
+        if row_index == -1:
+            print("找不到营业金额总数, 默认值0。")
+            result = 0
+
+        else:
+            row_idx = int(find_in_df.iloc[rowIndex:,:].index[0])
+            result = float(df.iloc[row_idx, 1])
+
+        pattern = make_space_insensitive_pattern("商业积分消费赠送值")
+
+        find_in_df = df[df["column 1"].astype(str).str.contains(pattern, case=False, regex=True)]
+
+        if len(find_in_df) == 0:
+            print("找不到商业积分消费赠送值，默认值0。")
+            result -= 0
+
+        else:
+            row_idx = int(find_in_df.index[0])
+            result -= float(df.iloc[row_idx, take_column])
+        
+    return result
+
+def amfuture_get_df_date(df):
+
+    date_list = amfuture_get_entry(df=df, param="date")
+
+    if len(date_list) > 1:
+        print("不支持跨日期。 \n报表日期将采用'{}'".format(date_list[0].strftime("%Y-%m-%d")))
+        
+    else:
+        pass
+
+    dfb = date_list[0]
+
+    yesterday = dfb - dt.timedelta(days=1)
+
+    if sys.platform.strip().upper() in ["IOS", "WIN32"]:
+        date_chinese_string = dfb.strftime("%YNIAN%mYUE%dRI")
+        date_chinese_string = date_chinese_string.replace("NIAN", "年")
+        date_chinese_string = date_chinese_string.replace("YUE", "月")
+        date_chinese_string = date_chinese_string.replace("RI", "日")
+
+    else:
+        date_chinese_string = dfb.strftime("%Y年%m月%d日")
+
+    date_dict = {
+        "dfb" : dfb,
+        "yesterday" : yesterday,
+        "date_chinese_string" : date_chinese_string
+    }
+
+    return date_dict
+
+def amfuture_parse_value_dict(promo_num, lun_sales, lun_gc, tb_sales, tb_gc, lun_fwc, lun_kwc, tb_fwc, tb_kwc, night_fwc, night_kwc, rule_df_dict, take_databases, date_dict, read, k_dict, lunchTakeawayCount, lunchDineInCount, lunchMeituanCount, teatimeTakeawayCount, teatimeDineInCount, teatimeMeituanCount):
+
+    outlet_loc = amfuture_get_entry(df=read, param="outlet")
+
+    dfb = date_dict["dfb"]
+    yesterday = date_dict["yesterday"]
+    date_chinese_string = date_dict["date_chinese_string"]
+
+    total_sales = amfuture_get_entry(df=read, param="total sales")
+    no_of_cover = amfuture_get_entry(df=read, param="people count")
+    #lun_sales = lun_sales
+    lun_gc = int(lunchTakeawayCount) + int(lunchDineInCount) + int(lunchMeituanCount)
+    
+    if lun_gc == 0:
+        lun_avg = 0
+    else:
+        lun_avg = lun_sales / lun_gc
+    
+    lun_avg = normal_round(lun_avg, 2)
+
+    #tb_sales = tb_sales
+    tb_gc = int(teatimeTakeawayCount) + int(teatimeDineInCount) + int(teatimeMeituanCount)
+
+    if tb_gc == 0:
+        tb_avg = 0
+    else:
+        tb_avg =  tb_sales / tb_gc
+
+    tb_avg = normal_round(tb_avg, 2)
+
+    night_sales = total_sales - lun_sales - tb_sales
+    night_gc = no_of_cover - int(lun_gc) - int(tb_gc)
+
+    if night_gc == 0:
+        night_avg = 0
+    else:
+        night_avg = night_sales/int(night_gc)
+
+    night_sales = normal_round(night_sales, 2)
+    night_avg = normal_round(night_avg, 2)
+
+    value_dict = {
+    'date_chinese_string' : date_chinese_string,
+    'outlet_loc' : outlet_loc,
+    'lun_gc' : lun_gc,
+    'lun_fwc' : lun_fwc,
+    'lun_kwc' : lun_kwc,
+    'tb_gc' : tb_gc,
+    'tb_fwc': tb_fwc,
+    'tb_kwc' : tb_kwc,
+    'night_gc' : night_gc,
+    'night_fwc' : night_fwc,
+    'night_kwc' : night_kwc,
+    'no_of_cover' : no_of_cover,
+    }
+
+    FOODPANDA = amfuture_get_entry(df=read, param="foodpanda")
+    GRABFOOD = amfuture_get_entry(df=read, param="grabfood")
+    GETZ = amfuture_get_entry(df=read, param="getz")
+    ODDLE = amfuture_get_entry(df=read, param="oddle")
+    TANG = amfuture_get_entry(df=read, param="chinatown")
+    MEMBER_DISCOUNT = amfuture_get_entry(df=read, param="member discount")
+    MANUAL_DISCOUNT = amfuture_get_entry(df=read, param="manual discount")
+    MMALLE_SUM = amfuture_get_entry(df=read, param="mall voucher")
+    SANRENXING_SUM = amfuture_get_entry(df=read, param="srx voucher")
+    TOP_UP_AMOUNT = amfuture_get_entry(df=read, param="top up amount")
+    FREE_AMOUNT = amfuture_get_entry(df=read, param="free amount")
+    USED_AMOUNT = amfuture_get_entry(df=read, param="used amount")
+    SALES_DI = amfuture_get_entry(df=read, param="dine in sale total")
+    SALES_TA = amfuture_get_entry(df=read, param="takeaway sale total")
+    net_sales = amfuture_get_entry(df=read, param="net sale")
+    svc = amfuture_get_entry(df=read, param="svc charge")
+    gst = amfuture_get_entry(df=read, param="GST")
+    LUNCH_COUNT = amfuture_get_entry(df=read, param="lunch set")
+
+    var_list = [
+        lun_sales,
+        lun_avg,
+        tb_sales,
+        tb_avg,
+        night_sales,
+        night_avg,
+        FOODPANDA,
+        GRABFOOD,
+        GETZ,
+        ODDLE,
+        TANG,
+        MEMBER_DISCOUNT,
+        MANUAL_DISCOUNT,
+        MMALLE_SUM,
+        SANRENXING_SUM,
+        TOP_UP_AMOUNT,
+        FREE_AMOUNT,
+        USED_AMOUNT,
+        SALES_DI,
+        SALES_TA,
+        net_sales,
+        svc,
+        gst,
+        LUNCH_COUNT,
+    ]
+
+    var_name_list = [
+        "lun_sales",
+        "lun_avg",
+        "tb_sales",
+        "tb_avg",
+        "night_sales",
+        "night_avg",
+        "FOODPANDA",
+        "GRABFOOD",
+        "GETZ",
+        "ODDLE",
+        "TANG",
+        "MEMBER_DISCOUNT",
+        "MANUAL_DISCOUNT",
+        "MMALLE_SUM",
+        "SANRENXING_SUM",
+        "TOP_UP_AMOUNT",
+        "FREE_AMOUNT",
+        "USED_AMOUNT",
+        "SALES_DI",
+        "SALES_TA",
+        "net_sales",
+        "svc",
+        "gst",
+        "LUNCH_COUNT"
+    ]
+
+    for idx in range(len(var_list)):
+        value_dict.update({ var_name_list[idx] : single_zero(normal_round(var_list[idx], 2))})
+
+    vd_df = rule_df_dict["vd_df"]
+
+    for index in range(len(vd_df)):
+        if int(vd_df.iloc[index, 8]) == 1:
+            keyword = str(vd_df.iloc[index, 1])
+            pattern = make_space_insensitive_pattern(keyword)
+            
+            dataframe = read[read["column 1"].astype(str).str.contains(pattern, case=False, regex=True)]
+
+            sum_rule_take = int(vd_df.iloc[index, 4])
+
+            key_value = sum_rule(dfSlice=dataframe, take=sum_rule_take)
+            key = str(vd_df.iloc[index, 0])
+
+            value_dict.update({ key : key_value })
+
+            if key.startswith("promo") and key.endswith("_count"):
+                promo_key = "{}_ytd_tdy".format(key.replace("_count", ""))
+
+                promo_add_rule_list = promo_add_rule(take_databases=take_databases,
+                                                     k_dict=k_dict,
+                                                     dfb=dfb,
+                                                     yesterday=yesterday,
+                                                     promo_suffix=key,
+                                                     promo_count=value_dict[key])
+
+                value_dict.update({ promo_key : promo_add_rule_list })
+
+        else:
+            continue
+    
+    financial_database_sheetname = k_dict["financial_database_sheetname"]
+    financial_data = take_databases[financial_database_sheetname]
+
+    financial_data["DATE"] = pd.to_datetime(financial_data["DATE"])
+    dfb = pd.to_datetime(dfb)
+    yesterday = pd.to_datetime(yesterday)
+
+    financial_ytd_record = financial_data[financial_data["DATE"] == yesterday]
+
+    if financial_ytd_record.empty:
+        write_finance_db = False
+    else:
+        write_finance_db = True
+
+    if write_finance_db:
+        if int(dfb.day) == 1:
+            cmns_ytd = 0.0
+            cmns_tdy = cmns_ytd + float(value_dict["net_sales"])
+            cmns_tdy = float(format(normal_round(cmns_tdy, 2), ".2f"))
+        else:
+            cmns_ytd = float(financial_ytd_record["CUM NET SALES TODAY"].values[0])
+            cmns_tdy = cmns_ytd + float(value_dict["net_sales"])
+            cmns_tdy = float(format(normal_round(cmns_tdy, 2), ".2f"))
+
+        avg_daily_sales = cmns_tdy/int(dfb.day)
+        ads = avg_daily_sales
+        #ads_rd1 = str(avg_daily_sales)[str(avg_daily_sales).find('.'):][:3]
+        #ads_rd2 = str(avg_daily_sales)[:str(avg_daily_sales).find('.')]
+        #ads = float(ads_rd2+ads_rd1)
+
+        cmns_tdy = format(cmns_tdy, ".2f")
+
+        value_dict.update({
+            "cmns_ytd" : cmns_ytd,
+            "cmns_tdy" : cmns_tdy,
+            "ads" : ads,
+        })
+
+    else:
+        print("错误! {}的昨天({})的营业额信息不存在".format(dfb.strftime("%Y-%m-%d"), yesterday.strftime("%Y-%m-%d")))
+        value_dict.update({
+            "cmns_ytd" : -1000000.00,
+            "cmns_tdy" : -1000000.00,
+            "ads" : -1000000.00,
+        })
+
+    
+    for num in range(promo_num):
+        value_dict.update({ "promo{}_ytd".format(num+1) : value_dict["promo{}_ytd_tdy".format(num+1)][0],
+                            "promo{}_tdy".format(num+1) : value_dict["promo{}_ytd_tdy".format(num+1)][1],
+                          })
+
+    promotion_database_sheetname = k_dict["promotion_database_sheetname"]
+    promo_data = take_databases[promotion_database_sheetname]
+
+    promo_data["DATE"] = pd.to_datetime(promo_data["DATE"])
+    dfb = pd.to_datetime(dfb)
+    yesterday = pd.to_datetime(yesterday)
+
+    promo_ytd_record = promo_data[promo_data["DATE"] == yesterday]
+
+    if promo_ytd_record.empty:
+        write_promo_db = False
+    else:
+        write_promo_db = True
+
+    return value_dict, write_finance_db, write_promo_db
+
 def get_dfs(google_auth, db_setting_url, constants_sheetname, serialized_rule_filename, outlet, fernet_key, wifi, backup_foldername):
 
     if wifi:
@@ -396,6 +1024,39 @@ def get_dfs(google_auth, db_setting_url, constants_sheetname, serialized_rule_fi
             k_dict.update({ str(k_df.iloc[index, 0]) : str(k_df.iloc[index, outlet_col_index]) })
 
     return k_dict, rule_df_dict
+
+def amfuture_get_book_dfs(k_dict, outlet):
+    
+    book_filename = str(k_dict["book_filename"])
+    min_book_len_allowable = int(k_dict["min_book_len_allowable"])
+
+    read = pd.read_excel(book_filename, thousands=",")
+
+    if read.columns[0].strip() != "日结单":
+        print("报表不对，可能不是日结单或者日结单是英文版本。")
+        print("此程序仅支持简体中文的日结单。")
+        read = None
+
+    else:
+        columnsRename = []
+        for col in range(len(read.columns)):
+            columnRename += ["column {}".format(col+1)]
+        
+        read.columns = columnsRename
+        read["column 1"] = read["column 1"].astype(str)
+
+        if len(read) < int(min_book_len_allowable):
+            print("你应该没有复制所有的后台数据, 复制完所有的数据后再运行一遍")
+            read = None
+    
+        else:
+            pass
+
+    book_dict = {"read" : read}
+
+    return book_dict
+
+
 
 def get_book_dfs(k_dict, outlet):
 
@@ -1225,36 +1886,38 @@ def sum_rule(dfSlice, take, is_money):
         value = 0
 
     else:
-
-        dfsc = np.arange(0, len(dfSlice.columns)).astype(str)
-        dfSlice.columns = dfsc
-
-        if int(take) == 1:
-            value = float(dfSlice['1'].values[0])
-
-        elif int(take) == 2:
-            dfSlice['1'] = dfSlice['1'].astype(float)
-            value = float(dfSlice['1'].sum())
-
-        elif int(take) == 3:
-            a_list = []
-            eval_a_list = []
-
-            for x in dfSlice['0'].values:
-                res = re.findall(r'\(.*?\)', x)
-                a_list += res
-
-            for y in range(len(a_list)):
-                eval_a_list += [eval(a_list[y])]
-
-            value = sum(eval_a_list)
-
-        elif int(take) == 4:
-            dfSlice['1'] = dfSlice['1'].astype(int)
-            value = int(dfSlice['1'].sum())
-
+        if int(take) == -1:
+            value = float(dfSlice["column 2"].values[0])
         else:
-            value = -404
+            dfsc = np.arange(0, len(dfSlice.columns)).astype(str)
+            dfSlice.columns = dfsc
+    
+            if int(take) == 1:
+                value = float(dfSlice['1'].values[0])
+    
+            elif int(take) == 2:
+                dfSlice['1'] = dfSlice['1'].astype(float)
+                value = float(dfSlice['1'].sum())
+    
+            elif int(take) == 3:
+                a_list = []
+                eval_a_list = []
+    
+                for x in dfSlice['0'].values:
+                    res = re.findall(r'\(.*?\)', x)
+                    a_list += res
+    
+                for y in range(len(a_list)):
+                    eval_a_list += [eval(a_list[y])]
+    
+                value = sum(eval_a_list)
+    
+            elif int(take) == 4:
+                dfSlice['1'] = dfSlice['1'].astype(int)
+                value = int(dfSlice['1'].sum())
+    
+            else:
+                value = -404
 
     if int(is_money) == 1:
         value = single_zero(format(value, '.2f'))
@@ -3125,7 +3788,8 @@ def backup_script(script_backup_filename, script, backup_foldername):
     with open("{}/{}/{}".format(os.getcwd(), backup_foldername, script_backup_filename), "wb") as sfile:
         sfile.write(encrypted_script)
 
-def night_audit_main(database_url, db_setting_url, serialized_rule_filename, service_filename, constants_sheetname, google_auth, box_num, drink_num, promo_num, lun_sales, lun_gc, tb_sales, tb_gc, lun_fwc, lun_kwc, tb_fwc, tb_kwc, night_fwc, night_kwc, script_backup_filename, script, wifi, backup_foldername,cashier_on_duty, drink_on_duty, box_on_duty, payslip_on_duty, manager_on_duty):
+def night_audit_main(database_url, db_setting_url, serialized_rule_filename, service_filename, constants_sheetname, google_auth, box_num, drink_num, promo_num, lun_sales, lun_gc, tb_sales, tb_gc, lun_fwc, lun_kwc, tb_fwc, tb_kwc, night_fwc, night_kwc, script_backup_filename, script, wifi, backup_foldername,cashier_on_duty, drink_on_duty, box_on_duty, payslip_on_duty, manager_on_duty, lunchTakeawayCount, lunchDineInCount, lunchMeituanCount, teatimeTakeawayCount, teatimeDineInCount, teatimeMeituanCount):
+    global GLOBAL_POS_SYSTEM
     database_url = database_url
     db_setting_url = db_setting_url
     serialized_rule_filename = serialized_rule_filename
@@ -3154,6 +3818,13 @@ def night_audit_main(database_url, db_setting_url, serialized_rule_filename, ser
     box_on_duty = box_on_duty
     payslip_on_duty = payslip_on_duty
     manager_on_duty = manager_on_duty
+    lunchTakeawayCount = lunchTakeawayCount
+    lunchDineInCount = lunchDineInCount
+    lunchMeituanCount = lunchMeituanCount
+
+    teatimeTakeawayCount = teatimeTakeawayCount
+    teatimeDineInCount = teatimeDineInCount
+    teatimeMeituanCount = teatimeMeituanCount 
 
     fernet_key = get_key()
 
@@ -3167,20 +3838,31 @@ def night_audit_main(database_url, db_setting_url, serialized_rule_filename, ser
         backup_script(script_backup_filename, script, backup_foldername)
 
         with tqdm(total=100) as pbar:
+            print("订餐系统: {}".format(GLOBAL_POS_SYSTEM))
+            print()
+            print()
             if wifi:
                 pbar.set_description("云端模式")
             else:
                 pbar.set_description("离线模式")
-
+                
             outlet = get_outlet()
             k_dict, rule_df_dict = get_dfs(google_auth, db_setting_url, constants_sheetname, serialized_rule_filename, outlet, fernet_key, wifi, backup_foldername)
-            book_dict = get_book_dfs(k_dict, outlet)
+            
+            if GLOBAL_POS_SYSTEM.strip().upper() == "AMFUTURE":
+                book_dict = amfuture_get_book_dfs(k_dict, outlet)
+            else:
+                #SGDATAPOS
+                book_dict = get_book_dfs(k_dict, outlet)
 
             if len(book_dict) == 0:
                 pass
             else:
                 pbar.set_description("获取日期")
-                date_dict = get_df_date(book_dict)
+                if GLOBAL_POS_SYSTEM.strip().upper() == "AMFUTURE":
+                    amfuture_get_df_date(df["read"])
+                else:
+                    date_dict = get_df_date(book_dict)
                 pbar.update(3)
 
                 pbar.set_description("获取列名称")
@@ -3217,7 +3899,11 @@ def night_audit_main(database_url, db_setting_url, serialized_rule_filename, ser
                 pbar.update(10)
 
                 pbar.set_description("计算营业额")
-                value_dict, write_finance_db, write_promo_db = parse_value_dict(promo_num, lun_sales, lun_gc, tb_sales, tb_gc, lun_fwc, lun_kwc, tb_fwc, tb_kwc, night_fwc, night_kwc, rule_df_dict, take_databases, date_dict, book_dict, k_dict)
+                if GLOBAL_POS_SYSTEM.strip().upper() == "AMFUTURE":
+                    read = book_dict["read"]
+                    value_dict, write_finance_db, write_promo_db = amfuture_parse_value_dict(promo_num, lun_sales, lun_gc, tb_sales, tb_gc, lun_fwc, lun_kwc, tb_fwc, tb_kwc, night_fwc, night_kwc, rule_df_dict, take_databases, date_dict, read, k_dict)
+                else:
+                    value_dict, write_finance_db, write_promo_db = parse_value_dict(promo_num, lun_sales, lun_gc, tb_sales, tb_gc, lun_fwc, lun_kwc, tb_fwc, tb_kwc, night_fwc, night_kwc, rule_df_dict, take_databases, date_dict, book_dict, k_dict)
                 pbar.update(4)
 
                 pbar.set_description("处理酒水库存")
