@@ -7828,7 +7828,7 @@ def uniform_main(google_auth, db_setting_url, constants_sheetname, serialized_ru
             print()
             print()
 
-def main(database_url, db_setting_url, serialized_rule_filename, service_filename, constants_sheetname, google_auth, box_num, drink_num, promo_num, lun_sales, lun_gc, tb_sales, tb_gc, lun_fwc, lun_kwc, tb_fwc, tb_kwc, night_fwc, night_kwc, script_backup_filename, script, wifi, backup_foldername,cashier_on_duty, drink_on_duty, box_on_duty, payslip_on_duty, do_not_show_menu):
+def main(database_url, db_setting_url, serialized_rule_filename, service_filename, constants_sheetname, google_auth, box_num, drink_num, promo_num, lun_sales, lun_gc, tb_sales, tb_gc, lun_fwc, lun_kwc, tb_fwc, tb_kwc, night_fwc, night_kwc, script_backup_filename, script, wifi, backup_foldername,cashier_on_duty, drink_on_duty, box_on_duty, payslip_on_duty, do_not_show_menu, lunchTakeawayCount, lunchDineInCount, lunchMeituanCount, teatimeTakeawayCount, teatimeDineInCount, teatimeMeituanCount):
     database_url = database_url
     db_setting_url = db_setting_url
     serialized_rule_filename = serialized_rule_filename
@@ -7857,6 +7857,12 @@ def main(database_url, db_setting_url, serialized_rule_filename, service_filenam
     box_on_duty = box_on_duty
     payslip_on_duty = payslip_on_duty
     do_not_show_menu = do_not_show_menu
+    lunchTakeawayCount = lunchTakeawayCount
+    lunchDineInCount = lunchDineInCount
+    lunchMeituanCount = lunchMeituanCount
+    teatimeTakeawayCount = teatimeTakeawayCount
+    teatimeDineInCount = teatimeDineInCount
+    teatimeMeituanCount = teatimeMeituanCount
 
     if do_not_show_menu:
         night_audit_main(database_url, db_setting_url, serialized_rule_filename, service_filename, constants_sheetname, google_auth, box_num, drink_num, promo_num, lun_sales, lun_gc, tb_sales, tb_gc, lun_fwc, lun_kwc, tb_fwc, tb_kwc, night_fwc, night_kwc, script_backup_filename, script, wifi, backup_foldername,cashier_on_duty, drink_on_duty, box_on_duty, payslip_on_duty, manager_on_duty)
