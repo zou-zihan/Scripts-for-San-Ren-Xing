@@ -1040,7 +1040,7 @@ def amfuture_get_book_dfs(k_dict, outlet):
     else:
         columnsRename = []
         for col in range(len(read.columns)):
-            columnRename += ["column {}".format(col+1)]
+            columnsRename += ["column {}".format(col+1)]
         
         read.columns = columnsRename
         read["column 1"] = read["column 1"].astype(str)
