@@ -7865,7 +7865,7 @@ def main(database_url, db_setting_url, serialized_rule_filename, service_filenam
     teatimeMeituanCount = teatimeMeituanCount
 
     if do_not_show_menu:
-        night_audit_main(database_url, db_setting_url, serialized_rule_filename, service_filename, constants_sheetname, google_auth, box_num, drink_num, promo_num, lun_sales, lun_gc, tb_sales, tb_gc, lun_fwc, lun_kwc, tb_fwc, tb_kwc, night_fwc, night_kwc, script_backup_filename, script, wifi, backup_foldername,cashier_on_duty, drink_on_duty, box_on_duty, payslip_on_duty, manager_on_duty)
+        night_audit_main(database_url, db_setting_url, serialized_rule_filename, service_filename, constants_sheetname, google_auth, box_num, drink_num, promo_num, lun_sales, lun_gc, tb_sales, tb_gc, lun_fwc, lun_kwc, tb_fwc, tb_kwc, night_fwc, night_kwc, script_backup_filename, script, wifi, backup_foldername,cashier_on_duty, drink_on_duty, box_on_duty, payslip_on_duty, manager_on_duty,lunchTakeawayCount, lunchDineInCount, lunchMeituanCount, teatimeTakeawayCount, teatimeDineInCount, teatimeMeituanCount)
 
     else:
         if int(np.random.randint(1,7,size=1)[0]) % 2 == 0:
