@@ -7886,7 +7886,7 @@ def main(database_url, db_setting_url, serialized_rule_filename, service_filenam
             SRX_take_input = option_limit(options, input("在这里输入>>>: "))
 
             if SRX_take_input == 0:
-                night_audit_main(database_url, db_setting_url, serialized_rule_filename, service_filename, constants_sheetname, google_auth, box_num, drink_num, promo_num, lun_sales, lun_gc, tb_sales, tb_gc, lun_fwc, lun_kwc, tb_fwc, tb_kwc, night_fwc, night_kwc, script_backup_filename, script, wifi, backup_foldername,cashier_on_duty, drink_on_duty, box_on_duty, payslip_on_duty, manager_on_duty)
+                night_audit_main(database_url, db_setting_url, serialized_rule_filename, service_filename, constants_sheetname, google_auth, box_num, drink_num, promo_num, lun_sales, lun_gc, tb_sales, tb_gc, lun_fwc, lun_kwc, tb_fwc, tb_kwc, night_fwc, night_kwc, script_backup_filename, script, wifi, backup_foldername,cashier_on_duty, drink_on_duty, box_on_duty, payslip_on_duty, manager_on_duty, lunchTakeawayCount, lunchDineInCount, lunchMeituanCount, teatimeTakeawayCount, teatimeDineInCount, teatimeMeituanCount)
 
             elif SRX_take_input == 1:
                 inventory_main(google_auth, db_setting_url, constants_sheetname, serialized_rule_filename, backup_foldername, database_url, box_num, drink_num)
