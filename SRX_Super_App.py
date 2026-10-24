@@ -21,6 +21,7 @@ import pyfiglet
 import time
 import uuid
 import ast
+from dateutil import parser
 
 '''
 generate pdf works well with borb version 2.1.5.2
@@ -124,6 +125,13 @@ else:
 #中午营业额
 lun_sales = 0.0
 
+#中午打包量
+lunchTakeawayCount = 0
+#中午堂食用餐人数
+lunchDineInCount = 0
+#中午外卖订单量
+lunchMeituanCount = 0
+
 #中午顾客人数
 lun_gc = 0
 
@@ -142,8 +150,17 @@ tb_kwc = ""
 #下午茶营业额
 tb_sales = 0.0
 
+#下午茶打包量
+teatimeTakeawayCount = 0
+
+#下午茶堂食用餐人数
+teatimeDineInCount = 0
+
+#下午茶外卖订单量
+teatimeMeituanCount = 0
+
 #下午茶顾客人数
-tb_gc = ""
+tb_gc = 0
 
 #晚上楼面员工人数(加引号)
 night_fwc = ""
@@ -164,6 +181,14 @@ exec(open("Local Script.py", encoding="utf-8").read())
 
 '''
 
+#VARIABLES NOT IN USE
+lun_gc = 0
+tb_gc = 0
+box_on_duty = ""
+drink_on_duty = ""
+payslip_on_duty = ""
+#VARIABLES NOT IN USE
+
 database_url = "gAAAAABksmmj1NC7ooHFZ7wTi9d1dhk-Q6i1Y_GWWb24xVpLfC0lmNa5vsXGDhCYwRO_NLy8NDge8xV6zna6ny1pDagdp77f8eE9nrOmRWdzeEYMi21hbEEY88G0lnfJPl0XZb2kN6M7BWasrkIp3TeDgSFmdnigSvlT4NJn92lVdCKJIJXCq5Qik4qj52Q-JJU7LZ5Xc_Lf"
 db_setting_url = "gAAAAABksml2tGtCXmmE6x14Fj-_f9RKeL7pMvBlrDn1puSotmBKVAZzWRaYLQq0FRhe2MHYX6JQMDzzeUKI5lKjADOYSKWMaA3EKicdBC94U6KDqjMf71prmgXaVKu-dq_W9NBJtgDKKU7HfmRyKU6mE1Di1Nge1wt4FFuHRjJqIxvMO6eX9OQHOY8mEDYDkcLfP0GKvXu2"
 
@@ -176,6 +201,9 @@ constants_sheetname = "Constants"
 box_num = 40
 drink_num = 12
 promo_num = 30
+
+GLOBAL_POS_SYSTEM = "AMFUTURE"
+GLOBAL_OUTLET = "无门店信息"
 
 google_auth = pygsheets.authorize(service_file=service_filename)
 
@@ -350,6 +378,7 @@ def amfuture_get_entry(df, param):
         "net sale" : None,
         "GST" : "- 税金",
         "svc charge" : "- 服务费",
+        "cash" : "现金",
         
     }
 
@@ -376,6 +405,7 @@ def amfuture_get_entry(df, param):
         "net sale" : 1,
         "GST" : 1,
         "svc charge" : 1,
+        "cash" : 1,
     }
 
     fallback_dictionary = {
@@ -401,6 +431,7 @@ def amfuture_get_entry(df, param):
         "net sale" : -1000000,
         "GST" : -250000,
         "svc charge" : 0,
+        "cash" : -100000,
     }
 
     list_1 = [
@@ -418,6 +449,7 @@ def amfuture_get_entry(df, param):
         "top up amount", 
         "free amount",
         "used amount",
+        "cash",
     ]
 
     list_2 = ["GST", "svc charge"]
@@ -453,7 +485,7 @@ def amfuture_get_entry(df, param):
         find_in_df = df[df["column 1"].astype(str).str.contains(pattern, case=False, regex=True)]
     
         if len(find_in_df) == 0:
-            print("报表上找不到'{}'".format(keyword))
+            #print("报表上找不到'{}'".format(keyword))
             result = fallback
     
         else:
@@ -476,7 +508,7 @@ def amfuture_get_entry(df, param):
     elif param == "people count":
         people_count = 0
         for name in keyword:
-            pattern = make_space_insensitive_pattern[name]
+            pattern = make_space_insensitive_pattern(name)
 
             find_in_df = df[df["column 1"].astype(str).str.contains(pattern, case=False, regex=True)]
 
@@ -581,7 +613,7 @@ def amfuture_get_entry(df, param):
         else:
             row_idx = int(find_in_df.index[0])
             if len(str(df.iloc[row_idx, 0])) == 4:
-                result += float(df.iloc[row_idx, 0])
+                result += float(df.iloc[row_idx, 2])
 
             else:
                 print("外卖订单金额很有可能不正确，请注意检查。")
@@ -625,7 +657,7 @@ def amfuture_get_entry(df, param):
                 rowIndex = -1
 
 
-        if row_index == -1:
+        if rowIndex == -1:
             print("找不到营业金额总数, 默认值0。")
             result = 0
 
@@ -644,6 +676,24 @@ def amfuture_get_entry(df, param):
         else:
             row_idx = int(find_in_df.index[0])
             result -= float(df.iloc[row_idx, take_column])
+
+        pattern = make_space_insensitive_pattern("- Rounding ")
+
+        find_in_df = df[df["column 1"].astype(str).str.contains(pattern, case=False, regex=True)]
+
+        if len(find_in_df) == 0:
+            print("找不到'- Rounding'，默认值0。")
+            result -= 0
+
+        else:
+            if str(find_in_df.iloc[-1,0]).endswith("Rounding"):
+                pass
+            else:
+                print("Rounding的数额可能不准确，请注意检查。")
+            
+            row_idx = int(find_in_df.index[-1])
+
+            result -= float(df.iloc[row_idx, 1])
         
     return result
 
@@ -748,11 +798,15 @@ def amfuture_parse_value_dict(promo_num, lun_sales, lun_gc, tb_sales, tb_gc, lun
     USED_AMOUNT = amfuture_get_entry(df=read, param="used amount")
     SALES_DI = amfuture_get_entry(df=read, param="dine in sale total")
     SALES_TA = amfuture_get_entry(df=read, param="takeaway sale total")
-    net_sales = amfuture_get_entry(df=read, param="net sale")
     svc = amfuture_get_entry(df=read, param="svc charge")
     gst = amfuture_get_entry(df=read, param="GST")
     LUNCH_COUNT = amfuture_get_entry(df=read, param="lunch set")
-
+    CASH = amfuture_get_entry(df=read, param="cash")
+   
+    net_sales = amfuture_get_entry(df=read, param="net sale")
+    net_sales -= svc
+    net_sales -= gst
+    
     var_list = [
         lun_sales,
         lun_avg,
@@ -778,6 +832,7 @@ def amfuture_parse_value_dict(promo_num, lun_sales, lun_gc, tb_sales, tb_gc, lun
         svc,
         gst,
         LUNCH_COUNT,
+        CASH
     ]
 
     var_name_list = [
@@ -804,11 +859,12 @@ def amfuture_parse_value_dict(promo_num, lun_sales, lun_gc, tb_sales, tb_gc, lun
         "net_sales",
         "svc",
         "gst",
-        "LUNCH_COUNT"
+        "LUNCH_COUNT",
+        "CASH",
     ]
 
     for idx in range(len(var_list)):
-        value_dict.update({ var_name_list[idx] : single_zero(normal_round(var_list[idx], 2))})
+        value_dict.update({ var_name_list[idx] : single_zero(format(normal_round(var_list[idx], 2), ".2f"))})
 
     vd_df = rule_df_dict["vd_df"]
 
@@ -872,6 +928,7 @@ def amfuture_parse_value_dict(promo_num, lun_sales, lun_gc, tb_sales, tb_gc, lun
         #ads = float(ads_rd2+ads_rd1)
 
         cmns_tdy = format(cmns_tdy, ".2f")
+        ads = normal_round(ads, 2)
 
         value_dict.update({
             "cmns_ytd" : cmns_ytd,
@@ -892,6 +949,9 @@ def amfuture_parse_value_dict(promo_num, lun_sales, lun_gc, tb_sales, tb_gc, lun
         value_dict.update({ "promo{}_ytd".format(num+1) : value_dict["promo{}_ytd_tdy".format(num+1)][0],
                             "promo{}_tdy".format(num+1) : value_dict["promo{}_ytd_tdy".format(num+1)][1],
                           })
+
+    for num in range(promo_num):
+        value_dict["promo{}_count".format(num+1)] = int(value_dict["promo{}_count".format(num+1)])
 
     promotion_database_sheetname = k_dict["promotion_database_sheetname"]
     promo_data = take_databases[promotion_database_sheetname]
@@ -1374,6 +1434,9 @@ def retrieve_database(k_dict, google_auth, fernet_key, wifi, database_url, backu
                     online_max_date_record = open_online_df["DATE"].max()
                     local_max_date_record = open_local_df["DATE"].max()
 
+                    open_local_df = open_local_df.head(1000)
+                    open_online_df = open_online_df.head(1000)
+
                     if local_max_date_record > online_max_date_record:
                         take_databases.update({ name : open_local_df })
                     else:
@@ -1490,7 +1553,15 @@ def box_now(tb_data, box_name, box_value, yesterday):
     return value
 
 def parse_tabox(k_dict, google_auth, fernet_key, box_num, rule_df_dict, take_databases, book_dict, date_dict, wifi, backup_foldername):
-    read_ = book_dict["read_"]
+    try:
+        read_ = book_dict["read_"]
+
+    except:
+        try:
+            read_ = book_dict["read"]
+        except:
+            pass
+            
     dfb = date_dict["dfb"]
     yesterday = date_dict["yesterday"]
 
@@ -1881,7 +1952,7 @@ def look_up_rule(dataFrame, a_string, take):
 
     return dfSlice
 
-def sum_rule(dfSlice, take, is_money):
+def sum_rule(dfSlice, take, is_money=0):
     if dfSlice.empty:
         value = 0
 
@@ -2668,7 +2739,7 @@ def pending_upload_db(take_databases, k_dict, box_value, drink_dict, value_dict,
             time_log = pd.to_datetime(dt.datetime.now())
             date = dfb
             day = dfb.strftime("%A")
-            net_sales = value_dict["net_sales_after_deduction"]
+            net_sales = value_dict["net_sales"]
             cum_net_sales_ytd = value_dict["cmns_ytd"]
             cum_net_sales_tdy = float(value_dict["cmns_tdy"])
             avg_sales_per_day = value_dict["ads"]
@@ -3831,14 +3902,14 @@ def night_audit_main(database_url, db_setting_url, serialized_rule_filename, ser
     if fernet_key == 0:
         print("安全密钥错误! ")
     else:
-        res = pyfiglet.figlet_format("Night Audit")
+        res = pyfiglet.figlet_format("{}".format(GLOBAL_POS_SYSTEM))
         print(res)
         time.sleep(0.15)
 
         backup_script(script_backup_filename, script, backup_foldername)
 
         with tqdm(total=100) as pbar:
-            print("订餐系统: {}".format(GLOBAL_POS_SYSTEM))
+            #print("订餐系统: {}".format(GLOBAL_POS_SYSTEM))
             print()
             print()
             if wifi:
@@ -3860,7 +3931,7 @@ def night_audit_main(database_url, db_setting_url, serialized_rule_filename, ser
             else:
                 pbar.set_description("获取日期")
                 if GLOBAL_POS_SYSTEM.strip().upper() == "AMFUTURE":
-                    amfuture_get_df_date(df["read"])
+                    date_dict = amfuture_get_df_date(book_dict["read"])
                 else:
                     date_dict = get_df_date(book_dict)
                 pbar.update(3)
@@ -3877,11 +3948,16 @@ def night_audit_main(database_url, db_setting_url, serialized_rule_filename, ser
                 take_databases = update_columns(take_databases, get_columns, k_dict)
                 pbar.update(3)
 
-                pbar.set_description("处理打包盒库存")
+                #pbar.set_description("处理打包盒库存")
+                pbar.set_description("处理中。")
+                
                 tabox_write_db, box_value, box_unparsed_alert = parse_tabox(k_dict, google_auth, fernet_key, box_num, rule_df_dict, take_databases, book_dict, date_dict, wifi, backup_foldername)
+                
                 pbar.update(10)
 
-                pbar.set_description("处理打包盒警示信息")
+                #pbar.set_description("处理打包盒警示信息")
+                pbar.set_description("处理中。。")
+                
                 box_stock_alert = eval(str(k_dict["box_stock_alert"]).strip().capitalize())
                 box_alert_freq = str(k_dict["box_stock_alert_frequency"]).strip().upper()
                 box_understock_alert = eval(str(k_dict["box_understocking_alert"]).strip().capitalize())
@@ -3901,17 +3977,23 @@ def night_audit_main(database_url, db_setting_url, serialized_rule_filename, ser
                 pbar.set_description("计算营业额")
                 if GLOBAL_POS_SYSTEM.strip().upper() == "AMFUTURE":
                     read = book_dict["read"]
-                    value_dict, write_finance_db, write_promo_db = amfuture_parse_value_dict(promo_num, lun_sales, lun_gc, tb_sales, tb_gc, lun_fwc, lun_kwc, tb_fwc, tb_kwc, night_fwc, night_kwc, rule_df_dict, take_databases, date_dict, read, k_dict)
+                    value_dict, write_finance_db, write_promo_db = amfuture_parse_value_dict(promo_num, lun_sales, lun_gc, tb_sales, tb_gc, lun_fwc, lun_kwc, tb_fwc, tb_kwc, night_fwc, night_kwc, rule_df_dict, take_databases, date_dict, read, k_dict, lunchTakeawayCount, lunchDineInCount, lunchMeituanCount, teatimeTakeawayCount, teatimeDineInCount, teatimeMeituanCount)
                 else:
                     value_dict, write_finance_db, write_promo_db = parse_value_dict(promo_num, lun_sales, lun_gc, tb_sales, tb_gc, lun_fwc, lun_kwc, tb_fwc, tb_kwc, night_fwc, night_kwc, rule_df_dict, take_databases, date_dict, book_dict, k_dict)
                 pbar.update(4)
 
-                pbar.set_description("处理酒水库存")
+                #pbar.set_description("处理酒水库存")
+                pbar.set_description("处理中。。。")
+                
                 write_drink_db, drink_dict, drink_unparsed_alert = parse_drink_stock(k_dict, fernet_key, google_auth, drink_num, value_dict, take_databases, date_dict, wifi, backup_foldername)
+                
                 pbar.update(4)
 
-                pbar.set_description("处理酒水警示信息")
+                #pbar.set_description("处理酒水警示信息")
+                pbar.set_description("处理中。。。。")
+                
                 drink_stock_alert = eval(str(k_dict["drink_stock_alert"]).strip().capitalize())
+                
                 pbar.update(4)
 
                 drink_understock_alert = eval(str(k_dict["drink_understocking_alert"]).strip().capitalize())
@@ -3964,33 +4046,44 @@ def night_audit_main(database_url, db_setting_url, serialized_rule_filename, ser
 
                 pbar.update(5)
 
-                pbar.set_description("生成表格")
-                bk_df, show_box_df, show_drink_df, tabox_max_date, drink_db_max_date = parse_display_df(value_dict, rule_df_dict, k_dict, google_auth, db_writables, fernet_key, database_url, backup_foldername)
+                #pbar.set_description("生成表格")
+                pbar.set_description("整理文件。")
+                
+                try:
+                    bk_df, show_box_df, show_drink_df, tabox_max_date, drink_db_max_date = parse_display_df(value_dict, rule_df_dict, k_dict, google_auth, db_writables, fernet_key, database_url, backup_foldername)
 
-                pbar.set_description("酒水明细")
-                trigger_drink_generate = trigger_gen_drink_pdf(k_dict, date_dict)
-                if trigger_drink_generate:
-                    stock_count_foldername = "{}盘点文件".format(outlet.strip().capitalize())
-                    songti_filename = "SongTi.ttf"
+                except:
+                    pass
+                    
+                #pbar.set_description("酒水明细")
+                pbar.set_description("整理文件。。。")
 
-                    if not os.path.exists("{}/{}/{}".format(os.getcwd(), stock_count_foldername, songti_filename)):
-                        print("宋体TTF文件'{}'不存在, 酒水明细表的生成无法继续".format(songti_filename))
-                        print("请把宋体TTF文件'{}'保存至盘点文件名的目录下, 具体路径需在:'{}/{}/{}'".format(songti_filename, os.getcwd(), stock_count_foldername, songti_filename))
-                        print()
-                        print("生成酒水明细表PDF环节已跳过! ")
-
+                try:
+                    trigger_drink_generate = trigger_gen_drink_pdf(k_dict, date_dict)
+                    if trigger_drink_generate:
+                        stock_count_foldername = "{}盘点文件".format(outlet.strip().capitalize())
+                        songti_filename = "SongTi.ttf"
+    
+                        if not os.path.exists("{}/{}/{}".format(os.getcwd(), stock_count_foldername, songti_filename)):
+                            print("宋体TTF文件'{}'不存在, 酒水明细表的生成无法继续".format(songti_filename))
+                            print("请把宋体TTF文件'{}'保存至盘点文件名的目录下, 具体路径需在:'{}/{}/{}'".format(songti_filename, os.getcwd(), stock_count_foldername, songti_filename))
+                            print()
+                            print("生成酒水明细表PDF环节已跳过! ")
+    
+                        else:
+                            print("月底了，已自动进入酒水明细表生成环节! ")
+                            print()
+                            print("读取字体文件中...")
+                            custom_font_path = pathlib.Path("{}/{}/{}".format(os.getcwd(), stock_count_foldername, songti_filename))
+                            borb_custom_font = borb_TrueTypeFont.true_type_font_from_file(custom_font_path)
+                            print("字体文件读取完成。")
+                            print()
+                            print("进入酒水明细表生成环节后请准确选择你要生成的年份和月份")
+                            print()
+                            gen_drink_pdf(google_auth, db_setting_url, constants_sheetname, serialized_rule_filename, backup_foldername, database_url, borb_custom_font, drink_num)
                     else:
-                        print("月底了，已自动进入酒水明细表生成环节! ")
-                        print()
-                        print("读取字体文件中...")
-                        custom_font_path = pathlib.Path("{}/{}/{}".format(os.getcwd(), stock_count_foldername, songti_filename))
-                        borb_custom_font = borb_TrueTypeFont.true_type_font_from_file(custom_font_path)
-                        print("字体文件读取完成。")
-                        print()
-                        print("进入酒水明细表生成环节后请准确选择你要生成的年份和月份")
-                        print()
-                        gen_drink_pdf(google_auth, db_setting_url, constants_sheetname, serialized_rule_filename, backup_foldername, database_url, borb_custom_font, drink_num)
-                else:
+                        pass
+                except:
                     pass
 
                 pbar.set_description("任务完成")
@@ -4020,23 +4113,26 @@ def night_audit_main(database_url, db_setting_url, serialized_rule_filename, ser
                     if len(drink_message_string) > 0:
                         print(drink_message_string)
                 print("——————————————")
-                if not bk_df.empty:
-                    print("账务簿记: ")
-                    print(date_dict["date_chinese_string"])
-                    prtdf(bk_df)
-                    print()
-
-                if not show_drink_df.empty:
-                    print("酒水信息: ")
-                    print(drink_db_max_date.strftime("%Y-%m-%d"))
-                    prtdf(show_drink_df)
-                    print()
-
-                if not show_box_df.empty:
-                    print("打包盒信息: ")
-                    print(tabox_max_date.strftime("%Y-%m-%d"))
-                    prtdf(show_box_df)
-                    print()
+                try:
+                    if not bk_df.empty:
+                        print("账务簿记: ")
+                        print(date_dict["date_chinese_string"])
+                        prtdf(bk_df)
+                        print()
+    
+                    if not show_drink_df.empty:
+                        print("酒水信息: ")
+                        print(drink_db_max_date.strftime("%Y-%m-%d"))
+                        prtdf(show_drink_df)
+                        print()
+    
+                    if not show_box_df.empty:
+                        print("打包盒信息: ")
+                        print(tabox_max_date.strftime("%Y-%m-%d"))
+                        prtdf(show_box_df)
+                        print()
+                except:
+                    pass
 
 def get_k_dictionary(google_auth, db_setting_url, constants_sheetname, serialized_rule_filename, outlet, fernet_key, backup_foldername):
     try:
