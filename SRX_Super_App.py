@@ -371,7 +371,7 @@ def amfuture_get_entry(df, param):
         "mall voucher" : "ECapitaMall",
         "srx voucher": "三人行礼券",
         "top up amount" : "用户充值商业积分",
-        "free amount" : "用户赠送商业积分",
+        "free amount" : "用户赠送值商业积分",
         "used amount" : "商业积分支付",
         "dine in sale total" : None,
         "takeaway sale total": None,
@@ -665,7 +665,7 @@ def amfuture_get_entry(df, param):
             row_idx = int(find_in_df.iloc[rowIndex:,:].index[0])
             result = float(df.iloc[row_idx, 1])
 
-        pattern = make_space_insensitive_pattern("商业积分消费赠送值")
+        pattern = make_space_insensitive_pattern("- 商业积分消费赠送值")
 
         find_in_df = df[df["column 1"].astype(str).str.contains(pattern, case=False, regex=True)]
 
