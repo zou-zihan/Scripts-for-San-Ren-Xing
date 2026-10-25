@@ -757,17 +757,8 @@ def amfuture_parse_value_dict(promo_num, lun_sales, lun_gc, tb_sales, tb_gc, lun
         tb_avg =  tb_sales / tb_gc
 
     tb_avg = normal_round(tb_avg, 2)
-
-    night_sales = total_sales - lun_sales - tb_sales
+    
     night_gc = no_of_cover - int(lun_gc) - int(tb_gc)
-
-    if night_gc == 0:
-        night_avg = 0
-    else:
-        night_avg = night_sales/int(night_gc)
-
-    night_sales = normal_round(night_sales, 2)
-    night_avg = normal_round(night_avg, 2)
 
     value_dict = {
     'date_chinese_string' : date_chinese_string,
@@ -803,7 +794,29 @@ def amfuture_parse_value_dict(promo_num, lun_sales, lun_gc, tb_sales, tb_gc, lun
     LUNCH_COUNT = amfuture_get_entry(df=read, param="lunch set")
     CASH = amfuture_get_entry(df=read, param="cash")
    
+    pattern = make_space_insensitive_pattern("- Rounding")
+
+    find_in_df = read[read["column 1"].astype(str).str.contains(pattern, case=False, regex=True)]
+    
+    if str(find_in_df.iloc[-1, 0]).strip().endswith("Rouding"):
+        pass
+    else:
+        print("晚上营业额可能不准确，请注意检查。")
+    
+    rounding_value = float(find_in_df.iloc[-1, 1])
+
     net_sales = amfuture_get_entry(df=read, param="net sale")
+    
+    night_sales = net_sales + rounding_value - lun_sales - tb_sales
+    
+    if night_gc == 0:
+        night_avg = 0
+    else:
+        night_avg = night_sales/int(night_gc)
+
+    night_sales = normal_round(night_sales, 2)
+    night_avg = normal_round(night_avg, 2)
+
     net_sales -= svc
     net_sales -= gst
     
