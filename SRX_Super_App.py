@@ -798,7 +798,7 @@ def amfuture_parse_value_dict(promo_num, lun_sales, lun_gc, tb_sales, tb_gc, lun
 
     find_in_df = read[read["column 1"].astype(str).str.contains(pattern, case=False, regex=True)]
     
-    if str(find_in_df.iloc[-1, 0]).strip().endswith("Rouding"):
+    if str(find_in_df.iloc[-1, 0]).strip().endswith("Rounding"):
         pass
     else:
         print("晚上营业额可能不准确，请注意检查。")
