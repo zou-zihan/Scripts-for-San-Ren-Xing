@@ -879,7 +879,7 @@ def amfuture_parse_value_dict(promo_num, lun_sales, lun_gc, tb_sales, tb_gc, lun
     for idx in range(len(var_list)):
         value_dict.update({ var_name_list[idx] : single_zero(format(normal_round(var_list[idx], 2), ".2f"))})
         
-    value_dict["LUNCH_COUNT"] = str(int(value_dict["LUNCH_COUNT"]))
+    value_dict["LUNCH_COUNT"] = str(int(float(value_dict["LUNCH_COUNT"])))
 
     vd_df = rule_df_dict["vd_df"]
 
