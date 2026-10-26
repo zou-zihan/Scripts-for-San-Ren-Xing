@@ -362,7 +362,7 @@ def amfuture_get_entry(df, param):
         "people count" : ["打包订单量", "堂食用餐人数", "外卖订单量"],
         "foodpanda" : "- Foodpanda",
         "grabfood" : "- Grab",
-        "getz" : "- Getz",
+        "getz" : "Getz Takeaway",
         "oddle" : "- Oddle",
         "chinatown" : "- 唐人街",
         "lunch set" : "午市套餐",
