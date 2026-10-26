@@ -389,7 +389,7 @@ def amfuture_get_entry(df, param):
         "people count" : None,
         "foodpanda" : 2,
         "grabfood" : 2,
-        "getz" : 2,
+        "getz" : 1,
         "oddle" : 2,
         "chinatown" : 2,
         "lunch set" : None,
