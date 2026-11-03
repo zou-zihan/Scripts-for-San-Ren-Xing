@@ -802,6 +802,7 @@ def amfuture_parse_value_dict(promo_num, lun_sales, lun_gc, tb_sales, tb_gc, lun
         pass
     else:
         print("晚上营业额可能不准确，请注意检查。")
+        print("Round value captured: {}".format(float(find_in_df.iloc[-1, 1])))
     
     rounding_value = float(find_in_df.iloc[-1, 1])
 
