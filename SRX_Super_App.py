@@ -794,7 +794,7 @@ def amfuture_parse_value_dict(promo_num, lun_sales, lun_gc, tb_sales, tb_gc, lun
     LUNCH_COUNT = amfuture_get_entry(df=read, param="lunch set")
     CASH = amfuture_get_entry(df=read, param="cash")
    
-    pattern = make_space_insensitive_pattern("- Rounding")
+    pattern = make_space_insensitive_pattern("+ Rounding")
 
     find_in_df = read[read["column 1"].astype(str).str.contains(pattern, case=False, regex=True)]
     
@@ -802,7 +802,6 @@ def amfuture_parse_value_dict(promo_num, lun_sales, lun_gc, tb_sales, tb_gc, lun
         pass
     else:
         print("晚上营业额可能不准确，请注意检查。")
-        print("Round value captured: {}".format(float(find_in_df.iloc[-1, 1])))
     
     rounding_value = float(find_in_df.iloc[-1, 1])
 
