@@ -677,12 +677,12 @@ def amfuture_get_entry(df, param):
             row_idx = int(find_in_df.index[0])
             result -= float(df.iloc[row_idx, take_column])
 
-        pattern = make_space_insensitive_pattern("+ Rounding ")
+        pattern = make_space_insensitive_pattern("- Rounding ")
 
         find_in_df = df[df["column 1"].astype(str).str.contains(pattern, case=False, regex=True)]
 
         if len(find_in_df) == 0:
-            print("找不到'+ Rounding'，默认值0。")
+            print("找不到'- Rounding'，默认值0。")
             result -= 0
 
         else:
@@ -794,7 +794,7 @@ def amfuture_parse_value_dict(promo_num, lun_sales, lun_gc, tb_sales, tb_gc, lun
     LUNCH_COUNT = amfuture_get_entry(df=read, param="lunch set")
     CASH = amfuture_get_entry(df=read, param="cash")
    
-    pattern = make_space_insensitive_pattern("+ Rounding")
+    pattern = make_space_insensitive_pattern("- Rounding")
 
     find_in_df = read[read["column 1"].astype(str).str.contains(pattern, case=False, regex=True)]
     
